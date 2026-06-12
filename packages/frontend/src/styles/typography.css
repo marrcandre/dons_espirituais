@@ -1,0 +1,18 @@
+.page-title {
+  font-size: var(--font-size-page-title);
+  font-weight: 700;
+}
+
+.section-title {
+  font-size: var(--font-size-section);
+  font-weight: 600;
+}
+
+.body-text {
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+
+.caption-text {
+  font-size: var(--font-size-caption);
+}

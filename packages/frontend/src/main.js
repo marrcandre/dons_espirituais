@@ -2,7 +2,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router/index.js'
-import './assets/variables.css'
+import './styles/index.css'
 import vuetify from './plugins/vuetify.js'
 import { useAuthStore } from './stores/auth.js'
 
