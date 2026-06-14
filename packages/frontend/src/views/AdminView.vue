@@ -1,64 +1,59 @@
 <template>
   <v-container class="py-8" max-width="1200">
     <div class="d-flex align-center justify-space-between mb-6">
-      <h1 class="text-h5 font-weight-bold text-primary">Painel Admin</h1>
+      <h1 class="text-h5 font-weight-bold text-primary">Painel Administrativo</h1>
     </div>
 
-    <!-- Filtros -->
-    <v-card rounded="xl" elevation="2" class="pa-4 mb-4">
-      <div class="d-flex gap-3 flex-wrap">
-        <v-text-field v-model="search" label="Buscar por nome" variant="outlined" density="compact"
-          prepend-inner-icon="mdi-magnify" rounded="lg" clearable style="max-width: 260px" />
-
-        <v-text-field v-model="filterGP" label="Filtrar por GP" variant="outlined" density="compact"
-          prepend-inner-icon="mdi-account-group" rounded="lg" clearable style="max-width: 260px" />
-
-        <!-- NOVO FILTRO -->
-        <v-checkbox v-model="filterWithoutAI" label="Sem análise" density="compact" />
-      </div>
-    </v-card>
-
-    <!-- DASHBOARD -->
+    <!-- Dashboard -->
     <v-row class="mb-4">
       <v-col cols="6" sm="3">
-        <div class="d-flex align-center ga-2">
-          <v-icon size="18" color="primary"> mdi-calendar-today </v-icon>
+        <div class="dashboard-item" :class="{ 'dashboard-active': quickFilter === 'today' }"
+          @click="quickFilter = quickFilter === 'today' ? null : 'today'">
+          <v-icon size="18" color="primary">mdi-calendar-today</v-icon>
           <span class="text-caption">Hoje:</span>
           <strong>{{ totalToday }}</strong>
         </div>
       </v-col>
 
       <v-col cols="6" sm="3">
-        <div class="d-flex align-center ga-2">
-          <v-icon size="18" color="primary"> mdi-calendar-week </v-icon>
-          <span class="text-caption">Semana:</span>
+        <div class="dashboard-item" :class="{ 'dashboard-active': quickFilter === 'week' }"
+          @click="quickFilter = quickFilter === 'week' ? null : 'week'">
+          <v-icon size="18" color="primary">mdi-calendar-week</v-icon>
+          <span class="text-caption">7 dias:</span>
           <strong>{{ totalWeek }}</strong>
         </div>
       </v-col>
 
       <v-col cols="6" sm="3">
-        <div class="d-flex align-center ga-2">
-          <v-icon size="18" color="primary"> mdi-counter </v-icon>
+        <div class="dashboard-item" :class="{ 'dashboard-active': quickFilter === null }" @click="quickFilter = null">
+          <v-icon size="18" color="primary">mdi-counter</v-icon>
           <span class="text-caption">Total:</span>
           <strong>{{ total }}</strong>
         </div>
       </v-col>
 
       <v-col cols="6" sm="3">
-        <div class="d-flex align-center ga-2">
+        <div class="dashboard-item" :class="{ 'dashboard-active': quickFilter === 'without-ai' }"
+          @click="quickFilter = quickFilter === 'without-ai' ? null : 'without-ai'">
           <v-icon size="18" color="warning"> mdi-file-document-alert-outline </v-icon>
           <span class="text-caption">Sem análise:</span>
           <strong>{{ totalWithoutAI }}</strong>
         </div>
       </v-col>
     </v-row>
-
     <v-alert v-if="error" type="error" variant="tonal" rounded="xl" class="mb-4">
       {{ error }}
       <template #append>
         <v-btn variant="text" color="error" @click="loadRows">Tentar novamente</v-btn>
       </template>
     </v-alert>
+
+    <!-- Filtrar por nome ou GP -->
+    <div class="d-flex flex-wrap">
+      <v-text-field v-model="search" label="Buscar nome ou GP" variant="outlined" density="compact"
+        prepend-inner-icon="mdi-magnify" rounded="lg" clearable style="max-width: 400px" />
+    </div>
+
 
     <v-card rounded="xl" elevation="2">
       <v-data-table :headers="headers" :items="filteredRows" :loading="loading" item-value="id" class="rounded-xl"
@@ -123,8 +118,7 @@ const error = ref(null);
 const rows = ref([]);
 
 const search = ref("");
-const filterGP = ref("");
-const filterWithoutAI = ref(false);
+const quickFilter = ref(null);
 
 const editingName = ref(null);
 const editingGP = ref(null);
@@ -175,11 +169,11 @@ const totalToday = computed(() => {
 });
 
 const totalWeek = computed(() => {
-  const now = new Date();
-  const weekStart = new Date();
-  weekStart.setDate(now.getDate() - now.getDay());
+  const last7Days = new Date();
 
-  return rows.value.filter((r) => new Date(r.created_at) >= weekStart).length;
+  last7Days.setDate(last7Days.getDate() - 7);
+
+  return rows.value.filter((r) => new Date(r.created_at) >= last7Days).length;
 });
 
 const totalWithoutAI = computed(() => rows.value.filter((r) => !r.ai_analysis).length);
@@ -194,15 +188,33 @@ const headers = [
 
 const filteredRows = computed(() => {
   return rows.value.filter((r) => {
+    const term = search.value?.toLowerCase() ?? "";
+
     const matchSearch =
-      !search.value || r.name?.toLowerCase().includes(search.value.toLowerCase());
+      !term ||
+      r.name?.toLowerCase().includes(term) ||
+      r.gp?.toLowerCase().includes(term);
 
-    const matchGP =
-      !filterGP.value || r.gp?.toLowerCase().includes(filterGP.value.toLowerCase());
+    let matchQuickFilter = true;
 
-    const matchAI = !filterWithoutAI.value || !r.ai_analysis;
+    if (quickFilter.value === "without-ai") {
+      matchQuickFilter = !r.ai_analysis;
+    }
 
-    return matchSearch && matchGP && matchAI;
+    if (quickFilter.value === "today") {
+      matchQuickFilter =
+        new Date(r.created_at).toDateString() === new Date().toDateString();
+    }
+
+    if (quickFilter.value === "week") {
+      const last7Days = new Date();
+
+      last7Days.setDate(last7Days.getDate() - 7);
+
+      matchQuickFilter = new Date(r.created_at) >= last7Days;
+    }
+
+    return matchSearch && matchQuickFilter;
   });
 });
 
@@ -270,5 +282,24 @@ function formatDateTime(iso) {
 
 .hover-text:hover {
   color: rgb(var(--v-theme-primary));
+}
+
+.dashboard-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 10px;
+  transition: all 0.15s ease;
+}
+
+.dashboard-item:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.dashboard-active {
+  background: rgba(27, 84, 56, 0.12);
+  font-weight: 600;
 }
 </style>
