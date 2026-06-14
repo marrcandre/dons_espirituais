@@ -4,55 +4,57 @@
       <h1 class="text-h5 font-weight-bold text-primary">Painel Administrativo</h1>
     </div>
 
-    <!-- Dashboard -->
-    <v-row class="mb-4">
-      <v-col cols="6" sm="3">
-        <div class="dashboard-item" :class="{ 'dashboard-active': quickFilter === 'today' }"
-          @click="quickFilter = quickFilter === 'today' ? null : 'today'">
-          <v-icon size="18" color="primary">mdi-calendar-today</v-icon>
-          <span class="text-caption">Hoje:</span>
-          <strong>{{ totalToday }}</strong>
-        </div>
-      </v-col>
+    <v-card rounded="xl" elevation="2" class="pa-4 mb-4">
+      <!-- Dashboard -->
+      <v-row class="mb-4">
+        <v-col cols="6" sm="3">
+          <div class="dashboard-item" :class="{ 'dashboard-active': quickFilter === 'today' }"
+            @click="quickFilter = quickFilter === 'today' ? null : 'today'">
+            <v-icon size="18" color="primary">mdi-calendar-today</v-icon>
+            <span class="text-caption">Hoje:</span>
+            <strong>{{ totalToday }}</strong>
+          </div>
+        </v-col>
 
-      <v-col cols="6" sm="3">
-        <div class="dashboard-item" :class="{ 'dashboard-active': quickFilter === 'week' }"
-          @click="quickFilter = quickFilter === 'week' ? null : 'week'">
-          <v-icon size="18" color="primary">mdi-calendar-week</v-icon>
-          <span class="text-caption">7 dias:</span>
-          <strong>{{ totalWeek }}</strong>
-        </div>
-      </v-col>
+        <v-col cols="6" sm="3">
+          <div class="dashboard-item" :class="{ 'dashboard-active': quickFilter === 'week' }"
+            @click="quickFilter = quickFilter === 'week' ? null : 'week'">
+            <v-icon size="18" color="primary">mdi-calendar-week</v-icon>
+            <span class="text-caption">7 dias:</span>
+            <strong>{{ totalWeek }}</strong>
+          </div>
+        </v-col>
 
-      <v-col cols="6" sm="3">
-        <div class="dashboard-item" :class="{ 'dashboard-active': quickFilter === null }" @click="quickFilter = null">
-          <v-icon size="18" color="primary">mdi-counter</v-icon>
-          <span class="text-caption">Total:</span>
-          <strong>{{ total }}</strong>
-        </div>
-      </v-col>
+        <v-col cols="6" sm="3">
+          <div class="dashboard-item" :class="{ 'dashboard-active': quickFilter === null }" @click="quickFilter = null">
+            <v-icon size="18" color="primary">mdi-counter</v-icon>
+            <span class="text-caption">Total:</span>
+            <strong>{{ total }}</strong>
+          </div>
+        </v-col>
 
-      <v-col cols="6" sm="3">
-        <div class="dashboard-item" :class="{ 'dashboard-active': quickFilter === 'without-ai' }"
-          @click="quickFilter = quickFilter === 'without-ai' ? null : 'without-ai'">
-          <v-icon size="18" color="warning"> mdi-file-document-alert-outline </v-icon>
-          <span class="text-caption">Sem análise:</span>
-          <strong>{{ totalWithoutAI }}</strong>
-        </div>
-      </v-col>
-    </v-row>
-    <v-alert v-if="error" type="error" variant="tonal" rounded="xl" class="mb-4">
-      {{ error }}
-      <template #append>
-        <v-btn variant="text" color="error" @click="loadRows">Tentar novamente</v-btn>
-      </template>
-    </v-alert>
+        <v-col cols="6" sm="3">
+          <div class="dashboard-item" :class="{ 'dashboard-active': quickFilter === 'without-ai' }"
+            @click="quickFilter = quickFilter === 'without-ai' ? null : 'without-ai'">
+            <v-icon size="18" color="warning"> mdi-file-document-alert-outline </v-icon>
+            <span class="text-caption">Sem análise:</span>
+            <strong>{{ totalWithoutAI }}</strong>
+          </div>
+        </v-col>
+      </v-row>
+      <v-alert v-if="error" type="error" variant="tonal" rounded="xl" class="mb-4">
+        {{ error }}
+        <template #append>
+          <v-btn variant="text" color="error" @click="loadRows">Tentar novamente</v-btn>
+        </template>
+      </v-alert>
 
-    <!-- Filtrar por nome ou GP -->
-    <div class="d-flex flex-wrap">
-      <v-text-field v-model="search" label="Buscar nome ou GP" variant="outlined" density="compact"
-        prepend-inner-icon="mdi-magnify" rounded="lg" clearable style="max-width: 400px" />
-    </div>
+      <!-- Filtrar por nome ou GP -->
+      <div class="d-flex flex-wrap">
+        <v-text-field v-model="search" label="Buscar nome ou GP" variant="outlined" density="compact"
+          prepend-inner-icon="mdi-magnify" rounded="lg" clearable style="max-width: 400px" />
+      </div>
+    </v-card>
 
 
     <v-card rounded="xl" elevation="2">
