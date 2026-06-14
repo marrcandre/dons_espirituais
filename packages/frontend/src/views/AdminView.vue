@@ -4,31 +4,18 @@
       <h1 class="text-h5 font-weight-bold text-primary">Painel Administrativo</h1>
     </div>
 
-    <v-card rounded="xl" elevation="2" class="pa-4 mb-4">
-      <!-- Dashboard -->
-      <v-row class="mb-4">
-        <v-col cols="6" sm="3">
-          <div class="dashboard-item" :class="{ 'dashboard-active': quickFilter === 'today' }"
-            @click="quickFilter = quickFilter === 'today' ? null : 'today'">
-            <v-icon size="18" color="primary">mdi-calendar-today</v-icon>
-            <span class="text-caption">Hoje:</span>
-            <strong>{{ totalToday }}</strong>
-          </div>
-        </v-col>
+    <v-card rounded="xl" elevation="2" class="pa-2 mb-4">
 
-        <v-col cols="6" sm="3">
-          <div class="dashboard-item" :class="{ 'dashboard-active': quickFilter === 'week' }"
-            @click="quickFilter = quickFilter === 'week' ? null : 'week'">
-            <v-icon size="18" color="primary">mdi-calendar-week</v-icon>
-            <span class="text-caption">7 dias:</span>
-            <strong>{{ totalWeek }}</strong>
-          </div>
-        </v-col>
-
+      <!-- DASHBOARD -->
+      <v-row class="mb-1" dense>
         <v-col cols="6" sm="3">
           <div class="dashboard-item" :class="{ 'dashboard-active': quickFilter === null }" @click="quickFilter = null">
-            <v-icon size="18" color="primary">mdi-counter</v-icon>
-            <span class="text-caption">Total:</span>
+            <v-icon size="14" color="primary">
+              mdi-counter
+            </v-icon>
+
+            <span>Total</span>
+
             <strong>{{ total }}</strong>
           </div>
         </v-col>
@@ -36,26 +23,59 @@
         <v-col cols="6" sm="3">
           <div class="dashboard-item" :class="{ 'dashboard-active': quickFilter === 'without-ai' }"
             @click="quickFilter = quickFilter === 'without-ai' ? null : 'without-ai'">
-            <v-icon size="18" color="warning"> mdi-file-document-alert-outline </v-icon>
-            <span class="text-caption">Sem análise:</span>
+            <v-icon size="14" color="warning">
+              mdi-file-document-alert-outline
+            </v-icon>
+
+            <span>Sem IA</span>
+
             <strong>{{ totalWithoutAI }}</strong>
           </div>
         </v-col>
+
+        <v-col cols="6" sm="3">
+          <div class="dashboard-item" :class="{ 'dashboard-active': quickFilter === 'today' }"
+            @click="quickFilter = quickFilter === 'today' ? null : 'today'">
+            <v-icon size="14" color="primary">
+              mdi-calendar-today
+            </v-icon>
+
+            <span>Hoje</span>
+
+            <strong>{{ totalToday }}</strong>
+          </div>
+        </v-col>
+
+        <v-col cols="6" sm="3">
+          <div class="dashboard-item" :class="{ 'dashboard-active': quickFilter === 'week' }"
+            @click="quickFilter = quickFilter === 'week' ? null : 'week'">
+            <v-icon size="14" color="primary">
+              mdi-calendar-week
+            </v-icon>
+
+            <span>7 dias</span>
+
+            <strong>{{ totalWeek }}</strong>
+          </div>
+        </v-col>
+
       </v-row>
-      <v-alert v-if="error" type="error" variant="tonal" rounded="xl" class="mb-4">
+
+      <v-alert v-if="error" type="error" variant="tonal" rounded="xl" class="mb-2">
         {{ error }}
+
         <template #append>
-          <v-btn variant="text" color="error" @click="loadRows">Tentar novamente</v-btn>
+          <v-btn variant="text" color="error" @click="loadRows">
+            Tentar novamente
+          </v-btn>
         </template>
       </v-alert>
 
-      <!-- Filtrar por nome ou GP -->
-      <div class="d-flex flex-wrap">
-        <v-text-field v-model="search" label="Buscar nome ou GP" variant="outlined" density="compact"
-          prepend-inner-icon="mdi-magnify" rounded="lg" clearable style="max-width: 400px" />
-      </div>
-    </v-card>
+      <!-- BUSCA -->
+      <v-text-field v-model="search" label="Buscar nome ou GP" variant="outlined" density="compact"
+        prepend-inner-icon="mdi-magnify" rounded="lg" clearable hide-details />
 
+    </v-card>
 
     <v-card rounded="xl" elevation="2">
       <v-data-table :headers="headers" :items="filteredRows" :loading="loading" item-value="id" class="rounded-xl"
@@ -289,11 +309,22 @@ function formatDateTime(iso) {
 .dashboard-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 4px;
+
+  padding: 4px 6px;
+
+  border-radius: 8px;
+
   cursor: pointer;
-  padding: 8px 12px;
-  border-radius: 10px;
+
+  font-size: 0.85rem;
+
   transition: all 0.15s ease;
+}
+
+.dashboard-item strong {
+  font-size: 0.95rem;
 }
 
 .dashboard-item:hover {
