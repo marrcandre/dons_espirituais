@@ -18,7 +18,7 @@
 
       <v-text-field
         v-model="form.gp"
-        label="Líder (apascentador, coordenador, supervisor, etc)"
+        label="Quem é seu líder? (apascentador, coordenador, supervisor, etc.)"
         variant="outlined"
         rounded="lg"
         prepend-inner-icon="mdi-account-group"
