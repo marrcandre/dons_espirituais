@@ -1,8 +1,8 @@
 <template>
   <v-container class="py-8" max-width="1200">
-    <div class="d-flex align-center justify-space-between mb-6">
+    <!-- <div class="d-flex align-center justify-space-between mb-6">
       <h1 class="text-h5 font-weight-bold text-primary">Painel Administrativo</h1>
-    </div>
+    </div> -->
 
     <v-card rounded="xl" elevation="2" class="pa-2 mb-4">
 
