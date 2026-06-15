@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         from: emailFrom,
         to: adminEmail,
-        subject: `[Dons] Novo teste: ${response.name}`,
+        subject: `[Dons] ${response.name} fez o teste`,
         html: `
           <p>Novo teste finalizado</p>
           <p><strong>Nome:</strong> ${response.name}</p>
