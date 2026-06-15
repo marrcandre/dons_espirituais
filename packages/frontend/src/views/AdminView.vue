@@ -1,15 +1,12 @@
 <template>
   <v-container class="py-8" max-width="1200">
-    <!-- <div class="d-flex align-center justify-space-between mb-6">
-      <h1 class="text-h5 font-weight-bold text-primary">Painel Administrativo</h1>
-    </div> -->
-
     <v-card rounded="xl" elevation="2" class="pa-2 mb-4">
 
       <!-- DASHBOARD -->
       <v-row class="mb-1" dense>
         <v-col cols="6" sm="3">
-          <div class="dashboard-item" :class="{ 'dashboard-active': quickFilter === null }" @click="quickFilter = null">
+          <div class="dashboard-item" :class="{ 'dashboard-active': quickFilter === 'all' }"
+            @click="quickFilter = null">
             <v-icon size="14" color="primary">
               mdi-counter
             </v-icon>
@@ -72,7 +69,7 @@
       </v-alert>
 
       <!-- BUSCA -->
-      <v-text-field v-model="search" label="Buscar nome ou GP" variant="outlined" density="compact"
+      <v-text-field v-model="search" label="Buscar..." variant="outlined" density="compact"
         prepend-inner-icon="mdi-magnify" rounded="lg" clearable hide-details />
 
     </v-card>
@@ -80,23 +77,12 @@
     <v-card rounded="xl" elevation="2">
       <v-data-table :headers="headers" :items="filteredRows" :loading="loading" item-value="id" class="rounded-xl"
         :items-per-page="25">
-        <template #item.status="{ item }">
-          <div class="d-flex align-center ga-3">
-            <!-- EMAIL -->
-            <v-icon size="20" class="status-icon" :class="{ active: item.email_sent }">
-              mdi-email-outline
-            </v-icon>
 
-            <!-- RESULTADO -->
-            <v-tooltip text="Abrir resultado">
-              <template #activator="{ props }">
-                <v-icon v-bind="props" size="20" class="status-icon clickable" :class="{ active: item.ai_analysis }"
-                  @click.stop="goToResult(item.id)">
-                  mdi-file-document-outline
-                </v-icon>
-              </template>
-            </v-tooltip>
-          </div>
+        <template #item.status="{ item }">
+          <v-icon size="18" class="status-icon clickable" :class="{ active: item.ai_analysis }"
+            @click.stop="goToResult(item.id)">
+            mdi-file-document-outline
+          </v-icon>
         </template>
 
         <!-- Nome -->
@@ -104,8 +90,9 @@
           <v-text-field v-if="editingName === item.id" v-model="item.name" density="compact" variant="underlined"
             hide-details autofocus @blur="saveName(item)" @keyup.enter="saveName(item)" />
 
-          <span class="hover-text" v-else style="cursor: pointer" @click="editingName = item.id">
-            {{ item.name }}
+          <span v-else class="hover-text" :class="{ 'text-grey': !item.name }" style="cursor: pointer"
+            @click="editingName = item.id">
+            {{ item.name || '[sem nome]' }}
           </span>
         </template>
 
@@ -114,14 +101,18 @@
           <v-text-field v-if="editingGP === item.id" v-model="item.gp" density="compact" variant="underlined"
             hide-details autofocus @blur="saveGP(item)" @keyup.enter="saveGP(item)" />
 
-          <span class="hover-text" v-else style="cursor: pointer" @click="editingGP = item.id">
-            {{ item.gp }}
+          <span v-else class="hover-text" :class="{ 'text-grey': !item.gp }" style="cursor: pointer"
+            @click="editingGP = item.id">
+            {{ item.gp || '[sem GP]' }}
           </span>
         </template>
+
+
         <!-- Data e Hora -->
         <template #item.created_at="{ item }">
           {{ formatDateTime(item.created_at) }}
         </template>
+
       </v-data-table>
     </v-card>
   </v-container>
@@ -140,7 +131,7 @@ const error = ref(null);
 const rows = ref([]);
 
 const search = ref("");
-const quickFilter = ref(null);
+const quickFilter = ref('all');
 
 const editingName = ref(null);
 const editingGP = ref(null);
@@ -167,11 +158,16 @@ async function updateField(id, field, value) {
 }
 
 async function saveName(item) {
-  item.name = item.name?.trim();
+  item.name = item.name?.trim()
 
-  await updateField(item.id, "name", item.name);
+  if (!item.name) {
+    editingName.value = null
+    return
+  }
 
-  editingName.value = null;
+  await updateField(item.id, "name", item.name)
+
+  editingName.value = null
 }
 
 async function saveGP(item) {
@@ -201,7 +197,7 @@ const totalWeek = computed(() => {
 const totalWithoutAI = computed(() => rows.value.filter((r) => !r.ai_analysis).length);
 
 const headers = [
-  { title: "", key: "status", sortable: false, width: 70 },
+  { title: "", key: "status", sortable: false, width: 24 },
   { title: "Nome", key: "name", sortable: true },
   { title: "GP", key: "gp", sortable: true },
   { title: "Respondido em", key: "created_at", sortable: true },
@@ -250,7 +246,7 @@ async function loadRows() {
     const { data, error: fetchError } = await runSupabaseQuery(
       supabase
         .from("responses")
-        .select("id, name, gp, age, created_at, scores, ai_analysis, email_sent")
+        .select("id, name, gp, age, created_at, ai_analysis")
         .order("created_at", { ascending: false })
     );
 
@@ -278,10 +274,6 @@ function formatDateTime(iso) {
 <style scoped>
 .v-card {
   transition: all 0.2s ease;
-}
-
-.v-card:hover {
-  transform: translateY(-2px);
 }
 
 .status-icon {
