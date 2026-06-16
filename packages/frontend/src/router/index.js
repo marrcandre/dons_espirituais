@@ -81,7 +81,7 @@ router.beforeEach(async (to) => {
 
   // 🔐 admin
   if (to.meta.requiresAdmin) {
-    if (!authStore.isAdmin) return { name: 'home' }
+    if (!authStore.canAccessAdminPanel) return { name: 'home' }
   }
 })
 

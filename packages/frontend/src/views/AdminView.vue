@@ -89,9 +89,12 @@
         <template #item.name="{ item }">
           <v-text-field v-if="editingName === item.id" v-model="item.name" density="compact" variant="underlined"
             hide-details autofocus @blur="saveName(item)" @keyup.enter="saveName(item)" />
-
-          <span v-else class="hover-text" :class="{ 'text-grey': !item.name }" style="cursor: pointer"
-            @click="editingName = item.id">
+          <span v-else :class="[
+            { 'text-grey': !item.name },
+            authStore.isAdmin ? 'hover-text' : ''
+          ]" :style="{
+              cursor: authStore.isAdmin ? 'pointer' : 'default'
+            }" @click="authStore.isAdmin && (editingName = item.id)">
             {{ item.name || '[sem nome]' }}
           </span>
         </template>
@@ -101,8 +104,12 @@
           <v-text-field v-if="editingGP === item.id" v-model="item.gp" density="compact" variant="underlined"
             hide-details autofocus @blur="saveGP(item)" @keyup.enter="saveGP(item)" />
 
-          <span v-else class="hover-text" :class="{ 'text-grey': !item.gp }" style="cursor: pointer"
-            @click="editingGP = item.id">
+          <span v-else :class="[
+            { 'text-grey': !item.gp },
+            authStore.isAdmin ? 'hover-text' : ''
+          ]" :style="{
+    cursor: authStore.isAdmin ? 'pointer' : 'default'
+  }" @click="authStore.isAdmin && (editingGP = item.id)">
             {{ item.gp || '[sem GP]' }}
           </span>
         </template>
@@ -123,6 +130,9 @@ import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { supabase } from "../services/supabase.js";
 import { runSupabaseQuery } from "../services/supabaseQuery.js";
+import { useAuthStore } from '../stores/auth.js'
+
+const authStore = useAuthStore()
 
 const router = useRouter();
 
@@ -158,6 +168,8 @@ async function updateField(id, field, value) {
 }
 
 async function saveName(item) {
+  if (!authStore.isAdmin) return
+
   item.name = item.name?.trim()
 
   if (!item.name) {
@@ -171,6 +183,8 @@ async function saveName(item) {
 }
 
 async function saveGP(item) {
+  if (!authStore.isAdmin) return
+
   item.gp = item.gp?.trim();
 
   await updateField(item.id, "gp", item.gp);

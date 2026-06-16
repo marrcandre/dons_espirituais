@@ -19,7 +19,7 @@
 
     <template #append>
       <v-btn
-        v-if="authStore.isAdmin"
+        v-if="authStore.canAccessAdminPanel"
         icon="mdi-shield-account"
         color="white"
         variant="text"
