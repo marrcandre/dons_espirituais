@@ -16,16 +16,28 @@
     </div>
 
     <!-- Aviso de atualização -->
-    <v-alert type="warning" variant="tonal" class="mb-6" density="comfortable">
-      <div class="text-body-2">
-        <strong>Atualização recente:</strong><br />
+    <v-card rounded="xl" elevation="2" class="pa-5 mb-6" color="warning" variant="tonal">
+      <div class="d-flex align-start">
+        <v-icon color="warning" size="28" class="mr-4 mt-1">
+          mdi-information-outline
+        </v-icon>
 
-        Revisamos todas as perguntas do teste de dons espirituais para deixá-las mais claras e fiéis ao
-         original em inglês.<br /><br />
+        <div>
+          <div class="text-subtitle-1 font-weight-bold mb-2">
+            Atualização recente
+          </div>
 
-        Se você já realizou o teste anteriormente, recomendamos refazê-lo para obter um resultado mais preciso.
+          <div class="text-body-2">
+            Revisamos todas as perguntas do teste de dons espirituais para deixá-las mais claras e mais fiéis ao
+            conteúdo original em inglês.
+
+            <br /><br />
+
+            Se você já realizou o teste anteriormente, recomendamos refazê-lo para obter um resultado mais preciso.
+          </div>
+        </div>
       </div>
-    </v-alert>
+    </v-card>
 
     <!-- Histórico -->
     <v-card v-if="hasHistory" rounded="xl" class="mb-6 pa-5 d-flex align-center justify-space-between" elevation="2">
