@@ -11,6 +11,9 @@ dist/
 # supabase local
 .supabase/
 
+# Supabase CLI
+supabase/.temp/
+
 # OS
 .DS_Store
 
