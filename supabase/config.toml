@@ -9,14 +9,3 @@ entrypoint = "./functions/retry-ai-analysis/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/retry-ai-analysis/*.html" ]
-
-[functions.teste-generate-ai]
-enabled = true
-verify_jwt = false
-import_map = "./functions/teste-generate-ai/deno.json"
-# Uncomment to specify a custom file path to the entrypoint.
-# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
-entrypoint = "./functions/teste-generate-ai/index.ts"
-# Specifies static files to be bundled with the function. Supports glob patterns.
-# For example, if you want to serve static HTML pages in your function:
-# static_files = [ "./functions/teste-generate-ai/*.html" ]
