@@ -2,11 +2,29 @@
 
 ## Sprint 1 — Experiência do Resultado
 
-## Sprint 1.2 — PDF Baseado na Tela
+### Sprint 1.1 — Simplificação da ResultsView
+
+**Objetivo:** transformar a tela de resultados em uma experiência mais limpa, objetiva e agradável para o usuário.
+
+#### Interface
+
+* [ ] Simplificar layout geral
+* [ ] Reduzir poluição visual
+* [ ] Revisar hierarquia das informações
+* [ ] Melhorar legibilidade da análise IA
+* [ ] Revisar exibição dos dons secundários
+* [ ] Revisar apresentação dos recursos e recomendações
+* [ ] Revisar uso de chips, alertas e cartões
+* [ ] Revisar gráfico de dons
+* [ ] Melhorar experiência mobile
+
+---
+
+### Sprint 1.2 — PDF Baseado na Tela
 
 **Objetivo:** eliminar o PDF artesanal e gerar o documento diretamente a partir da tela de resultados.
 
-### Planejamento
+#### Planejamento
 
 * [ ] Criar container exportável
 * [ ] Exportar página completa usando html2canvas
@@ -15,12 +33,12 @@
 * [ ] Remover dependência da montagem manual do PDF
 * [ ] Eliminar páginas especiais de recursos
 * [ ] Eliminar renderização separada da análise IA
-* [ ] Eliminar renderização separada de gráfico
+* [ ] Eliminar renderização separada do gráfico
 * [ ] Validar resultado em desktop
 * [ ] Validar resultado em mobile
 * [ ] Comparar tamanho final do PDF
 
-### Limpeza
+#### Limpeza
 
 * [ ] Simplificar exportPDF()
 * [ ] Reduzir código da ResultsView
@@ -28,42 +46,92 @@
 
 ---
 
-## Sprint 1.3 — Revisão da Arquitetura da Análise IA
+### Sprint 1.3 — Arquitetura da Análise IA
 
 **Objetivo:** tornar a tela de resultados apenas uma tela de exibição.
 
-### Fluxo ideal
+#### Fluxo Ideal
 
 Teste → Resultado → IA → E-mail → Visualização
 
-### Tarefas
+#### Tarefas
 
-* [ ] Revisar geração automática da IA
-* [ ] Verificar se a análise deve ser criada antes da abertura da tela
-* [ ] Avaliar fila assíncrona
+* [x] Implementar geração automática da análise
+* [x] Implementar recuperação automática de falhas
+* [ ] Eliminar dependências da ResultsView na geração da análise
+* [ ] Revisar estratégia de envio de e-mail
+* [ ] Avaliar fila assíncrona (caso o volume cresça)
 * [ ] Avaliar uso de Edge Functions desacopladas
-* [ ] Evitar lógica pesada dentro da ResultsView
 
 ---
 
-## Sprint 1.4 — Limpeza do Projeto
+## Sprint 2 — Remodelação da UI/UX
 
-### Componentes
+### Histórico
 
-* [ ] Revisar componentes não utilizados
-* [ ] Revisar imports não utilizados
-* [ ] Revisar refs não utilizadas
-* [ ] Revisar CSS órfão
+* [x] Simplificar tela "Meus Resultados"
 
-### Frontend
+### Navegação
 
-* [ ] Revisar rotas não utilizadas
-* [ ] Revisar páginas experimentais
-* [ ] Revisar assets não utilizados
+* [ ] Revisar menu principal
+* [ ] Revisar fluxo Login → Teste → Resultado
+* [ ] Revisar estados de carregamento
+* [ ] Revisar mensagens de erro
+
+### Consistência Visual
+
+* [ ] Revisar espaçamentos
+* [ ] Revisar títulos
+* [ ] Revisar uso de chips
+* [ ] Revisar excesso de cartões
+* [ ] Revisar densidade de informações
+
+### Responsividade
+
+* [ ] Auditoria mobile
+* [ ] Auditoria tablet
+* [ ] Auditoria desktop
 
 ---
 
-## Sprint 2 — Conteúdo Institucional
+## Sprint 3 — Dados e Arquitetura
+
+### Fonte Única de Verdade
+
+**Objetivo:** eliminar duplicação de definições dos dons.
+
+* [ ] Criar módulo compartilhado dos dons
+* [ ] Eliminar duplicação entre frontend e backend
+* [ ] Revisar estrutura de scoring
+* [ ] Revisar geração dos gráficos
+* [ ] Revisar geração das análises
+* [ ] Padronizar nomes dos dons
+* [ ] Padronizar ordenação dos dons
+
+### Banco de Dados
+
+* [ ] Revisar índices do Supabase
+* [ ] Revisar consultas frequentes
+* [ ] Revisar logs
+* [ ] Revisar crescimento da tabela responses
+
+---
+
+## Sprint 4 — Segurança
+
+### Autenticação e Permissões
+
+* [ ] Auditoria de autenticação
+* [ ] Revisar políticas RLS
+* [ ] Revisar permissões das Edge Functions
+* [ ] Revisar uso da Service Role
+* [ ] Revisar exposição de dados
+* [ ] Revisar variáveis de ambiente
+* [ ] Revisar informações sensíveis nos logs
+
+---
+
+## Sprint 5 — Conteúdo Institucional
 
 ### Página Sobre
 
@@ -87,30 +155,23 @@ Teste → Resultado → IA → E-mail → Visualização
 
 ---
 
-## Sprint 3 — Plataforma
+## Sprint 6 — Administração
 
-### Usuário
-
-* [ ] Melhorar página "Meus Resultados"
-* [ ] Permitir filtros
-* [ ] Permitir busca
-
-### Administração
+### Dashboard
 
 * [ ] Dashboard estatístico
 * [ ] Distribuição dos dons
 * [ ] Evolução dos testes
+* [ ] Indicadores gerais
+
+### Exportação
+
 * [ ] Exportação CSV
-
-### Dados
-
-* [ ] Revisar índices do Supabase
-* [ ] Revisar políticas RLS
-* [ ] Revisar logs
+* [ ] Relatórios administrativos
 
 ---
 
-## Sprint 4 — Design System
+## Sprint 7 — Design System
 
 ### Identidade Visual
 
@@ -118,18 +179,14 @@ Teste → Resultado → IA → E-mail → Visualização
 * [ ] Padronizar cartões
 * [ ] Padronizar títulos
 * [ ] Padronizar botões
-
-### Responsividade
-
-* [ ] Auditoria mobile
-* [ ] Auditoria tablet
-* [ ] Auditoria desktop
+* [ ] Padronizar alertas
+* [ ] Padronizar tabelas
 
 ### Acessibilidade
 
-* [ ] Contraste
+* [ ] Revisar contraste
 * [ ] Navegação por teclado
-* [ ] Leitores de tela
+* [ ] Compatibilidade com leitores de tela
 
 ---
 
@@ -137,8 +194,10 @@ Teste → Resultado → IA → E-mail → Visualização
 
 ### Monitoramento
 
-* [ ] Configurar UptimeRobot
+* [x] Configurar UptimeRobot
 * [ ] Criar endpoint healthcheck
+* [ ] Monitorar falhas de geração IA
+* [ ] Monitorar Edge Functions
 * [ ] Monitorar Vercel
 * [ ] Monitorar Supabase
 
@@ -147,6 +206,7 @@ Teste → Resultado → IA → E-mail → Visualização
 * [ ] Revisar variáveis de ambiente
 * [ ] Revisar Edge Functions
 * [ ] Revisar backups
+* [ ] Revisar estratégia de recuperação de falhas
 
 ---
 
@@ -157,10 +217,13 @@ Teste → Resultado → IA → E-mail → Visualização
 * [x] Criar CHANGELOG.md
 * [ ] Manter CHANGELOG atualizado
 * [ ] Revisar README
-* [ ] Documentar arquitetura
+* [ ] Documentar arquitetura geral
+* [ ] Documentar banco de dados
 
 ### IA
 
 * [ ] Documentar prompt atual
 * [ ] Documentar fluxo da análise
 * [ ] Registrar versões do prompt
+* [ ] Documentar estratégia de retry
+* [ ] Documentar Edge Functions relacionadas à IA

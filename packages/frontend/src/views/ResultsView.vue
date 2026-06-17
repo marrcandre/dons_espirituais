@@ -28,7 +28,7 @@
 
         <!-- Cabeçalho -->
         <div class="text-center mb-8">
-          <h1 class="text-h4 font-weight-bold text-primary mb-2">
+          <h1 class="text-h5 font-weight-bold text-primary mb-2">
             {{ response.name }}
           </h1>
 
