@@ -6,7 +6,7 @@
   class="d-flex align-center text-decoration-none text-white ml-2"
 >
 <v-icon
-  icon="mdi-gift-outline"
+  icon="mdi-home-outline"
   size="30"
   class="mr-3"
 />
