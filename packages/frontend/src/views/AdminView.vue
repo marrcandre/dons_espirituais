@@ -87,29 +87,48 @@
 
         <!-- Nome -->
         <template #item.name="{ item }">
-          <v-text-field v-if="editingName === item.id" v-model="item.name" density="compact" variant="underlined"
-            hide-details autofocus @blur="saveName(item)" @keyup.enter="saveName(item)" />
+          <div v-if="nameEditor.rowId === item.id" class="inline-cell-editor">
+            <v-text-field v-model="nameEditor.draft" density="compact" variant="outlined" hide-details autofocus
+              :disabled="nameEditor.isSaving" :error-messages="nameEditor.error" @keyup.enter="saveName(item)"
+              @keyup.esc="cancelNameEdit" />
+
+            <v-btn icon="mdi-check" color="primary" size="x-small" :loading="nameEditor.isSaving"
+              @click="saveName(item)" />
+
+            <v-btn icon="mdi-close" variant="text" color="primary" size="x-small" :disabled="nameEditor.isSaving"
+              @click="cancelNameEdit" />
+          </div>
+
           <span v-else :class="[
             { 'text-grey': !item.name },
             authStore.isAdmin ? 'hover-text' : ''
           ]" :style="{
               cursor: authStore.isAdmin ? 'pointer' : 'default'
-            }" @click="authStore.isAdmin && (editingName = item.id)">
+            }" @click="startNameEdit(item)">
             {{ item.name || '[sem nome]' }}
           </span>
         </template>
 
         <!-- GP -->
         <template #item.gp="{ item }">
-          <v-text-field v-if="editingGP === item.id" v-model="item.gp" density="compact" variant="underlined"
-            hide-details autofocus @blur="saveGP(item)" @keyup.enter="saveGP(item)" />
+          <div v-if="gpEditor.rowId === item.id" class="inline-cell-editor">
+            <v-text-field v-model="gpEditor.draft" density="compact" variant="outlined" hide-details autofocus
+              :disabled="gpEditor.isSaving" :error-messages="gpEditor.error" @keyup.enter="saveGP(item)"
+              @keyup.esc="cancelGPEdit" />
+
+            <v-btn icon="mdi-check" color="primary" size="x-small" :loading="gpEditor.isSaving"
+              @click="saveGP(item)" />
+
+            <v-btn icon="mdi-close" variant="text" color="primary" size="x-small" :disabled="gpEditor.isSaving"
+              @click="cancelGPEdit" />
+          </div>
 
           <span v-else :class="[
             { 'text-grey': !item.gp },
             authStore.isAdmin ? 'hover-text' : ''
           ]" :style="{
     cursor: authStore.isAdmin ? 'pointer' : 'default'
-  }" @click="authStore.isAdmin && (editingGP = item.id)">
+  }" @click="startGPEdit(item)">
             {{ item.gp || '[sem GP]' }}
           </span>
         </template>
@@ -126,7 +145,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, reactive, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { supabase } from "../services/supabase.js";
 import { runSupabaseQuery } from "../services/supabaseQuery.js";
@@ -143,8 +162,18 @@ const rows = ref([]);
 const search = ref("");
 const quickFilter = ref('all');
 
-const editingName = ref(null);
-const editingGP = ref(null);
+const nameEditor = reactive({
+  rowId: null,
+  draft: '',
+  isSaving: false,
+  error: '',
+});
+const gpEditor = reactive({
+  rowId: null,
+  draft: '',
+  isSaving: false,
+  error: '',
+});
 
 function goToResult(id) {
   router.push({ name: "results", params: { id } });
@@ -162,34 +191,96 @@ async function updateField(id, field, value) {
     );
 
     if (error) throw error;
+    return true;
   } catch (err) {
     console.error(`Erro ao atualizar ${field}:`, err);
+    return false;
   }
+}
+
+function startNameEdit(item) {
+  if (!authStore.isAdmin) return
+
+  nameEditor.rowId = item.id
+  nameEditor.draft = item.name || ''
+  nameEditor.error = ''
+}
+
+function cancelNameEdit() {
+  if (nameEditor.isSaving) return
+
+  nameEditor.rowId = null
+  nameEditor.draft = ''
+  nameEditor.error = ''
 }
 
 async function saveName(item) {
   if (!authStore.isAdmin) return
 
-  item.name = item.name?.trim()
+  const name = nameEditor.draft.trim()
 
-  if (!item.name) {
-    editingName.value = null
+  if (!name) {
+    nameEditor.error = 'Informe um nome.'
     return
   }
 
-  await updateField(item.id, "name", item.name)
+  nameEditor.isSaving = true
+  nameEditor.error = ''
 
-  editingName.value = null
+  try {
+    const updated = await updateField(item.id, "name", name)
+
+    if (!updated) {
+      nameEditor.error = 'Não foi possível salvar.'
+      return
+    }
+
+    item.name = name
+    nameEditor.rowId = null
+    nameEditor.draft = ''
+  } finally {
+    nameEditor.isSaving = false
+  }
+}
+
+function startGPEdit(item) {
+  if (!authStore.isAdmin) return
+
+  gpEditor.rowId = item.id
+  gpEditor.draft = item.gp || ''
+  gpEditor.error = ''
+}
+
+function cancelGPEdit() {
+  if (gpEditor.isSaving) return
+
+  gpEditor.rowId = null
+  gpEditor.draft = ''
+  gpEditor.error = ''
 }
 
 async function saveGP(item) {
   if (!authStore.isAdmin) return
 
-  item.gp = item.gp?.trim();
+  const gp = gpEditor.draft.trim();
 
-  await updateField(item.id, "gp", item.gp);
+  gpEditor.isSaving = true
+  gpEditor.error = ''
 
-  editingGP.value = null;
+  try {
+    const updated = await updateField(item.id, "gp", gp);
+
+    if (!updated) {
+      gpEditor.error = 'Não foi possível salvar.'
+      return
+    }
+
+    item.gp = gp;
+    gpEditor.rowId = null
+    gpEditor.draft = ''
+  } finally {
+    gpEditor.isSaving = false
+  }
 }
 
 const total = computed(() => rows.value.length);
@@ -310,6 +401,14 @@ function formatDateTime(iso) {
 
 .hover-text:hover {
   color: rgb(var(--v-theme-primary));
+}
+
+.inline-cell-editor {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) auto auto;
+  align-items: start;
+  gap: 4px;
+  min-width: 220px;
 }
 
 .dashboard-item {
