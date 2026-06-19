@@ -98,6 +98,29 @@
           </p>
         </div>
 
+        <!-- Atualização contextual da IA -->
+        <v-card
+          v-if="isOwner && uiState.showRegenerateAction"
+          rounded="xl"
+          variant="tonal"
+          color="primary"
+          class="mb-6 pa-4 text-center"
+        >
+          <p class="text-body-2 mb-3">
+            O nome do resultado foi alterado. Atualize a análise para que ela reflita essa mudança.
+          </p>
+
+          <v-btn
+            color="primary"
+            variant="flat"
+            prepend-icon="mdi-refresh"
+            :loading="uiState.isRegenerating"
+            @click="handleRegenerateAnalysis"
+          >
+            Atualizar análise com novo nome
+          </v-btn>
+        </v-card>
+
         <!-- Top 3 dons -->
         <GiftBadges
           :scores="response.scores"
@@ -150,25 +173,7 @@
         variant="outlined"
         class="mb-6 pa-4"
       >
-        <p
-          v-if="isOwner && uiState.showRegenerateAction"
-          class="text-body-2 text-medium-emphasis text-center mb-3"
-        >
-          O nome do resultado foi alterado. Atualize a análise para que ela reflita essa mudança.
-        </p>
-
         <div class="d-flex flex-wrap justify-center ga-3">
-
-          <v-btn
-            v-if="isOwner && uiState.showRegenerateAction"
-            color="primary"
-            variant="text"
-            prepend-icon="mdi-refresh"
-            :loading="uiState.isRegenerating"
-            @click="handleRegenerateAnalysis"
-          >
-            Atualizar análise com novo nome
-          </v-btn>
 
           <v-btn
             color="primary"
