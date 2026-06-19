@@ -77,6 +77,16 @@
               size="small"
               @click="openNameEditor"
             />
+
+            <v-btn
+              color="primary"
+              variant="tonal"
+              size="small"
+              prepend-icon="mdi-share-variant"
+              @click="shareResult"
+            >
+              Compartilhar
+            </v-btn>
           </div>
 
           <p class="text-body-1 text-medium-emphasis">
@@ -148,15 +158,6 @@
         </p>
 
         <div class="d-flex flex-wrap justify-center ga-3">
-
-          <v-btn
-            color="primary"
-            variant="outlined"
-            prepend-icon="mdi-share-variant"
-            @click="shareResult"
-          >
-            Compartilhar resultado
-          </v-btn>
 
           <v-btn
             v-if="isOwner && uiState.showRegenerateAction"
