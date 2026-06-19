@@ -27,12 +27,64 @@
 
         <!-- Cabeçalho -->
         <div class="text-center mb-8">
-          <h1 class="text-h5 font-weight-bold text-primary mb-2">
-            {{ response.name }}
-          </h1>
+          <v-form
+            v-if="nameEditor.isEditing"
+            class="d-flex align-start justify-center ga-2 mb-2"
+            @submit.prevent="saveName"
+          >
+            <v-text-field
+              v-model="nameEditor.draft"
+              class="name-editor-field"
+              variant="outlined"
+              density="compact"
+              autofocus
+              hide-details="auto"
+              :disabled="nameEditor.isSaving"
+              :error-messages="nameEditor.error"
+            />
+
+            <v-btn
+              icon="mdi-check"
+              color="primary"
+              size="small"
+              type="submit"
+              :loading="nameEditor.isSaving"
+            />
+
+            <v-btn
+              icon="mdi-close"
+              variant="text"
+              color="primary"
+              size="small"
+              :disabled="nameEditor.isSaving"
+              @click="cancelNameEdit"
+            />
+          </v-form>
+
+          <div
+            v-else
+            class="d-flex align-center justify-center ga-2 mb-2"
+          >
+            <h1 class="text-h5 font-weight-bold text-primary mb-0">
+              {{ response.name }}
+            </h1>
+
+            <v-btn
+              v-if="isOwner"
+              icon="mdi-pencil"
+              variant="text"
+              color="primary"
+              size="small"
+              @click="openNameEditor"
+            />
+          </div>
 
           <p class="text-body-1 text-medium-emphasis">
             Seu Perfil de Dons Espirituais
+          </p>
+
+          <p class="text-caption text-medium-emphasis mt-1">
+            Teste realizado em {{ formatDate(response.created_at) }}
           </p>
         </div>
 
@@ -73,13 +125,6 @@
           class="mb-6"
         />
 
-        <!-- Data -->
-        <div class="text-center mt-8">
-          <p class="text-caption text-medium-emphasis">
-            Teste realizado em {{ formatDate(response.created_at) }}
-          </p>
-        </div>
-
       </div>
 
       <!-- Histórico -->
@@ -114,16 +159,6 @@
           </v-btn>
 
           <v-btn
-            v-if="isOwner"
-            color="primary"
-            variant="text"
-            prepend-icon="mdi-pencil"
-            @click="openNameEditor"
-          >
-            Editar nome
-          </v-btn>
-
-          <v-btn
             v-if="isOwner && uiState.showRegenerateAction"
             color="primary"
             variant="text"
@@ -154,51 +189,6 @@
 
         </div>
       </v-card>
-
-      <v-dialog
-        v-model="nameEditor.isOpen"
-        max-width="420"
-      >
-        <v-card rounded="xl">
-          <v-card-title class="text-h6 font-weight-bold">
-            Editar nome
-          </v-card-title>
-
-          <v-card-text>
-            <v-form @submit.prevent="saveName">
-              <v-text-field
-                v-model="nameEditor.draft"
-                label="Nome"
-                variant="outlined"
-                density="comfortable"
-                autofocus
-                :disabled="nameEditor.isSaving"
-                :error-messages="nameEditor.error"
-              />
-            </v-form>
-          </v-card-text>
-
-          <v-card-actions class="px-6 pb-5">
-            <v-spacer />
-
-            <v-btn
-              variant="text"
-              :disabled="nameEditor.isSaving"
-              @click="nameEditor.isOpen = false"
-            >
-              Cancelar
-            </v-btn>
-
-            <v-btn
-              color="primary"
-              :loading="nameEditor.isSaving"
-              @click="saveName"
-            >
-              Salvar
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
 
       <v-snackbar
         v-model="nameEditor.showSuccess"
@@ -253,7 +243,7 @@ const error = ref(null)
 const response = ref(null)
 const analysisRegenerationError = ref(false)
 const nameEditor = reactive({
-  isOpen: false,
+  isEditing: false,
   draft: '',
   isSaving: false,
   error: '',
@@ -304,7 +294,15 @@ function openNameEditor() {
 
   nameEditor.draft = response.value?.name || ''
   nameEditor.error = ''
-  nameEditor.isOpen = true
+  nameEditor.isEditing = true
+}
+
+function cancelNameEdit() {
+  if (nameEditor.isSaving) return
+
+  nameEditor.draft = response.value?.name || ''
+  nameEditor.error = ''
+  nameEditor.isEditing = false
 }
 
 async function saveName() {
@@ -318,7 +316,7 @@ async function saveName() {
   }
 
   if (name === response.value.name) {
-    nameEditor.isOpen = false
+    nameEditor.isEditing = false
     return
   }
 
@@ -338,7 +336,7 @@ async function saveName() {
 
     response.value.name = data?.name || name
     uiState.showRegenerateAction = true
-    nameEditor.isOpen = false
+    nameEditor.isEditing = false
     nameEditor.showSuccess = true
   } catch (err) {
     console.error('Erro ao atualizar nome:', err)
@@ -415,5 +413,9 @@ onMounted(loadResponse)
 }
 .v-card:hover {
   transform: translateY(-2px);
+}
+
+.name-editor-field {
+  max-width: 360px;
 }
 </style>
