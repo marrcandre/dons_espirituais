@@ -87,6 +87,16 @@
             >
               Compartilhar
             </v-btn>
+
+            <v-btn
+              color="primary"
+              variant="tonal"
+              size="small"
+              prepend-icon="mdi-printer"
+              @click="printResult"
+            >
+              Imprimir
+            </v-btn>
           </div>
 
           <p class="text-body-1 text-medium-emphasis">
@@ -148,16 +158,6 @@
           />
         </v-card>
 
-        <!-- Crescimento -->
-        <GrowthSection
-          class="mb-6"
-        />
-
-        <!-- Recursos -->
-        <ResourcesSection
-          class="mb-6"
-        />
-
       </div>
 
       <!-- Histórico -->
@@ -167,34 +167,14 @@
         class="mt-6 mb-6"
       />
 
-      <!-- Ações -->
-      <v-card
-        rounded="xl"
-        variant="outlined"
-        class="mb-6 pa-4"
-      >
-        <div class="d-flex flex-wrap justify-center ga-3">
+      <!-- Seção final -->
+      <GrowthSection
+        class="mb-6"
+      />
 
-          <v-btn
-            color="primary"
-            variant="outlined"
-            prepend-icon="mdi-printer"
-            @click="printResult"
-          >
-            Imprimir
-          </v-btn>
-
-          <v-btn
-            v-if="!authStore.user"
-            color="primary"
-            prepend-icon="mdi-gift-outline"
-            to="/login"
-          >
-            Quero descobrir meus dons
-          </v-btn>
-
-        </div>
-      </v-card>
+      <ResourcesSection
+        class="mb-6"
+      />
 
       <v-snackbar
         v-model="nameEditor.showSuccess"
