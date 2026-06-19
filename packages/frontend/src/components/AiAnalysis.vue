@@ -99,9 +99,11 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { supabase } from '../services/supabase.js'
 import { useAuthStore } from '../stores/auth.js'
+import { regenerateAiAnalysis } from '../services/aiAnalysis.js'
 
 const props = defineProps({
   responseId: { type: String, required: true },
+  responseName: { type: String, required: true },
   initialText: { type: String, default: null },
 })
 
@@ -162,6 +164,20 @@ async function generateAnalysis(force = false) {
   error.value = null
 
   try {
+    if (force) {
+      const aiAnalysis = await regenerateAiAnalysis(
+        props.responseId,
+        props.responseName
+      )
+
+      text.value = aiAnalysis
+      loading.value = false
+      error.value = null
+      stopPolling()
+
+      return aiAnalysis
+    }
+
     const { error: invokeError } = await supabase.functions.invoke(
       'generate-ai',
       {
@@ -177,6 +193,7 @@ async function generateAnalysis(force = false) {
     }
 
     startPolling()
+    return true
   } catch (err) {
     console.error('Erro ao gerar análise:', err)
 
@@ -184,10 +201,15 @@ async function generateAnalysis(force = false) {
 
     error.value =
       'Não foi possível gerar a análise agora. Tente novamente em instantes.'
+    return false
   } finally {
     generating.value = false
   }
 }
+
+defineExpose({
+  generateAnalysis,
+})
 
 onMounted(() => {
   if (text.value) return

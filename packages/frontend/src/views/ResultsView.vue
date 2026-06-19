@@ -1,5 +1,5 @@
 <template>
-  <v-container class="py-8" max-width="800"   ref="pdfContentRef">
+  <v-container class="py-8" max-width="800">
 
     <!-- Loading -->
     <div v-if="loading" class="text-center py-16">
@@ -23,8 +23,7 @@
     <!-- Resultado -->
     <template v-else-if="response">
 
-      <!-- TUDO QUE VAI PARA O PDF -->
-      <div id="pdf-content">
+      <div>
 
         <!-- Cabeçalho -->
         <div class="text-center mb-8">
@@ -57,7 +56,9 @@
           class="mb-6"
         >
           <AiAnalysis
+            ref="aiAnalysisRef"
             :response-id="response.id"
+            :response-name="response.name"
             :initial-text="response.ai_analysis"
           />
         </v-card>
@@ -81,8 +82,6 @@
 
       </div>
 
-      <!-- FORA DO PDF -->
-
       <!-- Histórico -->
       <HistoryList
         v-if="isOwner"
@@ -96,17 +95,14 @@
         variant="outlined"
         class="mb-6 pa-4"
       >
-        <div class="d-flex flex-wrap justify-center ga-3">
+        <p
+          v-if="isOwner && uiState.showRegenerateAction"
+          class="text-body-2 text-medium-emphasis text-center mb-3"
+        >
+          O nome do resultado foi alterado. Atualize a análise para que ela reflita essa mudança.
+        </p>
 
-          <v-btn
-            color="primary"
-            variant="outlined"
-            prepend-icon="mdi-download"
-            @click="exportPDF"
-            :loading="exportingPDF"
-          >
-            Baixar PDF
-          </v-btn>
+        <div class="d-flex flex-wrap justify-center ga-3">
 
           <v-btn
             color="primary"
@@ -114,7 +110,28 @@
             prepend-icon="mdi-share-variant"
             @click="shareResult"
           >
-            Compartilhar
+            Compartilhar resultado
+          </v-btn>
+
+          <v-btn
+            v-if="isOwner"
+            color="primary"
+            variant="text"
+            prepend-icon="mdi-pencil"
+            @click="openNameEditor"
+          >
+            Editar nome
+          </v-btn>
+
+          <v-btn
+            v-if="isOwner && uiState.showRegenerateAction"
+            color="primary"
+            variant="text"
+            prepend-icon="mdi-refresh"
+            :loading="uiState.isRegenerating"
+            @click="handleRegenerateAnalysis"
+          >
+            Atualizar análise com novo nome
           </v-btn>
 
           <v-btn
@@ -138,6 +155,75 @@
         </div>
       </v-card>
 
+      <v-dialog
+        v-model="nameEditor.isOpen"
+        max-width="420"
+      >
+        <v-card rounded="xl">
+          <v-card-title class="text-h6 font-weight-bold">
+            Editar nome
+          </v-card-title>
+
+          <v-card-text>
+            <v-form @submit.prevent="saveName">
+              <v-text-field
+                v-model="nameEditor.draft"
+                label="Nome"
+                variant="outlined"
+                density="comfortable"
+                autofocus
+                :disabled="nameEditor.isSaving"
+                :error-messages="nameEditor.error"
+              />
+            </v-form>
+          </v-card-text>
+
+          <v-card-actions class="px-6 pb-5">
+            <v-spacer />
+
+            <v-btn
+              variant="text"
+              :disabled="nameEditor.isSaving"
+              @click="nameEditor.isOpen = false"
+            >
+              Cancelar
+            </v-btn>
+
+            <v-btn
+              color="primary"
+              :loading="nameEditor.isSaving"
+              @click="saveName"
+            >
+              Salvar
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <v-snackbar
+        v-model="nameEditor.showSuccess"
+        color="success"
+        timeout="3000"
+      >
+        Nome atualizado com sucesso.
+      </v-snackbar>
+
+      <v-snackbar
+        v-model="analysisRegenerationError"
+        color="warning"
+        timeout="4000"
+      >
+        Não foi possível atualizar a análise agora.
+      </v-snackbar>
+
+      <v-snackbar
+        v-model="uiState.showAnalysisSuccess"
+        color="success"
+        timeout="3000"
+      >
+        Análise atualizada com sucesso.
+      </v-snackbar>
+
     </template>
 
   </v-container>
@@ -146,7 +232,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth.js'
 import { supabase } from '../services/supabase.js'
@@ -157,17 +243,27 @@ import ResultsChart from '../components/ResultsChart.vue'
 import AiAnalysis from '../components/AiAnalysis.vue'
 import ResourcesSection from '../components/ResourcesSection.vue'
 import HistoryList from '../components/HistoryList.vue'
-import { resources } from '../data/resources.js'
 
 const route = useRoute()
-// Refs for PDF sections
-const pdfContentRef = ref(null)
+const aiAnalysisRef = ref(null)
 
 const authStore = useAuthStore()
 const loading = ref(true)
 const error = ref(null)
 const response = ref(null)
-const exportingPDF = ref(false)
+const analysisRegenerationError = ref(false)
+const nameEditor = reactive({
+  isOpen: false,
+  draft: '',
+  isSaving: false,
+  error: '',
+  showSuccess: false,
+})
+const uiState = reactive({
+  showRegenerateAction: false,
+  isRegenerating: false,
+  showAnalysisSuccess: false,
+})
 
 const isOwner = computed(() =>
   authStore.user &&
@@ -203,6 +299,89 @@ function formatDate(iso) {
   })
 }
 
+function openNameEditor() {
+  if (!isOwner.value) return
+
+  nameEditor.draft = response.value?.name || ''
+  nameEditor.error = ''
+  nameEditor.isOpen = true
+}
+
+async function saveName() {
+  if (!isOwner.value || !response.value) return
+
+  const name = nameEditor.draft.trim()
+
+  if (!name) {
+    nameEditor.error = 'Informe um nome.'
+    return
+  }
+
+  if (name === response.value.name) {
+    nameEditor.isOpen = false
+    return
+  }
+
+  nameEditor.isSaving = true
+  nameEditor.error = ''
+
+  try {
+    const { data, error: updateError } = await supabase
+      .from('responses')
+      .update({ name })
+      .eq('id', response.value.id)
+      .eq('user_id', authStore.user.id)
+      .select('name')
+      .single()
+
+    if (updateError) throw updateError
+
+    response.value.name = data?.name || name
+    uiState.showRegenerateAction = true
+    nameEditor.isOpen = false
+    nameEditor.showSuccess = true
+  } catch (err) {
+    console.error('Erro ao atualizar nome:', err)
+    nameEditor.error = 'Não foi possível atualizar o nome.'
+  } finally {
+    nameEditor.isSaving = false
+  }
+}
+
+async function regenerateAnalysis(responseId, name) {
+  if (!responseId || !name || !aiAnalysisRef.value) return null
+
+  return aiAnalysisRef.value.generateAnalysis(true)
+}
+
+async function handleRegenerateAnalysis() {
+  if (!isOwner.value || !response.value) return
+
+  uiState.isRegenerating = true
+  uiState.showAnalysisSuccess = false
+  analysisRegenerationError.value = false
+
+  try {
+    const generated = await regenerateAnalysis(
+      response.value.id,
+      response.value.name
+    )
+
+    if (!generated) {
+      throw new Error('Falha ao atualizar análise')
+    }
+
+    response.value.ai_analysis = generated
+    uiState.showRegenerateAction = false
+    uiState.showAnalysisSuccess = true
+  } catch (err) {
+    console.error('Erro ao atualizar análise:', err)
+    analysisRegenerationError.value = true
+  } finally {
+    uiState.isRegenerating = false
+  }
+}
+
 async function shareResult() {
   const url = window.location.href
 
@@ -224,86 +403,6 @@ async function shareResult() {
 
 function printResult() {
   window.print()
-}
-
-async function exportPDF() {
-  exportingPDF.value = true
-
-  try {
-    const [{ default: jsPDF }, { default: html2canvas }] =
-      await Promise.all([
-        import('jspdf'),
-        import('html2canvas'),
-      ])
-
-    const element = pdfContentRef.value?.$el || pdfContentRef.value
-
-    if (!element) {
-      throw new Error('Elemento não encontrado')
-    }
-
-    const canvas = await html2canvas(element, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#ffffff',
-      scrollY: -window.scrollY,
-    })
-
-    const imgData = canvas.toDataURL('image/png')
-
-    const pdf = new jsPDF({
-      orientation: 'p',
-      unit: 'mm',
-      format: 'a4',
-    })
-
-    const pageWidth = pdf.internal.pageSize.getWidth()
-    const pageHeight = pdf.internal.pageSize.getHeight()
-
-    const imgWidth = pageWidth
-    const imgHeight = (canvas.height * imgWidth) / canvas.width
-
-    let heightLeft = imgHeight
-    let position = 0
-
-    pdf.addImage(
-      imgData,
-      'PNG',
-      0,
-      position,
-      imgWidth,
-      imgHeight
-    )
-
-    heightLeft -= pageHeight
-
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight
-
-      pdf.addPage()
-
-      pdf.addImage(
-        imgData,
-        'PNG',
-        0,
-        position,
-        imgWidth,
-        imgHeight
-      )
-
-      heightLeft -= pageHeight
-    }
-
-    const slug = response.value.name
-      .replace(/\s+/g, '-')
-      .toLowerCase()
-
-    pdf.save(`dons-espirituais-${slug}.pdf`)
-  } catch (err) {
-    console.error('Erro ao exportar PDF:', err)
-  } finally {
-    exportingPDF.value = false
-  }
 }
 
 onMounted(loadResponse)
