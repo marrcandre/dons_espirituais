@@ -3,208 +3,131 @@
 
     <!-- Loading -->
     <div v-if="loading" class="text-center py-16">
-      <v-progress-circular
-        indeterminate
-        color="primary"
-        size="64"
-      />
+      <v-progress-circular indeterminate color="primary" size="64" />
     </div>
 
     <!-- Erro -->
-    <v-alert
-      v-else-if="error"
-      type="error"
-      rounded="xl"
-      class="mb-4"
-    >
+    <v-alert v-else-if="error" type="error" rounded="xl" class="mb-4">
       {{ error }}
     </v-alert>
 
     <!-- Resultado -->
     <template v-else-if="response">
 
-      <div>
+      <!-- ========================= -->
+      <!-- ACTION BAR (V2) -->
+      <!-- ========================= -->
+      <v-card rounded="xl" variant="outlined" class="mb-6 pa-2 d-flex justify-center ga-2 flex-wrap">
+        <v-btn size="small" variant="text" prepend-icon="mdi-share-variant" @click="shareResult">
+          Compartilhar
+        </v-btn>
 
-        <!-- Cabeçalho -->
-        <div class="text-center mb-8">
-          <v-form
-            v-if="nameEditor.isEditing"
-            class="d-flex align-start justify-center ga-2 mb-2"
-            @submit.prevent="saveName"
-          >
-            <v-text-field
-              v-model="nameEditor.draft"
-              class="name-editor-field"
-              variant="outlined"
-              density="compact"
-              autofocus
-              hide-details="auto"
-              :disabled="nameEditor.isSaving"
-              :error-messages="nameEditor.error"
-            />
+        <v-btn size="small" variant="text" prepend-icon="mdi-printer" @click="printResult">
+          Imprimir
+        </v-btn>
+      </v-card>
 
-            <v-btn
-              icon="mdi-check"
-              color="primary"
-              size="small"
-              type="submit"
-              :loading="nameEditor.isSaving"
-            />
+      <!-- ========================= -->
+      <!-- HEADER (IDENTIDADE) -->
+      <!-- ========================= -->
+      <div class="text-center mb-8">
 
-            <v-btn
-              icon="mdi-close"
-              variant="text"
-              color="primary"
-              size="small"
-              :disabled="nameEditor.isSaving"
-              @click="cancelNameEdit"
-            />
-          </v-form>
+        <!-- Editor de nome -->
+        <v-form v-if="nameEditor.isEditing" class="d-flex align-start justify-center ga-2 mb-2"
+          @submit.prevent="saveName">
+          <v-text-field v-model="nameEditor.draft" class="name-editor-field" variant="outlined" density="compact"
+            autofocus hide-details="auto" :disabled="nameEditor.isSaving" :error-messages="nameEditor.error" />
 
-          <div
-            v-else
-            class="d-flex align-center justify-center ga-2 mb-2"
-          >
+          <v-btn icon="mdi-check" color="primary" size="small" type="submit" :loading="nameEditor.isSaving" />
+
+          <v-btn icon="mdi-close" variant="text" color="primary" size="small" :disabled="nameEditor.isSaving"
+            @click="cancelNameEdit" />
+        </v-form>
+
+        <!-- BLOCO TIGHT (NOME + DATA) -->
+        <div v-else class="d-flex flex-column align-center justify-center mb-2">
+          <div class="d-flex align-center ga-2">
             <h1 class="text-h5 font-weight-bold text-primary mb-0">
               {{ response.name }}
             </h1>
 
-            <v-btn
-              v-if="isOwner"
-              icon="mdi-pencil"
-              variant="text"
-              color="primary"
-              size="small"
-              @click="openNameEditor"
-            />
-
-            <v-btn
-              color="primary"
-              variant="tonal"
-              size="small"
-              prepend-icon="mdi-share-variant"
-              @click="shareResult"
-            >
-              Compartilhar
-            </v-btn>
-
-            <v-btn
-              color="primary"
-              variant="tonal"
-              size="small"
-              prepend-icon="mdi-printer"
-              @click="printResult"
-            >
-              Imprimir
-            </v-btn>
+            <v-btn v-if="isOwner" icon="mdi-pencil" variant="text" color="primary" size="small"
+              @click="openNameEditor" />
           </div>
 
-          <p class="text-body-1 text-medium-emphasis">
-            Seu Perfil de Dons Espirituais
-          </p>
-
-          <p class="text-caption text-medium-emphasis mt-1">
-            Teste realizado em {{ formatDate(response.created_at) }}
+          <p class="text-caption text-medium-emphasis mt-1 tight-date">
+            {{ formatDate(response.created_at) }}
           </p>
         </div>
 
-        <!-- Atualização contextual da IA -->
-        <v-card
-          v-if="isOwner && uiState.showRegenerateAction"
-          rounded="xl"
-          variant="tonal"
-          color="primary"
-          class="mb-6 pa-4 text-center"
-        >
-          <p class="text-body-2 mb-3">
-            O nome do resultado foi alterado. Atualize a análise para que ela reflita essa mudança.
-          </p>
-
-          <v-btn
-            color="primary"
-            variant="flat"
-            prepend-icon="mdi-refresh"
-            :loading="uiState.isRegenerating"
-            @click="handleRegenerateAnalysis"
-          >
-            Atualizar análise com novo nome
-          </v-btn>
-        </v-card>
-
-        <!-- Top 3 dons -->
-        <GiftBadges
-          :scores="response.scores"
-          class="mb-6"
-        />
-
-        <!-- Gráfico -->
-        <ResultsChart
-          ref="chartRef"
-          :scores="response.scores"
-          class="mb-8"
-        />
-
-        <!-- Análise IA -->
-        <v-card
-          rounded="xl"
-          elevation="2"
-          class="mb-6"
-        >
-          <AiAnalysis
-            ref="aiAnalysisRef"
-            :response-id="response.id"
-            :response-name="response.name"
-            :initial-text="response.ai_analysis"
-          />
-        </v-card>
-
       </div>
 
-      <!-- Histórico -->
-      <HistoryList
-        v-if="isOwner"
-        :current-id="response.id"
-        class="mt-6 mb-6"
-      />
+      <!-- ========================= -->
+      <!-- BANNER IA CONTEXTUAL -->
+      <!-- ========================= -->
+      <!-- ========================= -->
+      <!-- BANNER IA CONTEXTUAL -->
+      <!-- ========================= -->
+      <v-card v-if="isOwner && uiState.showRegenerateAction && !uiState.dismissedRegenerateBanner" rounded="xl"
+        variant="tonal" color="warning" class="mb-6 pa-4 text-center">
+        <p class="text-body-2 mb-3">
+          O nome do resultado foi alterado. Atualize a análise para refletir essa mudança.
+        </p>
 
-      <!-- Seção final -->
-      <GrowthSection
-        class="mb-6"
-      />
+        <div class="d-flex justify-center ga-2 flex-wrap">
+          <v-btn color="warning" variant="flat" prepend-icon="mdi-refresh" :loading="uiState.isRegenerating"
+            @click="handleRegenerateAnalysis">
+            Atualizar análise
+          </v-btn>
 
-      <ResourcesSection
-        class="mb-6"
-      />
+          <v-btn variant="text" color="warning" @click="dismissRegenerateBanner">
+            Agora não
+          </v-btn>
+        </div>
+      </v-card>
 
-      <v-snackbar
-        v-model="nameEditor.showSuccess"
-        color="success"
-        timeout="3000"
-      >
+      <!-- ========================= -->
+      <!-- CONTEÚDO PRINCIPAL -->
+      <!-- ========================= -->
+
+      <!-- Top 3 dons -->
+      <GiftBadges :scores="response.scores" class="mb-6" />
+
+      <!-- Gráfico -->
+      <ResultsChart ref="chartRef" :scores="response.scores" class="mb-8" />
+
+      <!-- Análise IA -->
+      <v-card rounded="xl" elevation="2" class="mb-6">
+        <AiAnalysis ref="aiAnalysisRef" :response-id="response.id" :response-name="response.name"
+          :initial-text="response.ai_analysis" />
+      </v-card>
+
+      <!-- ========================= -->
+      <!-- SEÇÕES SECUNDÁRIAS -->
+      <!-- ========================= -->
+
+      <GrowthSection class="mb-6" />
+      <ResourcesSection class="mb-6" />
+
+      <!-- ========================= -->
+      <!-- SNACKBARS -->
+      <!-- ========================= -->
+
+      <v-snackbar v-model="nameEditor.showSuccess" color="success" timeout="3000">
         Nome atualizado com sucesso.
       </v-snackbar>
 
-      <v-snackbar
-        v-model="analysisRegenerationError"
-        color="warning"
-        timeout="4000"
-      >
+      <v-snackbar v-model="analysisRegenerationError" color="warning" timeout="4000">
         Não foi possível atualizar a análise agora.
       </v-snackbar>
 
-      <v-snackbar
-        v-model="uiState.showAnalysisSuccess"
-        color="success"
-        timeout="3000"
-      >
+      <v-snackbar v-model="uiState.showAnalysisSuccess" color="success" timeout="3000">
         Análise atualizada com sucesso.
       </v-snackbar>
 
     </template>
 
   </v-container>
-
-
 </template>
 
 <script setup>
@@ -218,16 +141,36 @@ import GiftBadges from '../components/GiftBadges.vue'
 import ResultsChart from '../components/ResultsChart.vue'
 import AiAnalysis from '../components/AiAnalysis.vue'
 import ResourcesSection from '../components/ResourcesSection.vue'
-import HistoryList from '../components/HistoryList.vue'
 
+/* =========================================================
+   ROUTE / STORE
+========================================================= */
 const route = useRoute()
+const authStore = useAuthStore()
+
+/* =========================================================
+   REFS (BASE STATE)
+========================================================= */
 const aiAnalysisRef = ref(null)
 
-const authStore = useAuthStore()
 const loading = ref(true)
 const error = ref(null)
 const response = ref(null)
-const analysisRegenerationError = ref(false)
+
+/* =========================================================
+   UI STATE
+========================================================= */
+const uiState = reactive({
+  showRegenerateAction: false,
+  isRegenerating: false,
+  showAnalysisSuccess: false,
+  dismissedRegenerateBanner: false,
+  analysisRegenerationError: false,
+})
+
+/* =========================================================
+   EDITOR STATE (NAME)
+========================================================= */
 const nameEditor = reactive({
   isEditing: false,
   draft: '',
@@ -235,17 +178,18 @@ const nameEditor = reactive({
   error: '',
   showSuccess: false,
 })
-const uiState = reactive({
-  showRegenerateAction: false,
-  isRegenerating: false,
-  showAnalysisSuccess: false,
-})
 
+/* =========================================================
+   DERIVED STATE
+========================================================= */
 const isOwner = computed(() =>
   authStore.user &&
   response.value?.user_id === authStore.user.id
 )
 
+/* =========================================================
+   DATA LAYER
+========================================================= */
 async function loadResponse() {
   loading.value = true
   error.value = null
@@ -267,6 +211,9 @@ async function loadResponse() {
   }
 }
 
+/* =========================================================
+   HELPERS
+========================================================= */
 function formatDate(iso) {
   return new Date(iso).toLocaleDateString('pt-BR', {
     day: '2-digit',
@@ -275,6 +222,9 @@ function formatDate(iso) {
   })
 }
 
+/* =========================================================
+   NAME EDIT FLOW
+========================================================= */
 function openNameEditor() {
   if (!isOwner.value) return
 
@@ -321,7 +271,10 @@ async function saveName() {
     if (updateError) throw updateError
 
     response.value.name = data?.name || name
+
     uiState.showRegenerateAction = true
+    uiState.dismissedRegenerateBanner = false
+
     nameEditor.isEditing = false
     nameEditor.showSuccess = true
   } catch (err) {
@@ -332,9 +285,11 @@ async function saveName() {
   }
 }
 
-async function regenerateAnalysis(responseId, name) {
-  if (!responseId || !name || !aiAnalysisRef.value) return null
-
+/* =========================================================
+   ANALYSIS FLOW
+========================================================= */
+async function regenerateAnalysis() {
+  if (!aiAnalysisRef.value) return null
   return aiAnalysisRef.value.generateAnalysis(true)
 }
 
@@ -342,66 +297,72 @@ async function handleRegenerateAnalysis() {
   if (!isOwner.value || !response.value) return
 
   uiState.isRegenerating = true
-  uiState.showAnalysisSuccess = false
-  analysisRegenerationError.value = false
+  uiState.analysisRegenerationError = false
 
   try {
-    const generated = await regenerateAnalysis(
-      response.value.id,
-      response.value.name
-    )
+    const generated = await regenerateAnalysis()
 
-    if (!generated) {
-      throw new Error('Falha ao atualizar análise')
-    }
+    if (!generated) throw new Error('Falha ao atualizar análise')
 
     response.value.ai_analysis = generated
     uiState.showRegenerateAction = false
     uiState.showAnalysisSuccess = true
   } catch (err) {
-    console.error('Erro ao atualizar análise:', err)
-    analysisRegenerationError.value = true
+    console.error(err)
+    uiState.analysisRegenerationError = true
   } finally {
     uiState.isRegenerating = false
   }
 }
 
-async function shareResult() {
+/* =========================================================
+   UI ACTIONS
+========================================================= */
+function shareResult() {
   const url = window.location.href
 
-  try {
-    if (navigator.share) {
-      await navigator.share({
-        title: 'Meu Resultado - Dons Espirituais',
-        text: 'Confira o resultado do meu teste de dons espirituais',
-        url,
-      })
-    } else {
-      await navigator.clipboard.writeText(url)
-      alert('Link copiado para a área de transferência.')
-    }
-  } catch (err) {
-    console.error('Erro ao compartilhar:', err)
+  if (navigator.share) {
+    navigator.share({
+      title: 'Meu Resultado - Dons Espirituais',
+      text: 'Confira meu resultado',
+      url,
+    })
+  } else {
+    navigator.clipboard.writeText(url)
   }
+}
+
+function dismissRegenerateBanner() {
+  uiState.showRegenerateAction = false
+  uiState.dismissedRegenerateBanner = true
 }
 
 function printResult() {
   window.print()
 }
 
+/* =========================================================
+   LIFECYCLE
+========================================================= */
 onMounted(loadResponse)
 </script>
-
 
 <style scoped>
 .v-card {
   transition: all 0.2s ease;
 }
+
 .v-card:hover {
   transform: translateY(-2px);
 }
 
 .name-editor-field {
   max-width: 360px;
+}
+
+.tight-date {
+  margin-top: 2px;
+  line-height: 1.2;
+  opacity: 0.7;
 }
 </style>
