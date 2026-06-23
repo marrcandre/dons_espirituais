@@ -8,9 +8,9 @@
 
 #### Interface
 
-* [ ] Simplificar layout geral
-* [ ] Reduzir poluição visual
-* [ ] Revisar hierarquia das informações
+* [x] Simplificar layout geral
+* [x] Reduzir poluição visual
+* [x] Revisar hierarquia das informações
 * [ ] Melhorar legibilidade da análise IA
 * [ ] Revisar exibição dos dons secundários
 * [ ] Revisar apresentação dos recursos e recomendações
@@ -58,6 +58,7 @@ Teste → Resultado → IA → E-mail → Visualização
 
 * [x] Implementar geração automática da análise
 * [x] Implementar recuperação automática de falhas
+* [x] Estabilizar fluxo de regeneração via UptimeRobot
 * [ ] Eliminar dependências da ResultsView na geração da análise
 * [ ] Revisar estratégia de envio de e-mail
 * [ ] Avaliar fila assíncrona (caso o volume cresça)
@@ -98,8 +99,6 @@ Teste → Resultado → IA → E-mail → Visualização
 
 ### Fonte Única de Verdade
 
-**Objetivo:** eliminar duplicação de definições dos dons.
-
 * [ ] Criar módulo compartilhado dos dons
 * [ ] Eliminar duplicação entre frontend e backend
 * [ ] Revisar estrutura de scoring
@@ -121,8 +120,10 @@ Teste → Resultado → IA → E-mail → Visualização
 
 ### Autenticação e Permissões
 
-* [ ] Auditoria de autenticação
-* [ ] Revisar políticas RLS
+* [x] Auditoria de autenticação
+* [x] Revisão e correção de RLS na tabela responses
+* [x] Separação entre usuário e admin
+* [x] Correção de falha de update no Supabase
 * [ ] Revisar permissões das Edge Functions
 * [ ] Revisar uso da Service Role
 * [ ] Revisar exposição de dados
@@ -196,17 +197,9 @@ Teste → Resultado → IA → E-mail → Visualização
 
 * [x] Configurar UptimeRobot
 * [ ] Criar endpoint healthcheck
-* [ ] Monitorar falhas de geração IA
 * [ ] Monitorar Edge Functions
 * [ ] Monitorar Vercel
 * [ ] Monitorar Supabase
-
-### Deploy
-
-* [ ] Revisar variáveis de ambiente
-* [ ] Revisar Edge Functions
-* [ ] Revisar backups
-* [ ] Revisar estratégia de recuperação de falhas
 
 ---
 
@@ -215,6 +208,7 @@ Teste → Resultado → IA → E-mail → Visualização
 ### Projeto
 
 * [x] Criar CHANGELOG.md
+* [x] Atualizar CHANGELOG com RLS + fluxo de edição
 * [ ] Manter CHANGELOG atualizado
 * [ ] Revisar README
 * [ ] Documentar arquitetura geral

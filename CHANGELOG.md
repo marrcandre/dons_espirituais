@@ -8,36 +8,54 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 
 ### Experiência do Resultado
 
-#### PDF Baseado na Tela
-
-* Gerar PDF diretamente a partir da tela de resultados.
-* Eliminar montagem manual do PDF.
-* Exportação multipágina automática.
-* Simplificação do fluxo de geração.
-
 #### Arquitetura da Análise IA
 
 * Tornar a ResultsView apenas uma tela de exibição.
 * Eliminar dependências de geração de análise na interface.
 * Avaliar fila assíncrona para crescimento futuro.
 * Avaliar desacoplamento adicional das Edge Functions.
+* Manutenção do fluxo de regeneração automática via UptimeRobot (fallback periódico para análises não geradas).
 
-#### UI/UX
+### UI/UX
 
 * Continuidade da remodelação visual da aplicação.
 * Simplificação adicional da tela de resultados.
 * Auditoria completa de responsividade.
 * Consolidação do Design System.
+* Correção do fluxo de edição inline de nome no resultado.
+* Melhoria na sincronização entre UI e banco após updates.
+* Ajuste de estados visuais (sucesso, banner de regeneração e feedback ao usuário).
 
-#### Segurança
+### Segurança
 
 * Auditoria de autenticação.
-* Revisão das políticas RLS.
+* Revisão e reestruturação das policies RLS na tabela `responses`.
+* Separação entre permissões de usuário e administrador.
+* Implementação de policy para admin via `is_admin()`.
+* Correção de falha de update causada por conflito entre policies e filtros do frontend.
+* Estabilização das regras de UPDATE (`USING` e `WITH CHECK` alinhados).
 * Revisão das permissões das Edge Functions.
 * Revisão de exposição de dados e variáveis sensíveis.
 
 ---
 
+## [1.3.1] - PDF Baseado na Tela
+
+### Exportação de PDF
+
+* Gerar PDF diretamente a partir da tela de resultados.
+* Substituição da montagem manual de PDF por captura estruturada da interface.
+* Exportação multipágina automática com base no layout real da tela.
+* Garantia de fidelidade visual entre UI e PDF gerado.
+* Simplificação do fluxo de exportação.
+
+### Arquitetura de Exportação
+
+* Avaliação de estratégia “UI-first export” (PDF baseado em renderização da tela).
+* Redução de lógica duplicada entre frontend e geração de PDF.
+* Preparação para expansão futura de exportações (ex: relatórios e históricos).
+* Base para possível padronização de relatórios em outros módulos.
+  
 ## [1.2.0] - Junho/2026
 
 ### Experiência do Usuário
