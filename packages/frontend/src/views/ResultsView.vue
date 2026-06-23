@@ -14,105 +14,128 @@
     <!-- Resultado -->
     <template v-else-if="response">
 
+<!-- ========================= -->
+<!-- HEADER ULTRA COMPACTO -->
+<!-- ========================= -->
+<div class="d-flex align-center justify-space-between flex-wrap ga-2 mb-3">
+
+  <!-- LADO ESQUERDO: Nome + data -->
+  <div class="d-flex align-center ga-2 flex-wrap">
+
+    <h1 class="text-h6 font-weight-bold text-primary mb-0">
+      {{ response.name }}
+    </h1>
+
+    <!-- Editar nome -->
+    <v-btn
+      v-if="isOwner"
+      icon="mdi-pencil"
+      variant="text"
+      size="x-small"
+      density="comfortable"
+      @click="openNameEditor"
+    />
+
+    <!-- Data bem próxima do nome -->
+    <span class="text-caption text-medium-emphasis">
+      · {{ formatDate(response.created_at) }}
+    </span>
+
+  </div>
+
+  <!-- LADO DIREITO: Ações -->
+  <div class="d-flex ga-1">
+
+    <v-btn
+      icon="mdi-share-variant"
+      variant="text"
+      size="small"
+      @click="shareResult"
+    />
+
+    <v-btn
+      icon="mdi-printer"
+      variant="text"
+      size="small"
+      @click="printResult"
+    />
+
+  </div>
+
+</div>
+
+<!-- Badges (abaixo, mas bem compacto) -->
+<div class="d-flex justify-center mt-1 mb-2 gift-badges-compact">
+  <GiftBadges :scores="response.scores" />
+</div>
+
       <!-- ========================= -->
-      <!-- ACTION BAR (V2) -->
+      <!-- BANNER IA (mais leve) -->
       <!-- ========================= -->
-      <v-card rounded="xl" variant="outlined" class="mb-6 pa-2 d-flex justify-center ga-2 flex-wrap">
-        <v-btn size="small" variant="text" prepend-icon="mdi-share-variant" @click="shareResult">
-          Compartilhar
-        </v-btn>
-
-        <v-btn size="small" variant="text" prepend-icon="mdi-printer" @click="printResult">
-          Imprimir
-        </v-btn>
-      </v-card>
-
-      <!-- ========================= -->
-      <!-- HEADER (IDENTIDADE) -->
-      <!-- ========================= -->
-      <div class="text-center mb-8">
-
-        <!-- Editor de nome -->
-        <v-form v-if="nameEditor.isEditing" class="d-flex align-start justify-center ga-2 mb-2"
-          @submit.prevent="saveName">
-          <v-text-field v-model="nameEditor.draft" class="name-editor-field" variant="outlined" density="compact"
-            autofocus hide-details="auto" :disabled="nameEditor.isSaving" :error-messages="nameEditor.error" />
-
-          <v-btn icon="mdi-check" color="primary" size="small" type="submit" :loading="nameEditor.isSaving" />
-
-          <v-btn icon="mdi-close" variant="text" color="primary" size="small" :disabled="nameEditor.isSaving"
-            @click="cancelNameEdit" />
-        </v-form>
-
-        <!-- BLOCO TIGHT (NOME + DATA) -->
-        <div v-else class="d-flex flex-column align-center justify-center mb-2">
-          <div class="d-flex align-center ga-2">
-            <h1 class="text-h5 font-weight-bold text-primary mb-0">
-              {{ response.name }}
-            </h1>
-
-            <v-btn v-if="isOwner" icon="mdi-pencil" variant="text" color="primary" size="small"
-              @click="openNameEditor" />
-          </div>
-
-          <p class="text-caption text-medium-emphasis mt-1 tight-date">
-            {{ formatDate(response.created_at) }}
-          </p>
+      <v-alert
+        v-if="isOwner && uiState.showRegenerateAction && !uiState.dismissedRegenerateBanner"
+        type="warning"
+        variant="tonal"
+        density="compact"
+        class="mb-4"
+      >
+        <div class="text-body-2 mb-2">
+          O nome do resultado foi alterado. Atualize a análise.
         </div>
 
-      </div>
-
-      <!-- ========================= -->
-      <!-- BANNER IA CONTEXTUAL -->
-      <!-- ========================= -->
-      <!-- ========================= -->
-      <!-- BANNER IA CONTEXTUAL -->
-      <!-- ========================= -->
-      <v-card v-if="isOwner && uiState.showRegenerateAction && !uiState.dismissedRegenerateBanner" rounded="xl"
-        variant="tonal" color="warning" class="mb-6 pa-4 text-center">
-        <p class="text-body-2 mb-3">
-          O nome do resultado foi alterado. Atualize a análise para refletir essa mudança.
-        </p>
-
         <div class="d-flex justify-center ga-2 flex-wrap">
-          <v-btn color="warning" variant="flat" prepend-icon="mdi-refresh" :loading="uiState.isRegenerating"
-            @click="handleRegenerateAnalysis">
-            Atualizar análise
+          <v-btn
+            size="small"
+            color="warning"
+            variant="flat"
+            prepend-icon="mdi-refresh"
+            :loading="uiState.isRegenerating"
+            @click="handleRegenerateAnalysis"
+          >
+            Atualizar
           </v-btn>
 
-          <v-btn variant="text" color="warning" @click="dismissRegenerateBanner">
+          <v-btn
+            size="small"
+            variant="text"
+            color="warning"
+            @click="dismissRegenerateBanner"
+          >
             Agora não
           </v-btn>
         </div>
-      </v-card>
+      </v-alert>
 
       <!-- ========================= -->
-      <!-- CONTEÚDO PRINCIPAL -->
+      <!-- GRÁFICO (FOCO PRINCIPAL) -->
       <!-- ========================= -->
+      <ResultsChart
+        ref="chartRef"
+        :scores="response.scores"
+        class="mb-8"
+      />
 
-      <!-- Top 3 dons -->
-      <GiftBadges :scores="response.scores" class="mb-6" />
-
-      <!-- Gráfico -->
-      <ResultsChart ref="chartRef" :scores="response.scores" class="mb-8" />
-
-      <!-- Análise IA -->
+      <!-- ========================= -->
+      <!-- ANÁLISE IA -->
+      <!-- ========================= -->
       <v-card rounded="xl" elevation="2" class="mb-6">
-        <AiAnalysis ref="aiAnalysisRef" :response-id="response.id" :response-name="response.name"
-          :initial-text="response.ai_analysis" />
+        <AiAnalysis
+          ref="aiAnalysisRef"
+          :response-id="response.id"
+          :response-name="response.name"
+          :initial-text="response.ai_analysis"
+        />
       </v-card>
 
       <!-- ========================= -->
       <!-- SEÇÕES SECUNDÁRIAS -->
       <!-- ========================= -->
-
       <GrowthSection class="mb-6" />
       <ResourcesSection class="mb-6" />
 
       <!-- ========================= -->
       <!-- SNACKBARS -->
       <!-- ========================= -->
-
       <v-snackbar v-model="nameEditor.showSuccess" color="success" timeout="3000">
         Nome atualizado com sucesso.
       </v-snackbar>
@@ -361,5 +384,16 @@ onMounted(loadResponse)
   margin-top: 2px;
   line-height: 1.2;
   opacity: 0.7;
+}
+
+.gift-badges-compact {
+  transform: scale(0.85);
+  transform-origin: center;
+  margin-top: -4px;
+}
+
+.gift-badges-compact > * {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
 }
 </style>
