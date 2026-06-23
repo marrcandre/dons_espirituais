@@ -260,23 +260,20 @@ async function saveName() {
   nameEditor.error = ''
 
   try {
-    const { data, error: updateError } = await supabase
+    const { error: updateError } = await supabase
       .from('responses')
       .update({ name })
       .eq('id', response.value.id)
-      .eq('user_id', authStore.user.id)
-      .select('name')
-      .single()
 
     if (updateError) throw updateError
 
-    response.value.name = data?.name || name
-
+    response.value.name = name
     uiState.showRegenerateAction = true
     uiState.dismissedRegenerateBanner = false
 
     nameEditor.isEditing = false
     nameEditor.showSuccess = true
+
   } catch (err) {
     console.error('Erro ao atualizar nome:', err)
     nameEditor.error = 'Não foi possível atualizar o nome.'
