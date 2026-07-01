@@ -1,0 +1,55 @@
+@keyframes ds-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ds-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ds-expand-y {
+  from {
+    opacity: 0;
+    transform: scaleY(0.98);
+    transform-origin: top;
+  }
+
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+}
+
+.animate-fade-in {
+  animation: ds-fade-in var(--duration-normal, 250ms) var(--easing-standard, ease);
+}
+
+.animate-slide-up {
+  animation: ds-slide-up var(--duration-normal, 250ms) var(--easing-standard, ease);
+}
+
+.animate-expand {
+  animation: ds-expand-y var(--duration-fast, 150ms) var(--easing-standard, ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-slide-up,
+  .animate-expand {
+    animation: none;
+  }
+}

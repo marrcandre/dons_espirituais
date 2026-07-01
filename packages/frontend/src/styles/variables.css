@@ -1,0 +1,25 @@
+:root {
+  /* Core color tokens for future DS migration (no current component override). */
+  --color-accent: #0f766e;
+  --color-success: #16a34a;
+  --color-warning: #ea580c;
+  --color-error: #dc2626;
+  --color-background: #f4f8f4;
+  --color-surface: #fafaf8;
+  --color-text: #1f2937;
+  --color-text-secondary: #475569;
+
+  /* Border radius scale extension. */
+  --radius-xl: 20px;
+
+  /* Container tokens aligned with design plan naming. */
+  --container-default: 900px;
+  --container-reading: 700px;
+  --container-form: 600px;
+
+  /* Motion tokens. */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 350ms;
+  --easing-standard: ease;
+}

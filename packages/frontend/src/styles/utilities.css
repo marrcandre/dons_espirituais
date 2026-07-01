@@ -1,3 +1,28 @@
 .text-center {
   text-align: center;
 }
+
+.container-default {
+  max-width: var(--container-default);
+  margin: 0 auto;
+  padding: var(--space-md);
+}
+
+.container-reading {
+  max-width: var(--container-reading);
+  margin: 0 auto;
+}
+
+.container-form {
+  max-width: var(--container-form);
+  margin: 0 auto;
+}
+
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-lg { box-shadow: var(--shadow-lg); }
+
+.radius-sm { border-radius: var(--radius-sm); }
+.radius-md { border-radius: var(--radius-md); }
+.radius-lg { border-radius: var(--radius-lg); }
+.radius-xl { border-radius: var(--radius-xl); }

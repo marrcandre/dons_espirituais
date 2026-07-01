@@ -1928,6 +1928,10 @@ Nunca modificar sem solicitação explícita:
 
 Sempre reutilizar componentes existentes antes de criar novos.
 
+Os componentes de domínio nunca devem conhecer detalhes visuais.
+
+Eles devem consumir componentes base sempre que possível.
+
 Caso um novo componente seja necessário:
 
 - deve ser genérico;

@@ -3,6 +3,11 @@
   font-weight: 700;
 }
 
+.main-title {
+  font-size: var(--font-size-main-title);
+  font-weight: 700;
+}
+
 .section-title {
   font-size: var(--font-size-section);
   font-weight: 600;
@@ -13,6 +18,23 @@
   line-height: var(--line-height-body);
 }
 
+.subtitle-text {
+  font-size: var(--font-size-helper);
+  font-weight: 600;
+}
+
+.helper-text {
+  font-size: var(--font-size-helper);
+}
+
 .caption-text {
   font-size: var(--font-size-caption);
+}
+
+.text-primary {
+  color: var(--color-text);
+}
+
+.text-secondary {
+  color: var(--color-text-secondary);
 }
