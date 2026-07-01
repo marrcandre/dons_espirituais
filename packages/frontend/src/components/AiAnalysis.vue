@@ -1,6 +1,5 @@
 <template>
   <v-card rounded="xl" elevation="1" class="pa-6">
-
     <div class="d-flex align-center justify-space-between mb-4">
 
       <div>
@@ -24,7 +23,6 @@
           />
         </template>
       </v-tooltip>
-
     </div>
 
     <!-- Carregando -->

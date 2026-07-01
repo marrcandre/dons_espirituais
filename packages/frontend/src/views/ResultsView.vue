@@ -1,146 +1,174 @@
 <template>
-  <v-container class="py-8" max-width="800">
+  <AppPage class="mt-xl mb-xl">
 
-    <!-- Loading -->
-    <div v-if="loading" class="text-center py-16">
-      <v-progress-circular indeterminate color="primary" size="64" />
+    <!-- LOADING -->
+    <LoadingState v-if="loading" class="py-16" :size="64" :thickness="6" />
+
+    <!-- ERROR -->
+    <div v-else-if="error" class="result-error-state mb-4">
+      <v-alert type="error" rounded="xl">
+        {{ error }}
+      </v-alert>
     </div>
 
-    <!-- Erro -->
-    <v-alert v-else-if="error" type="error" rounded="xl" class="mb-4">
-      {{ error }}
-    </v-alert>
-
-    <!-- Resultado -->
+    <!-- RESULT -->
     <template v-else-if="response">
 
-<!-- ========================= -->
-<!-- HEADER ULTRA COMPACTO -->
-<!-- ========================= -->
-<div class="d-flex align-center justify-space-between flex-wrap ga-2 mb-3">
+      <!-- HEADER -->
+      <div class="result-header mb-3">
+        <div class="result-header-main d-flex align-center justify-space-between flex-wrap ga-2">
 
-  <!-- LADO ESQUERDO: Nome + data -->
-  <div class="d-flex align-center ga-2 flex-wrap">
+          <!-- NAME + EDIT -->
+          <div class="result-header-left d-flex align-center ga-2 flex-wrap">
 
-    <h1 class="text-h6 font-weight-bold text-primary mb-0">
-      {{ response.name }}
-    </h1>
+            <!-- VIEW MODE -->
+            <div v-if="!nameEditor.isEditing" class="d-flex align-center ga-2">
+              <h1 class="text-h6 font-weight-bold text-primary mb-0">
+                {{ response.name }}
+              </h1>
 
-    <!-- Editar nome -->
-    <v-btn
-      v-if="isOwner"
-      icon="mdi-pencil"
-      variant="text"
-      size="x-small"
-      density="comfortable"
-      @click="openNameEditor"
-    />
+              <v-btn
+                v-if="isOwner"
+                icon="mdi-pencil"
+                variant="text"
+                size="x-small"
+                density="comfortable"
+                @click="openNameEditor"
+              />
+            </div>
 
-    <!-- Data bem próxima do nome -->
-    <span class="text-caption text-medium-emphasis">
-      · {{ formatDate(response.created_at) }}
-    </span>
+            <!-- EDIT MODE -->
+            <div v-else class="d-flex align-center ga-2">
+              <v-text-field
+                v-model="nameEditor.draft"
+                autofocus
+                density="compact"
+                hide-details
+                variant="outlined"
+                class="name-edit-input"
+                @keyup.enter="saveName"
+                @keyup.esc="cancelNameEdit"
+              />
 
-  </div>
+              <v-btn
+                icon="mdi-check"
+                color="success"
+                size="small"
+                :loading="nameEditor.isSaving"
+                @click="saveName"
+              />
 
-  <!-- LADO DIREITO: Ações -->
-  <div class="d-flex ga-1">
+              <v-btn
+                icon="mdi-close"
+                size="small"
+                variant="text"
+                @click="cancelNameEdit"
+              />
+            </div>
 
-    <v-btn
-      icon="mdi-share-variant"
-      variant="text"
-      size="small"
-      @click="shareResult"
-    />
+            <span class="text-caption text-medium-emphasis">
+              · {{ formatDate(response.created_at) }}
+            </span>
+          </div>
 
-    <v-btn
-      icon="mdi-printer"
-      variant="text"
-      size="small"
-      @click="printResult"
-    />
+          <!-- ACTIONS -->
+          <div class="result-header-right d-flex ga-1">
+            <v-btn
+              icon="mdi-share-variant"
+              variant="text"
+              size="small"
+              @click="shareResult"
+            />
 
-  </div>
+            <v-btn
+              icon="mdi-printer"
+              variant="text"
+              size="small"
+              @click="printResult"
+            />
+          </div>
 
-</div>
+        </div>
+      </div>
 
-<!-- Badges (abaixo, mas bem compacto) -->
-<div class="d-flex justify-center mt-1 mb-2 gift-badges-compact">
-  <GiftBadges :scores="response.scores" />
-</div>
-
-      <!-- ========================= -->
-      <!-- BANNER IA (mais leve) -->
-      <!-- ========================= -->
-      <v-alert
-        v-if="isOwner && uiState.showRegenerateAction && !uiState.dismissedRegenerateBanner"
-        type="warning"
-        variant="tonal"
-        density="compact"
-        class="mb-4"
-      >
-        <div class="text-body-2 mb-2">
-          O nome do resultado foi alterado. Atualize a análise.
+      <!-- SUMMARY -->
+      <section class="result-summary">
+        <div class="result-header-meta d-flex justify-center mt-1 mb-2 gift-badges-compact">
+          <GiftBadges :scores="response.scores" />
         </div>
 
-        <div class="d-flex justify-center ga-2 flex-wrap">
-          <v-btn
-            size="small"
-            color="warning"
-            variant="flat"
-            prepend-icon="mdi-refresh"
-            :loading="uiState.isRegenerating"
-            @click="handleRegenerateAnalysis"
+        <div
+          v-if="isOwner && uiState.showRegenerateAction && !uiState.dismissedRegenerateBanner"
+          class="ai-regeneration-banner"
+        >
+          <v-alert
+            type="warning"
+            variant="tonal"
+            density="compact"
+            class="mb-4"
           >
-            Atualizar
-          </v-btn>
+            <div class="ai-banner-message text-body-2 mb-2">
+              O nome do resultado foi alterado. Atualize a análise.
+            </div>
 
-          <v-btn
-            size="small"
-            variant="text"
-            color="warning"
-            @click="dismissRegenerateBanner"
-          >
-            Agora não
-          </v-btn>
+            <div class="ai-banner-actions d-flex justify-center ga-2 flex-wrap">
+              <div class="ai-banner-loading-state">
+                <v-btn
+                  size="small"
+                  color="warning"
+                  variant="flat"
+                  prepend-icon="mdi-refresh"
+                  :loading="uiState.isRegenerating"
+                  @click="handleRegenerateAnalysis"
+                >
+                  Atualizar
+                </v-btn>
+              </div>
+
+              <v-btn
+                size="small"
+                variant="text"
+                color="warning"
+                @click="dismissRegenerateBanner"
+              >
+                Agora não
+              </v-btn>
+            </div>
+          </v-alert>
         </div>
-      </v-alert>
+      </section>
 
-      <!-- ========================= -->
-      <!-- GRÁFICO (FOCO PRINCIPAL) -->
-      <!-- ========================= -->
-      <ResultsChart
-        ref="chartRef"
-        :scores="response.scores"
-        class="mb-8"
-      />
+      <!-- INSIGHTS -->
+      <section class="mb-6">
+        <ResultsChart
+          ref="chartRef"
+          :scores="response.scores"
+        />
+      </section>
 
-      <!-- ========================= -->
-      <!-- ANÁLISE IA -->
-      <!-- ========================= -->
-      <v-card rounded="xl" elevation="2" class="mb-6">
+      <section class="mb-6">
         <AiAnalysis
           ref="aiAnalysisRef"
           :response-id="response.id"
           :response-name="response.name"
           :initial-text="response.ai_analysis"
         />
-      </v-card>
+      </section>
 
-      <!-- ========================= -->
-      <!-- SEÇÕES SECUNDÁRIAS -->
-      <!-- ========================= -->
-      <GrowthSection class="mb-6" />
-      <ResourcesSection class="mb-6" />
+      <section class="mb-6">
+        <GrowthSection />
+      </section>
 
-      <!-- ========================= -->
+      <section class="mb-6">
+        <ResourcesSection />
+      </section>
+
       <!-- SNACKBARS -->
-      <!-- ========================= -->
       <v-snackbar v-model="nameEditor.showSuccess" color="success" timeout="3000">
         Nome atualizado com sucesso.
       </v-snackbar>
 
-      <v-snackbar v-model="analysisRegenerationError" color="warning" timeout="4000">
+      <v-snackbar v-model="uiState.analysisRegenerationError" color="warning" timeout="4000">
         Não foi possível atualizar a análise agora.
       </v-snackbar>
 
@@ -150,7 +178,9 @@
 
     </template>
 
-  </v-container>
+    <div v-else class="result-empty-state" />
+
+  </AppPage>
 </template>
 
 <script setup>
@@ -164,25 +194,18 @@ import GiftBadges from '../components/GiftBadges.vue'
 import ResultsChart from '../components/ResultsChart.vue'
 import AiAnalysis from '../components/AiAnalysis.vue'
 import ResourcesSection from '../components/ResourcesSection.vue'
+import AppPage from '../components/ui/AppPage.vue'
+import LoadingState from '../components/ui/LoadingState.vue'
 
-/* =========================================================
-   ROUTE / STORE
-========================================================= */
 const route = useRoute()
 const authStore = useAuthStore()
 
-/* =========================================================
-   REFS (BASE STATE)
-========================================================= */
 const aiAnalysisRef = ref(null)
 
 const loading = ref(true)
 const error = ref(null)
 const response = ref(null)
 
-/* =========================================================
-   UI STATE
-========================================================= */
 const uiState = reactive({
   showRegenerateAction: false,
   isRegenerating: false,
@@ -191,9 +214,6 @@ const uiState = reactive({
   analysisRegenerationError: false,
 })
 
-/* =========================================================
-   EDITOR STATE (NAME)
-========================================================= */
 const nameEditor = reactive({
   isEditing: false,
   draft: '',
@@ -202,17 +222,11 @@ const nameEditor = reactive({
   showSuccess: false,
 })
 
-/* =========================================================
-   DERIVED STATE
-========================================================= */
 const isOwner = computed(() =>
   authStore.user &&
   response.value?.user_id === authStore.user.id
 )
 
-/* =========================================================
-   DATA LAYER
-========================================================= */
 async function loadResponse() {
   loading.value = true
   error.value = null
@@ -234,9 +248,6 @@ async function loadResponse() {
   }
 }
 
-/* =========================================================
-   HELPERS
-========================================================= */
 function formatDate(iso) {
   return new Date(iso).toLocaleDateString('pt-BR', {
     day: '2-digit',
@@ -245,9 +256,7 @@ function formatDate(iso) {
   })
 }
 
-/* =========================================================
-   NAME EDIT FLOW
-========================================================= */
+/* NAME EDIT */
 function openNameEditor() {
   if (!isOwner.value) return
 
@@ -298,16 +307,14 @@ async function saveName() {
     nameEditor.showSuccess = true
 
   } catch (err) {
-    console.error('Erro ao atualizar nome:', err)
+    console.error(err)
     nameEditor.error = 'Não foi possível atualizar o nome.'
   } finally {
     nameEditor.isSaving = false
   }
 }
 
-/* =========================================================
-   ANALYSIS FLOW
-========================================================= */
+/* ANALYSIS */
 async function regenerateAnalysis() {
   if (!aiAnalysisRef.value) return null
   return aiAnalysisRef.value.generateAnalysis(true)
@@ -322,22 +329,19 @@ async function handleRegenerateAnalysis() {
   try {
     const generated = await regenerateAnalysis()
 
-    if (!generated) throw new Error('Falha ao atualizar análise')
+    if (!generated) throw new Error()
 
     response.value.ai_analysis = generated
     uiState.showRegenerateAction = false
     uiState.showAnalysisSuccess = true
   } catch (err) {
-    console.error(err)
     uiState.analysisRegenerationError = true
   } finally {
     uiState.isRegenerating = false
   }
 }
 
-/* =========================================================
-   UI ACTIONS
-========================================================= */
+/* ACTIONS */
 function shareResult() {
   const url = window.location.href
 
@@ -361,31 +365,10 @@ function printResult() {
   window.print()
 }
 
-/* =========================================================
-   LIFECYCLE
-========================================================= */
 onMounted(loadResponse)
 </script>
 
 <style scoped>
-.v-card {
-  transition: all 0.2s ease;
-}
-
-.v-card:hover {
-  transform: translateY(-2px);
-}
-
-.name-editor-field {
-  max-width: 360px;
-}
-
-.tight-date {
-  margin-top: 2px;
-  line-height: 1.2;
-  opacity: 0.7;
-}
-
 .gift-badges-compact {
   transform: scale(0.85);
   transform-origin: center;
@@ -396,4 +379,10 @@ onMounted(loadResponse)
   margin-top: 0 !important;
   margin-bottom: 0 !important;
 }
+
+.name-edit-input {
+  width: 380px;
+  max-width: 60vw;
+}
+
 </style>

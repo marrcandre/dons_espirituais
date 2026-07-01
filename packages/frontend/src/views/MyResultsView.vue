@@ -1,11 +1,7 @@
 <template>
-  <v-container class="py-8" max-width="700">
-    <div class="d-flex align-center justify-space-between mb-6">
-      <h1 class="text-h5 font-weight-bold text-primary">
-        Histórico de testes
-      </h1>
-
-      <v-btn
+  <AppPage class="container-reading mt-xl mb-xl">
+    <PageHeader title="Histórico de testes" class="mb-lg">
+      <AppButton
         color="primary"
         rounded="xl"
         prepend-icon="mdi-play-circle"
@@ -13,8 +9,8 @@
         class="text-none"
       >
         Novo teste
-      </v-btn>
-    </div>
+      </AppButton>
+    </PageHeader>
 
     <div v-if="loading" class="text-center py-16">
       <v-progress-circular
@@ -34,20 +30,18 @@
       {{ error }}
 
       <template #append>
-        <v-btn
+        <AppButton
           variant="text"
           color="error"
           @click="loadResults"
         >
           Tentar novamente
-        </v-btn>
+        </AppButton>
       </template>
     </v-alert>
 
-    <v-card
+    <AppCard
       v-else-if="rows.length === 0"
-      rounded="xl"
-      elevation="2"
       class="pa-8 text-center"
     >
       <v-icon
@@ -62,7 +56,7 @@
         Você ainda não fez nenhum teste.
       </p>
 
-      <v-btn
+      <AppButton
         color="primary"
         rounded="xl"
         prepend-icon="mdi-play-circle"
@@ -70,8 +64,8 @@
         class="text-none"
       >
         Fazer o primeiro teste
-      </v-btn>
-    </v-card>
+      </AppButton>
+    </AppCard>
 
     <div v-else>
       <div
@@ -96,7 +90,7 @@
         </div>
       </div>
     </div>
-  </v-container>
+  </AppPage>
 </template>
 
 <script setup>
@@ -105,6 +99,10 @@ import { useRouter } from 'vue-router'
 import { runSupabaseQuery } from '../services/supabaseQuery.js'
 import { supabase } from '../services/supabase.js'
 import { useAuthStore } from '../stores/auth.js'
+import AppPage from '../components/ui/AppPage.vue'
+import AppCard from '../components/ui/AppCard.vue'
+import AppButton from '../components/ui/AppButton.vue'
+import PageHeader from '../components/ui/PageHeader.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()

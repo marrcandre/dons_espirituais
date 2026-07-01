@@ -1,36 +1,42 @@
 <template>
-  <v-container class="py-6" max-width="680">
+  <AppPage class="container-reading">
+    <PageHeader
+      title="Descubra seus dons espirituais"
+      subtitle="Responda com sinceridade. Seu progresso e respostas continuam sendo salvos normalmente."
+    />
+
     <!-- Dialog: retomar ou recomeçar -->
     <v-dialog v-model="showResumeDialog" max-width="440" persistent>
-      <v-card rounded="xl" class="pa-4">
-        <v-card-title class="text-h6 font-weight-bold text-primary">
-          Teste em andamento
-        </v-card-title>
-        <v-card-text>
+      <AppCard variant="compact">
+        <SectionTitle title="Teste em andamento" />
+
+        <p>
           Você tem <strong>{{ quizStore.savedAnswerCount }} de 135</strong> respostas salvas.
           Deseja continuar de onde parou?
-        </v-card-text>
-        <v-card-actions class="justify-end gap-2">
-          <v-btn variant="outlined" color="grey" @click="handleStartFresh">Recomeçar</v-btn>
-          <v-btn color="primary" variant="flat" @click="handleResume">Continuar</v-btn>
-        </v-card-actions>
-      </v-card>
+        </p>
+
+        <div class="d-flex justify-end ga-2">
+          <AppButton variant="outlined" color="grey" @click="handleStartFresh">Recomeçar</AppButton>
+          <AppButton color="primary" variant="flat" @click="handleResume">Continuar</AppButton>
+        </div>
+      </AppCard>
     </v-dialog>
 
     <!-- Etapa 1: Dados do usuário -->
-    <UserInfoForm v-if="step === 'userInfo'" @submit="handleUserInfoSubmit" />
+    <AppCard v-if="step === 'userInfo'" variant="compact">
+      <UserInfoForm @submit="handleUserInfoSubmit" />
+    </AppCard>
 
     <!-- Etapa 2: Teste -->
     <template v-else-if="step === 'quiz'">
-
-      <div v-if="authStore.isAdmin" class="d-flex justify-end mb-2">
-        <v-btn color="warning" variant="outlined" size="small" prepend-icon="mdi-lightning-bolt" @click="finishTestNow">
-          Finalizar teste
-        </v-btn>
-      </div>
-
       <QuizProgress :progress="quizStore.progress" :current="quizStore.currentIndex + 1"
         :total="quizStore.totalQuestions" />
+
+      <div v-if="authStore.isAdmin" class="quiz-controls d-flex justify-end mb-2">
+        <AppButton color="warning" variant="outlined" size="small" prepend-icon="mdi-lightning-bolt" @click="finishTestNow">
+          Finalizar teste
+        </AppButton>
+      </div>
 
       <QuestionStep v-if="quizStore.currentQuestion" :question="quizStore.currentQuestion"
         :model-value="quizStore.answers[quizStore.currentQuestionId]" @update:model-value="handleAnswer"
@@ -40,11 +46,10 @@
 
 
     <!-- Etapa 3: Enviando -->
-    <div v-else-if="step === 'submitting'" class="text-center py-16">
-      <v-progress-circular indeterminate color="primary" size="64" class="mb-4" />
-      <p class="text-h6 text-medium-emphasis">Salvando seus resultados...</p>
-    </div>
-  </v-container>
+    <AppCard v-else-if="step === 'submitting'" variant="compact">
+      <LoadingState message="Salvando seus resultados..." :size="64" :thickness="6" />
+    </AppCard>
+  </AppPage>
 </template>
 
 <script setup>
@@ -57,6 +62,12 @@ import { supabase } from '../services/supabase.js'
 import UserInfoForm from '../components/UserInfoForm.vue'
 import QuizProgress from '../components/QuizProgress.vue'
 import QuestionStep from '../components/QuestionStep.vue'
+import AppPage from '../components/ui/AppPage.vue'
+import PageHeader from '../components/ui/PageHeader.vue'
+import AppButton from '../components/ui/AppButton.vue'
+import AppCard from '../components/ui/AppCard.vue'
+import SectionTitle from '../components/ui/SectionTitle.vue'
+import LoadingState from '../components/ui/LoadingState.vue'
 
 const router = useRouter()
 const quizStore = useQuizStore()
@@ -203,14 +214,3 @@ async function submitQuiz() {
   }
 }
 </script>
-
-
-<style scoped>
-.v-card {
-  transition: all 0.2s ease;
-}
-
-.v-card:hover {
-  transform: translateY(-2px);
-}
-</style>

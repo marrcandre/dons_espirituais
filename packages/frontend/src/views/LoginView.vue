@@ -1,34 +1,40 @@
 <template>
-  <v-container class="fill-height d-flex align-center justify-center"
-    style="min-height: 100vh; background: linear-gradient(160deg, #1B5438 0%, #2d7a50 100%);">
-    <v-card max-width="440" width="100%" rounded="xl" elevation="2" class="pa-6">
-      <div class="text-center mb-6">
+  <AppPage
+    class="fill-height d-flex align-center justify-center"
+    style="min-height: 100vh; background: linear-gradient(160deg, #1B5438 0%, #2d7a50 100%);"
+  >
+    <AppCard max-width="440" width="100%" class="login-card">
+      <PageHeader
+        title="Descubra Seus Dons Espirituais"
+        subtitle="Teste baseado no modelo de C. Peter Wagner"
+        class="text-center mb-lg"
+      >
         <v-icon size="56" color="primary" class="mb-2">mdi-gift</v-icon>
-        <h1 class="text-h5 font-weight-bold text-primary">Descubra Seus Dons Espirituais</h1>
-        <p class="text-body-2 text-medium-emphasis mt-2">
-          Teste baseado no modelo de C. Peter Wagner
-        </p>
-      </div>
+      </PageHeader>
 
       <v-alert v-if="error" type="error" variant="tonal" class="mb-4" closable @click:close="error = null">
         {{ error }}
       </v-alert>
 
-      <v-btn color="primary" size="large" block rounded="lg" :loading="loading" prepend-icon="mdi-google"
+      <AppButton color="primary" size="large" block rounded="lg" :loading="loading" prepend-icon="mdi-google"
         @click="handleLogin">
         Entrar com Google
-      </v-btn>
+      </AppButton>
 
       <p class="text-caption text-center text-medium-emphasis mt-4">
         Seus dados são usados somente para identificação do seu resultado.
       </p>
-    </v-card>
-  </v-container>
+    </AppCard>
+  </AppPage>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
+import AppPage from '../components/ui/AppPage.vue'
+import AppCard from '../components/ui/AppCard.vue'
+import AppButton from '../components/ui/AppButton.vue'
+import PageHeader from '../components/ui/PageHeader.vue'
 
 const authStore = useAuthStore()
 const loading = ref(false)
@@ -48,10 +54,10 @@ async function handleLogin() {
 
 
 <style scoped>
-.v-card {
+.login-card {
   transition: all 0.2s ease;
 }
-.v-card:hover {
+.login-card:hover {
   transform: translateY(-2px);
 }
 </style>
