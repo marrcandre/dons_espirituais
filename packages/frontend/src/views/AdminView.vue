@@ -1,147 +1,260 @@
 <template>
-  <v-container class="py-8" max-width="1200">
-    <v-card rounded="xl" elevation="2" class="pa-2 mb-4">
+  <AppPage class="mt-xl mb-xl">
 
-      <!-- DASHBOARD -->
-      <v-row class="mb-1" dense>
-        <v-col cols="6" sm="3">
-          <div class="dashboard-item" :class="{ 'dashboard-active': quickFilter === 'all' }"
-            @click="quickFilter = null">
-            <v-icon size="14" color="primary">
-              mdi-counter
-            </v-icon>
+    <!-- LOADING -->
+    <LoadingState v-if="loading" class="py-16" :size="56" :thickness="5" />
 
-            <span>Total</span>
+    <template v-else>
 
-            <strong>{{ total }}</strong>
+      <!-- FILTERS -->
+      <section class="mb-6">
+        <v-card rounded="xl" elevation="2" class="pa-4 admin-surface-card">
+          <v-text-field
+            v-model="search"
+            label="Buscar..."
+            variant="outlined"
+            density="compact"
+            prepend-inner-icon="mdi-magnify"
+            rounded="lg"
+            clearable
+            hide-details
+          />
+        </v-card>
+      </section>
+
+      <!-- STATS -->
+      <section class="mb-6">
+        <v-card rounded="xl" elevation="2" class="pa-2 admin-surface-card">
+          <v-row dense>
+            <v-col cols="6" sm="3">
+              <div
+                class="dashboard-item"
+                :class="{ 'dashboard-active': quickFilter === 'all' }"
+                @click="quickFilter = 'all'"
+              >
+                <div class="dashboard-item-meta d-flex align-center ga-2">
+                  <v-icon size="16" color="primary">
+                    mdi-counter
+                  </v-icon>
+
+                  <span class="text-caption text-medium-emphasis">Total</span>
+                </div>
+
+                <strong class="dashboard-item-value">{{ total }}</strong>
+              </div>
+            </v-col>
+
+            <v-col cols="6" sm="3">
+              <div
+                class="dashboard-item"
+                :class="{ 'dashboard-active': quickFilter === 'without-ai' }"
+                @click="quickFilter = quickFilter === 'without-ai' ? 'all' : 'without-ai'"
+              >
+                <div class="dashboard-item-meta d-flex align-center ga-2">
+                  <v-icon size="16" color="warning">
+                    mdi-file-document-alert-outline
+                  </v-icon>
+
+                  <span class="text-caption text-medium-emphasis">Sem IA</span>
+                </div>
+
+                <strong class="dashboard-item-value">{{ totalWithoutAI }}</strong>
+              </div>
+            </v-col>
+
+            <v-col cols="6" sm="3">
+              <div
+                class="dashboard-item"
+                :class="{ 'dashboard-active': quickFilter === 'today' }"
+                @click="quickFilter = quickFilter === 'today' ? 'all' : 'today'"
+              >
+                <div class="dashboard-item-meta d-flex align-center ga-2">
+                  <v-icon size="16" color="primary">
+                    mdi-calendar-today
+                  </v-icon>
+
+                  <span class="text-caption text-medium-emphasis">Hoje</span>
+                </div>
+
+                <strong class="dashboard-item-value">{{ totalToday }}</strong>
+              </div>
+            </v-col>
+
+            <v-col cols="6" sm="3">
+              <div
+                class="dashboard-item"
+                :class="{ 'dashboard-active': quickFilter === 'week' }"
+                @click="quickFilter = quickFilter === 'week' ? 'all' : 'week'"
+              >
+                <div class="dashboard-item-meta d-flex align-center ga-2">
+                  <v-icon size="16" color="primary">
+                    mdi-calendar-week
+                  </v-icon>
+
+                  <span class="text-caption text-medium-emphasis">7 dias</span>
+                </div>
+
+                <strong class="dashboard-item-value">{{ totalWeek }}</strong>
+              </div>
+            </v-col>
+          </v-row>
+        </v-card>
+      </section>
+
+      <!-- ERROR -->
+      <section v-if="error" class="mb-6">
+        <ErrorState
+          title="Erro ao carregar painel admin"
+          :description="error"
+          button-label="Tentar novamente"
+          @action="loadRows"
+        />
+      </section>
+
+      <!-- TABLE -->
+      <section class="mb-6">
+        <v-card rounded="xl" elevation="2" class="admin-surface-card">
+          <EmptyState
+            v-if="!error && !filteredRows.length"
+            class="pa-4"
+            title="Nenhum resultado para os filtros atuais"
+            description="Ajuste a busca ou os filtros rápidos para visualizar os registros."
+            card-variant="flat"
+          />
+
+          <v-data-table
+            v-else
+            :headers="headers"
+            :items="filteredRows"
+            item-value="id"
+            class="rounded-xl admin-table"
+            density="comfortable"
+            :items-per-page="25"
+          >
+            <template #item.status="{ item }">
+              <v-icon
+                size="18"
+                class="status-icon clickable"
+                :class="{ active: item.ai_analysis }"
+                @click.stop="goToResult(item.id)"
+              >
+                mdi-file-document-outline
+              </v-icon>
+            </template>
+
+            <!-- ACTIONS -->
+            <template #item.name="{ item }">
+              <div v-if="nameEditor.rowId === item.id" class="inline-cell-editor">
+                <v-text-field
+                  v-model="nameEditor.draft"
+                  class="inline-edit-input"
+                  density="compact"
+                  variant="outlined"
+                  hide-details
+                  autofocus
+                  :disabled="nameEditor.isSaving"
+                  :error-messages="nameEditor.error"
+                  @keyup.enter="saveName(item)"
+                  @keyup.esc="cancelNameEdit"
+                />
+
+                <v-btn
+                  icon="mdi-check"
+                  color="success"
+                  size="small"
+                  :loading="nameEditor.isSaving"
+                  @click="saveName(item)"
+                />
+
+                <v-btn
+                  icon="mdi-close"
+                  variant="text"
+                  size="small"
+                  :disabled="nameEditor.isSaving"
+                  @click="cancelNameEdit"
+                />
+              </div>
+
+              <span
+                v-else
+                :class="[
+                  { 'text-grey': !item.name },
+                  authStore.isAdmin ? 'hover-text is-editable' : ''
+                ]"
+                @click="startNameEdit(item)"
+              >
+                {{ item.name || '[sem nome]' }}
+              </span>
+            </template>
+
+            <template #item.gp="{ item }">
+              <div v-if="gpEditor.rowId === item.id" class="inline-cell-editor">
+                <v-text-field
+                  v-model="gpEditor.draft"
+                  class="inline-edit-input"
+                  density="compact"
+                  variant="outlined"
+                  hide-details
+                  autofocus
+                  :disabled="gpEditor.isSaving"
+                  :error-messages="gpEditor.error"
+                  @keyup.enter="saveGP(item)"
+                  @keyup.esc="cancelGPEdit"
+                />
+
+                <v-btn
+                  icon="mdi-check"
+                  color="success"
+                  size="small"
+                  :loading="gpEditor.isSaving"
+                  @click="saveGP(item)"
+                />
+
+                <v-btn
+                  icon="mdi-close"
+                  variant="text"
+                  size="small"
+                  :disabled="gpEditor.isSaving"
+                  @click="cancelGPEdit"
+                />
+              </div>
+
+              <span
+                v-else
+                :class="[
+                  { 'text-grey': !item.gp },
+                  authStore.isAdmin ? 'hover-text is-editable' : ''
+                ]"
+                @click="startGPEdit(item)"
+              >
+                {{ item.gp || '[sem GP]' }}
+              </span>
+            </template>
+
+            <template #item.created_at="{ item }">
+              {{ formatDateTime(item.created_at) }}
+            </template>
+          </v-data-table>
+        </v-card>
+      </section>
+
+      <!-- ACTIONS -->
+      <section class="mb-6">
+        <v-card rounded="xl" elevation="2" class="pa-4 admin-surface-card">
+          <div class="d-flex align-center flex-wrap ga-2 text-body-2 text-medium-emphasis">
+            <v-icon size="18" color="primary">mdi-information-outline</v-icon>
+            <span>
+              Ações administrativas: clique no nome ou GP para edição inline e no ícone de status para abrir o resultado.
+            </span>
           </div>
-        </v-col>
+        </v-card>
+      </section>
 
-        <v-col cols="6" sm="3">
-          <div class="dashboard-item" :class="{ 'dashboard-active': quickFilter === 'without-ai' }"
-            @click="quickFilter = quickFilter === 'without-ai' ? null : 'without-ai'">
-            <v-icon size="14" color="warning">
-              mdi-file-document-alert-outline
-            </v-icon>
+      <!-- DIALOGS -->
 
-            <span>Sem IA</span>
-
-            <strong>{{ totalWithoutAI }}</strong>
-          </div>
-        </v-col>
-
-        <v-col cols="6" sm="3">
-          <div class="dashboard-item" :class="{ 'dashboard-active': quickFilter === 'today' }"
-            @click="quickFilter = quickFilter === 'today' ? null : 'today'">
-            <v-icon size="14" color="primary">
-              mdi-calendar-today
-            </v-icon>
-
-            <span>Hoje</span>
-
-            <strong>{{ totalToday }}</strong>
-          </div>
-        </v-col>
-
-        <v-col cols="6" sm="3">
-          <div class="dashboard-item" :class="{ 'dashboard-active': quickFilter === 'week' }"
-            @click="quickFilter = quickFilter === 'week' ? null : 'week'">
-            <v-icon size="14" color="primary">
-              mdi-calendar-week
-            </v-icon>
-
-            <span>7 dias</span>
-
-            <strong>{{ totalWeek }}</strong>
-          </div>
-        </v-col>
-
-      </v-row>
-
-      <v-alert v-if="error" type="error" variant="tonal" rounded="xl" class="mb-2">
-        {{ error }}
-
-        <template #append>
-          <v-btn variant="text" color="error" @click="loadRows">
-            Tentar novamente
-          </v-btn>
-        </template>
-      </v-alert>
-
-      <!-- BUSCA -->
-      <v-text-field v-model="search" label="Buscar..." variant="outlined" density="compact"
-        prepend-inner-icon="mdi-magnify" rounded="lg" clearable hide-details />
-
-    </v-card>
-
-    <v-card rounded="xl" elevation="2">
-      <v-data-table :headers="headers" :items="filteredRows" :loading="loading" item-value="id" class="rounded-xl"
-        :items-per-page="25">
-
-        <template #item.status="{ item }">
-          <v-icon size="18" class="status-icon clickable" :class="{ active: item.ai_analysis }"
-            @click.stop="goToResult(item.id)">
-            mdi-file-document-outline
-          </v-icon>
-        </template>
-
-        <!-- Nome -->
-        <template #item.name="{ item }">
-          <div v-if="nameEditor.rowId === item.id" class="inline-cell-editor">
-            <v-text-field v-model="nameEditor.draft" density="compact" variant="outlined" hide-details autofocus
-              :disabled="nameEditor.isSaving" :error-messages="nameEditor.error" @keyup.enter="saveName(item)"
-              @keyup.esc="cancelNameEdit" />
-
-            <v-btn icon="mdi-check" color="primary" size="x-small" :loading="nameEditor.isSaving"
-              @click="saveName(item)" />
-
-            <v-btn icon="mdi-close" variant="text" color="primary" size="x-small" :disabled="nameEditor.isSaving"
-              @click="cancelNameEdit" />
-          </div>
-
-          <span v-else :class="[
-            { 'text-grey': !item.name },
-            authStore.isAdmin ? 'hover-text' : ''
-          ]" :style="{
-              cursor: authStore.isAdmin ? 'pointer' : 'default'
-            }" @click="startNameEdit(item)">
-            {{ item.name || '[sem nome]' }}
-          </span>
-        </template>
-
-        <!-- GP -->
-        <template #item.gp="{ item }">
-          <div v-if="gpEditor.rowId === item.id" class="inline-cell-editor">
-            <v-text-field v-model="gpEditor.draft" density="compact" variant="outlined" hide-details autofocus
-              :disabled="gpEditor.isSaving" :error-messages="gpEditor.error" @keyup.enter="saveGP(item)"
-              @keyup.esc="cancelGPEdit" />
-
-            <v-btn icon="mdi-check" color="primary" size="x-small" :loading="gpEditor.isSaving"
-              @click="saveGP(item)" />
-
-            <v-btn icon="mdi-close" variant="text" color="primary" size="x-small" :disabled="gpEditor.isSaving"
-              @click="cancelGPEdit" />
-          </div>
-
-          <span v-else :class="[
-            { 'text-grey': !item.gp },
-            authStore.isAdmin ? 'hover-text' : ''
-          ]" :style="{
-    cursor: authStore.isAdmin ? 'pointer' : 'default'
-  }" @click="startGPEdit(item)">
-            {{ item.gp || '[sem GP]' }}
-          </span>
-        </template>
-
-
-        <!-- Data e Hora -->
-        <template #item.created_at="{ item }">
-          {{ formatDateTime(item.created_at) }}
-        </template>
-
-      </v-data-table>
-    </v-card>
-  </v-container>
+      <!-- SNACKBARS -->
+    </template>
+  </AppPage>
 </template>
 
 <script setup>
@@ -150,11 +263,20 @@ import { useRouter } from "vue-router";
 import { supabase } from "../services/supabase.js";
 import { runSupabaseQuery } from "../services/supabaseQuery.js";
 import { useAuthStore } from '../stores/auth.js'
+import AppPage from "../components/ui/AppPage.vue";
+import LoadingState from "../components/ui/LoadingState.vue";
+import EmptyState from "../components/ui/EmptyState.vue";
+import ErrorState from "../components/ui/ErrorState.vue";
 
+// =========================================================
+// ROUTE / STORE
+// =========================================================
 const authStore = useAuthStore()
-
 const router = useRouter();
 
+// =========================================================
+// STATE
+// =========================================================
 const loading = ref(true);
 const error = ref(null);
 const rows = ref([]);
@@ -175,6 +297,73 @@ const gpEditor = reactive({
   error: '',
 });
 
+// =========================================================
+// COMPUTED
+// =========================================================
+const total = computed(() => rows.value.length);
+
+const totalToday = computed(() => {
+  const today = new Date().toDateString();
+
+  return rows.value.filter((r) => new Date(r.created_at).toDateString() === today).length;
+});
+
+const totalWeek = computed(() => {
+  const last7Days = new Date();
+
+  last7Days.setDate(last7Days.getDate() - 7);
+
+  return rows.value.filter((r) => new Date(r.created_at) >= last7Days).length;
+});
+
+const totalWithoutAI = computed(() => rows.value.filter((r) => !r.ai_analysis).length);
+
+const filteredRows = computed(() => {
+  return rows.value.filter((r) => {
+    const term = search.value?.toLowerCase() ?? "";
+
+    const matchSearch =
+      !term ||
+      r.name?.toLowerCase().includes(term) ||
+      r.gp?.toLowerCase().includes(term);
+
+    let matchQuickFilter = true;
+
+    if (quickFilter.value === "without-ai") {
+      matchQuickFilter = !r.ai_analysis;
+    }
+
+    if (quickFilter.value === "today") {
+      matchQuickFilter =
+        new Date(r.created_at).toDateString() === new Date().toDateString();
+    }
+
+    if (quickFilter.value === "week") {
+      const last7Days = new Date();
+
+      last7Days.setDate(last7Days.getDate() - 7);
+
+      matchQuickFilter = new Date(r.created_at) >= last7Days;
+    }
+
+    return matchSearch && matchQuickFilter;
+  });
+});
+
+// =========================================================
+// DATA
+// =========================================================
+const headers = [
+  { title: "", key: "status", sortable: false, width: 24 },
+  { title: "Nome", key: "name", sortable: true },
+  { title: "GP", key: "gp", sortable: true },
+  { title: "Respondido em", key: "created_at", sortable: true },
+  { title: "Idade", key: "age", sortable: true, width: 40 },
+];
+
+// =========================================================
+// ACTIONS
+// =========================================================
 function goToResult(id) {
   router.push({ name: "results", params: { id } });
 }
@@ -283,66 +472,6 @@ async function saveGP(item) {
   }
 }
 
-const total = computed(() => rows.value.length);
-
-const totalToday = computed(() => {
-  const today = new Date().toDateString();
-
-  return rows.value.filter((r) => new Date(r.created_at).toDateString() === today).length;
-});
-
-const totalWeek = computed(() => {
-  const last7Days = new Date();
-
-  last7Days.setDate(last7Days.getDate() - 7);
-
-  return rows.value.filter((r) => new Date(r.created_at) >= last7Days).length;
-});
-
-const totalWithoutAI = computed(() => rows.value.filter((r) => !r.ai_analysis).length);
-
-const headers = [
-  { title: "", key: "status", sortable: false, width: 24 },
-  { title: "Nome", key: "name", sortable: true },
-  { title: "GP", key: "gp", sortable: true },
-  { title: "Respondido em", key: "created_at", sortable: true },
-  { title: "Idade", key: "age", sortable: true, width: 40 },
-];
-
-const filteredRows = computed(() => {
-  return rows.value.filter((r) => {
-    const term = search.value?.toLowerCase() ?? "";
-
-    const matchSearch =
-      !term ||
-      r.name?.toLowerCase().includes(term) ||
-      r.gp?.toLowerCase().includes(term);
-
-    let matchQuickFilter = true;
-
-    if (quickFilter.value === "without-ai") {
-      matchQuickFilter = !r.ai_analysis;
-    }
-
-    if (quickFilter.value === "today") {
-      matchQuickFilter =
-        new Date(r.created_at).toDateString() === new Date().toDateString();
-    }
-
-    if (quickFilter.value === "week") {
-      const last7Days = new Date();
-
-      last7Days.setDate(last7Days.getDate() - 7);
-
-      matchQuickFilter = new Date(r.created_at) >= last7Days;
-    }
-
-    return matchSearch && matchQuickFilter;
-  });
-});
-
-onMounted(loadRows);
-
 async function loadRows() {
   loading.value = true;
   error.value = null;
@@ -365,6 +494,9 @@ async function loadRows() {
   }
 }
 
+// =========================================================
+// HELPERS
+// =========================================================
 function formatDateTime(iso) {
   return new Date(iso).toLocaleString("pt-BR", {
     day: "2-digit",
@@ -374,17 +506,28 @@ function formatDateTime(iso) {
     minute: "2-digit",
   });
 }
+
+// =========================================================
+// LIFECYCLE
+// =========================================================
+onMounted(loadRows);
 </script>
 
 <style scoped>
 .v-card {
-  transition: all 0.2s ease;
+  transition: box-shadow var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard);
+}
+
+.admin-surface-card {
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
 }
 
 .status-icon {
   cursor: default;
-  transition: all 0.15s ease;
-  color: #9e9e9e;
+  transition: transform var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard);
+  color: rgba(var(--v-theme-on-surface), 0.5);
 }
 
 .status-icon:hover {
@@ -403,41 +546,55 @@ function formatDateTime(iso) {
   color: rgb(var(--v-theme-primary));
 }
 
+.is-editable {
+  cursor: pointer;
+}
+
 .inline-cell-editor {
-  display: grid;
-  grid-template-columns: minmax(120px, 1fr) auto auto;
-  align-items: start;
-  gap: 4px;
-  min-width: 220px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: nowrap;
+}
+
+.inline-edit-input {
+  width: 320px;
+  max-width: 45vw;
+}
+
+.admin-table :deep(td) {
+  vertical-align: middle;
+}
+
+.admin-table :deep(th) {
+  white-space: nowrap;
 }
 
 .dashboard-item {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
-
-  padding: 4px 6px;
-
-  border-radius: 8px;
-
+  justify-content: space-between;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
   cursor: pointer;
 
-  font-size: 0.85rem;
-
-  transition: all 0.15s ease;
+  min-height: 44px;
+  transition: background-color var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard);
 }
 
-.dashboard-item strong {
-  font-size: 0.95rem;
+.dashboard-item-value {
+  font-size: var(--font-size-helper);
+  font-weight: 600;
 }
 
 .dashboard-item:hover {
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(var(--v-theme-on-surface), 0.05);
 }
 
 .dashboard-active {
-  background: rgba(27, 84, 56, 0.12);
+  background: rgba(var(--v-theme-primary), 0.12);
   font-weight: 600;
 }
 </style>
