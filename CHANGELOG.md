@@ -4,58 +4,72 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 
 ---
 
-## [1.3.0] - Em desenvolvimento
+## [1.4.0] - Julho/2026
 
-### Experiência do Resultado
+### Design System
 
-#### Arquitetura da Análise IA
+* Criação da infraestrutura do Design System (tokens CSS, estilos globais).
+* Implementação dos componentes base: AppPage, AppCard, AppButton, CollapsibleCard, PageHeader, SectionTitle, LoadingState, ErrorState, EmptyState, AppStat.
+* Criação da variante `interactive` no AppCard com efeito hover (translateY + shadow).
+* Suporte a `layout` prop no AppPage (`default`, `reading`, `form`).
+* Criação do componente CollapsibleCard com título, ícone, v-model e slot de ações.
+* Atualização do `design-plan.md` como documentação oficial do Design System.
 
-* Tornar a ResultsView apenas uma tela de exibição.
-* Eliminar dependências de geração de análise na interface.
-* Avaliar fila assíncrona para crescimento futuro.
-* Avaliar desacoplamento adicional das Edge Functions.
-* Manutenção do fluxo de regeneração automática via UptimeRobot (fallback periódico para análises não geradas).
+### Migração de Componentes
 
-### UI/UX
+* Substituição de `v-card` raw por AppCard em 7 componentes de domínio: AiAnalysis, GiftBadges, GrowthSection, HistoryList, ResourcesSection, ResultsChart, UserInfoForm.
+* Substituição de `v-card` raw por AppCard no AdminView.
+* Migração completa da HomeView para AppPage, AppCard, AppButton e CollapsibleCard.
+* Eliminação de ~80 linhas de CSS hover duplicado.
+* Remoção de títulos duplicados nos componentes de domínio.
 
-* Continuidade da remodelação visual da aplicação.
-* Simplificação adicional da tela de resultados.
-* Auditoria completa de responsividade.
-* Consolidação do Design System.
-* Correção do fluxo de edição inline de nome no resultado.
-* Melhoria na sincronização entre UI e banco após updates.
-* Ajuste de estados visuais (sucesso, banner de regeneração e feedback ao usuário).
+### CollapsibleCard
 
-### Segurança
+* Aplicação do CollapsibleCard na ResultsView envolvendo as seções: gráfico, análise, desenvolvimento e recursos.
+* Aplicação do CollapsibleCard na HomeView nas seções "Sobre o teste" e "Preparação".
+* Botão de refresh do AiAnalysis movido para o início do conteúdo.
 
-* Auditoria de autenticação.
-* Revisão e reestruturação das policies RLS na tabela `responses`.
-* Separação entre permissões de usuário e administrador.
-* Implementação de policy para admin via `is_admin()`.
-* Correção de falha de update causada por conflito entre policies e filtros do frontend.
-* Estabilização das regras de UPDATE (`USING` e `WITH CHECK` alinhados).
-* Revisão das permissões das Edge Functions.
-* Revisão de exposição de dados e variáveis sensíveis.
+### AdminView
+
+* Padronização do layout com AppCard.
+* Otimização para mobile: densidade compacta, margens reduzidas, stats compactos, input adaptável.
+* Datetime com ano de 4 dígitos em todas as situações.
+* Substituição de `mb-6` por `mb-3 mb-sm-4` nas seções.
+* Inline editors com layout horizontal e input adaptável ao mobile.
+* Remoção da seção de ações informativas (substituída por alerta compacto).
+
+### ResultsView
+
+* Banner de regeneração de análise ao alterar o nome do resultado.
+* Feedback de sucesso/erro na edição inline do nome.
+* Ajuste de margens e espaçamentos entre seções.
+
+### MyResultsView
+
+* Redesign completo: cada item como AppCard variant="interactive" com data, data relativa e chip "Último".
+* Uso de LoadingState, ErrorState e EmptyState.
+* Remoção de CSS scoped.
+* Remoção de pontuação e campo "top gift" dos cards.
+
+### Temas
+
+* Implementação do botão de alternância entre tema claro e escuro.
+* Persistência da preferência no localStorage.
+* Cores do gráfico (ResultsChart) reativas ao tema via `useTheme()`.
+* Definição das cores do tema dark no Vuetify.
+
+### QuizView
+
+* Correção do `finishTestNow()` (range 0-3 em vez de 0-5).
+* Uso do `layout="reading"` no AppPage.
+
+### Geral
+
+* Ajuste de margens e espaçamentos em todas as views para otimizar espaço vertical.
+* Redução de ~120px no AdminView, ~60px na ResultsView, ~28px no MyResultsView, ~24px na HomeView.
+* Correção de overflow em nomes longos no GiftBadges.
 
 ---
-
-## [1.3.1] - PDF Baseado na Tela
-
-### Exportação de PDF
-
-* Gerar PDF diretamente a partir da tela de resultados.
-* Substituição da montagem manual de PDF por captura estruturada da interface.
-* Exportação multipágina automática com base no layout real da tela.
-* Garantia de fidelidade visual entre UI e PDF gerado.
-* Simplificação do fluxo de exportação.
-
-### Arquitetura de Exportação
-
-* Avaliação de estratégia “UI-first export” (PDF baseado em renderização da tela).
-* Redução de lógica duplicada entre frontend e geração de PDF.
-* Preparação para expansão futura de exportações (ex: relatórios e históricos).
-* Base para possível padronização de relatórios em outros módulos.
-  
 ## [1.2.0] - Junho/2026
 
 ### Experiência do Usuário
