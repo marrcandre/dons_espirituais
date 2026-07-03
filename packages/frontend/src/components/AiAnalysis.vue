@@ -25,6 +25,41 @@
       </v-tooltip>
     </div>
 
+    <!-- Banner: nome alterado -->
+    <v-alert
+      v-if="showRegenerateBanner"
+      type="warning"
+      variant="tonal"
+      density="compact"
+      class="mb-4"
+    >
+      <div class="text-body-2 mb-2">
+        O nome do resultado foi alterado. Atualize a análise.
+      </div>
+
+      <div class="d-flex justify-center ga-2 flex-wrap">
+        <v-btn
+          size="small"
+          color="warning"
+          variant="flat"
+          prepend-icon="mdi-refresh"
+          :loading="isRegenerating"
+          @click="handleRegenerate"
+        >
+          Atualizar
+        </v-btn>
+
+        <v-btn
+          size="small"
+          variant="text"
+          color="warning"
+          @click="dismissBanner"
+        >
+          Agora não
+        </v-btn>
+      </div>
+    </v-alert>
+
     <!-- Carregando -->
     <div v-if="loading" class="text-center py-6">
       <v-progress-circular
@@ -90,11 +125,20 @@
       Esta página será atualizada automaticamente assim que a análise estiver pronta.
     </v-alert>
 
+    <!-- Snackbars -->
+    <v-snackbar v-model="showSuccess" color="success" timeout="3000">
+      Análise atualizada com sucesso.
+    </v-snackbar>
+
+    <v-snackbar v-model="showError" color="warning" timeout="4000">
+      Não foi possível atualizar a análise agora.
+    </v-snackbar>
+
   </v-card>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
 import { useAiStore } from '../stores/ai.js'
 import { useResponsesStore } from '../stores/responses.js'
@@ -113,6 +157,11 @@ const text = ref(props.initialText)
 const loading = ref(!props.initialText)
 const generating = ref(false)
 const error = ref(null)
+
+const showRegenerateBanner = ref(false)
+const isRegenerating = ref(false)
+const showSuccess = ref(false)
+const showError = ref(false)
 
 let pollInterval = null
 let pollAttempts = 0
@@ -166,6 +215,10 @@ async function generateAnalysis(force = false) {
       error.value = null
       stopPolling()
 
+      if (responseStore.current) {
+        responseStore.current.ai_analysis = aiAnalysis
+      }
+
       return aiAnalysis
     }
 
@@ -185,8 +238,32 @@ async function generateAnalysis(force = false) {
   }
 }
 
-defineExpose({
-  generateAnalysis,
+async function handleRegenerate() {
+  if (!authStore.isAdmin && responseStore.current?.user_id !== authStore.user?.id) return
+
+  isRegenerating.value = true
+  showError.value = false
+
+  try {
+    const generated = await generateAnalysis(true)
+
+    if (!generated) throw new Error()
+
+    showRegenerateBanner.value = false
+    showSuccess.value = true
+  } catch {
+    showError.value = true
+  } finally {
+    isRegenerating.value = false
+  }
+}
+
+function dismissBanner() {
+  showRegenerateBanner.value = false
+}
+
+watch(() => props.responseName, () => {
+  showRegenerateBanner.value = true
 })
 
 onMounted(() => {
