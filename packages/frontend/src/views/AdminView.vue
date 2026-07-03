@@ -232,7 +232,7 @@
             </template>
 
             <template #item.created_at="{ item }">
-              {{ mobile ? formatDate(item.created_at, { month: '2-digit' }) : formatDateTime(item.created_at) }}
+              {{ formatDateTime(item.created_at) }}
             </template>
           </v-data-table>
         </AppCard>
@@ -263,7 +263,7 @@ import { useRouter } from "vue-router";
 import { useDisplay } from "vuetify";
 import { useAuthStore } from '../stores/auth.js'
 import { useResponsesStore } from '../stores/responses.js'
-import { formatDate, formatDateTime } from '../helpers/date.js'
+import { formatDateTime } from '../helpers/date.js'
 import AppPage from "../components/ui/AppPage.vue";
 import LoadingState from "../components/ui/LoadingState.vue";
 import EmptyState from "../components/ui/EmptyState.vue";
@@ -507,23 +507,9 @@ onMounted(loadRows);
   flex-wrap: nowrap;
 }
 
-@media (max-width: 599px) {
-  .inline-cell-editor {
-    flex-direction: column;
-    align-items: stretch;
-  }
-}
-
 .inline-edit-input {
   width: 320px;
-  max-width: 45vw;
-}
-
-@media (max-width: 599px) {
-  .inline-edit-input {
-    width: 100%;
-    max-width: 100%;
-  }
+  max-width: min(320px, calc(100vw - 100px));
 }
 
 .admin-table :deep(td) {
