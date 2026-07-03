@@ -98,6 +98,7 @@
 import { computed, ref, watch } from 'vue'
 import { useTheme } from 'vuetify'
 import { useAuthStore } from '../stores/auth.js'
+import { initials as getInitials } from '../helpers/string.js'
 
 const theme = useTheme()
 const authStore = useAuthStore()
@@ -129,11 +130,6 @@ const initials = computed(() => {
     authStore.profile?.name ||
     ''
 
-  return name
-    .split(' ')
-    .slice(0, 2)
-    .map(n => n[0])
-    .join('')
-    .toUpperCase()
+  return getInitials(name)
 })
 </script>

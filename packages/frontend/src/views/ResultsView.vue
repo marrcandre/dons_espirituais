@@ -196,6 +196,7 @@ import AiAnalysis from '../components/AiAnalysis.vue'
 import ResourcesSection from '../components/ResourcesSection.vue'
 import AppPage from '../components/ui/AppPage.vue'
 import LoadingState from '../components/ui/LoadingState.vue'
+import { formatDate } from '../helpers/date.js'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -230,14 +231,6 @@ const isOwner = computed(() =>
 
 async function loadResponse() {
   await responseStore.fetchById(route.params.id)
-}
-
-function formatDate(iso) {
-  return new Date(iso).toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-  })
 }
 
 /* NAME EDIT */

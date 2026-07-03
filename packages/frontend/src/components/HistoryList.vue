@@ -20,7 +20,7 @@
       <v-list-item v-for="item in history" :key="item.id" :to="{ name: 'results', params: { id: item.id } }"
         :class="item.id === currentId ? 'bg-primary-lighten-5' : ''" rounded="lg" class="mb-2">
         <template #title>
-          <span class="font-weight-medium">{{ formatDate(item.created_at) }}</span>
+          <span class="font-weight-medium">{{ formatDate(item.created_at, { month: 'short' }) }}</span>
           <v-chip v-if="item.id === currentId" size="x-small" color="primary" class="ml-2">atual</v-chip>
         </template>
         <template #subtitle>
@@ -40,7 +40,8 @@
 import { computed, onMounted } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
 import { useResponsesStore } from '../stores/responses.js'
-import { rankGifts } from '../services/scoring.js'
+import { formatDate } from '../helpers/date.js'
+import { topGift } from '../helpers/string.js'
 
 const props = defineProps({
   currentId: { type: String, required: true },
@@ -58,18 +59,6 @@ onMounted(() => {
     limit: 10,
   })
 })
-
-function formatDate(iso) {
-  return new Date(iso).toLocaleDateString('pt-BR', {
-    day: '2-digit', month: 'short', year: 'numeric'
-  })
-}
-
-function topGift(scores) {
-  if (!scores) return ''
-  const ranked = rankGifts(scores)
-  return `Dom principal: ${ranked[0]?.gift.name}`
-}
 </script>
 
 

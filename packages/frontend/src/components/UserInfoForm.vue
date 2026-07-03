@@ -31,7 +31,7 @@
         variant="outlined"
         rounded="lg"
         type="number"
-        :rules="[ageRule]"
+        :rules="[ageRange]"
         prepend-inner-icon="mdi-calendar"
         class="mb-6"
       />
@@ -57,6 +57,7 @@
 import { ref, onMounted } from 'vue'
 import * as authRepository from '../repositories/authRepository.js'
 import * as userRepository from '../repositories/userRepository.js'
+import { required, ageRange } from '../helpers/validation.js'
 
 const emit = defineEmits(['submit'])
 
@@ -67,16 +68,6 @@ const form = ref({
   gp: '',
   age: '',
 })
-
-const required = (v) => !!v?.trim() || 'Campo obrigatório'
-
-const ageRule = (v) => {
-  if (!v) return true
-
-  const n = parseInt(v)
-
-  return (n >= 5 && n <= 120) || 'Idade inválida'
-}
 
 onMounted(loadUserData)
 

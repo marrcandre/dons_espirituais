@@ -262,6 +262,7 @@ import { ref, reactive, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from '../stores/auth.js'
 import { useResponsesStore } from '../stores/responses.js'
+import { formatDateTime } from '../helpers/date.js'
 import AppPage from "../components/ui/AppPage.vue";
 import LoadingState from "../components/ui/LoadingState.vue";
 import EmptyState from "../components/ui/EmptyState.vue";
@@ -462,18 +463,6 @@ async function loadRows() {
 }
 
 // =========================================================
-// HELPERS
-// =========================================================
-function formatDateTime(iso) {
-  return new Date(iso).toLocaleString("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
 // =========================================================
 // LIFECYCLE
 // =========================================================

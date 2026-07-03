@@ -2,15 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { questions } from '../data/questions.js'
 import { useAuthStore } from './auth.js'
-
-// Fisher-Yates shuffle in-place
-function shuffle(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[array[i], array[j]] = [array[j], array[i]]
-  }
-  return array
-}
+import { shuffle } from '../helpers/array.js'
 
 function storageKey(userId) {
   return `quiz_state_${userId}`
