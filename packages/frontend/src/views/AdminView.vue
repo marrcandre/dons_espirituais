@@ -260,9 +260,8 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { supabase } from "../services/supabase.js";
-import { runSupabaseQuery } from "../services/supabaseQuery.js";
 import { useAuthStore } from '../stores/auth.js'
+import { useResponsesStore } from '../stores/responses.js'
 import AppPage from "../components/ui/AppPage.vue";
 import LoadingState from "../components/ui/LoadingState.vue";
 import EmptyState from "../components/ui/EmptyState.vue";
@@ -272,14 +271,15 @@ import ErrorState from "../components/ui/ErrorState.vue";
 // ROUTE / STORE
 // =========================================================
 const authStore = useAuthStore()
+const responseStore = useResponsesStore()
 const router = useRouter();
 
 // =========================================================
 // STATE
 // =========================================================
-const loading = ref(true);
-const error = ref(null);
-const rows = ref([]);
+const loading = computed(() => responseStore.loading);
+const error = computed(() => responseStore.error);
+const rows = computed(() => responseStore.list);
 
 const search = ref("");
 const quickFilter = ref('all');
@@ -369,22 +369,7 @@ function goToResult(id) {
 }
 
 async function updateField(id, field, value) {
-  try {
-    const { error } = await runSupabaseQuery(
-      supabase
-        .from("responses")
-        .update({
-          [field]: value?.trim(),
-        })
-        .eq("id", id)
-    );
-
-    if (error) throw error;
-    return true;
-  } catch (err) {
-    console.error(`Erro ao atualizar ${field}:`, err);
-    return false;
-  }
+  return responseStore.updateField(id, field, value)
 }
 
 function startNameEdit(item) {
@@ -473,25 +458,7 @@ async function saveGP(item) {
 }
 
 async function loadRows() {
-  loading.value = true;
-  error.value = null;
-
-  try {
-    const { data, error: fetchError } = await runSupabaseQuery(
-      supabase
-        .from("responses")
-        .select("id, name, gp, age, created_at, ai_analysis")
-        .order("created_at", { ascending: false })
-    );
-
-    if (fetchError) throw fetchError;
-    rows.value = data ?? [];
-  } catch (err) {
-    console.error(err);
-    error.value = "Erro ao carregar painel admin";
-  } finally {
-    loading.value = false;
-  }
+  await responseStore.fetchAll("id, name, gp, age, created_at, ai_analysis")
 }
 
 // =========================================================

@@ -37,9 +37,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { supabase } from '../services/supabase.js'
+import { computed, onMounted } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
+import { useResponsesStore } from '../stores/responses.js'
 import { rankGifts } from '../services/scoring.js'
 
 const props = defineProps({
@@ -47,18 +47,16 @@ const props = defineProps({
 })
 
 const authStore = useAuthStore()
-const loading = ref(true)
-const history = ref([])
+const responseStore = useResponsesStore()
 
-onMounted(async () => {
-  const { data } = await supabase
-    .from('responses')
-    .select('id, created_at, scores')
-    .eq('user_id', authStore.user.id)
-    .order('created_at', { ascending: false })
-    .limit(10)
-  history.value = data ?? []
-  loading.value = false
+const loading = computed(() => responseStore.loading)
+const history = computed(() => responseStore.list)
+
+onMounted(() => {
+  responseStore.fetchByUserId(authStore.user.id, {
+    fields: 'id, created_at, scores',
+    limit: 10,
+  })
 })
 
 function formatDate(iso) {

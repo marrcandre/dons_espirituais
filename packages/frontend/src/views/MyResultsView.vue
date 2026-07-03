@@ -94,11 +94,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { runSupabaseQuery } from '../services/supabaseQuery.js'
-import { supabase } from '../services/supabase.js'
 import { useAuthStore } from '../stores/auth.js'
+import { useResponsesStore } from '../stores/responses.js'
 import AppPage from '../components/ui/AppPage.vue'
 import AppCard from '../components/ui/AppCard.vue'
 import AppButton from '../components/ui/AppButton.vue'
@@ -106,10 +105,11 @@ import PageHeader from '../components/ui/PageHeader.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const responseStore = useResponsesStore()
 
-const loading = ref(true)
-const error = ref(null)
-const rows = ref([])
+const loading = computed(() => responseStore.loading)
+const error = computed(() => responseStore.error)
+const rows = computed(() => responseStore.list)
 
 onMounted(loadResults)
 
@@ -121,29 +121,7 @@ function goToResult(id) {
 }
 
 async function loadResults() {
-  loading.value = true
-  error.value = null
-
-  try {
-    const { data, error: fetchError } = await runSupabaseQuery(
-      supabase
-        .from('responses')
-        .select('id, created_at')
-        .eq('user_id', authStore.user.id)
-        .order('created_at', { ascending: false })
-    )
-
-    if (fetchError) throw fetchError
-
-    rows.value = data ?? []
-  } catch (err) {
-    console.error('Erro ao carregar resultados:', err)
-
-    error.value =
-      'Não foi possível carregar seus resultados. Tente novamente.'
-  } finally {
-    loading.value = false
-  }
+  await responseStore.fetchByUserId(authStore.user.id, { fields: 'id, created_at' })
 }
 
 function formatDate(iso) {

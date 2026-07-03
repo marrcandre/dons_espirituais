@@ -95,9 +95,9 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import { supabase } from '../services/supabase.js'
 import { useAuthStore } from '../stores/auth.js'
-import { regenerateAiAnalysis } from '../services/aiAnalysis.js'
+import { useAiStore } from '../stores/ai.js'
+import { useResponsesStore } from '../stores/responses.js'
 
 const props = defineProps({
   responseId: { type: String, required: true },
@@ -106,17 +106,18 @@ const props = defineProps({
 })
 
 const authStore = useAuthStore()
+const aiStore = useAiStore()
+const responseStore = useResponsesStore()
 
 const text = ref(props.initialText)
 const loading = ref(!props.initialText)
 const generating = ref(false)
 const error = ref(null)
 
-let subscription = null
 let pollInterval = null
 let pollAttempts = 0
 
-const MAX_POLL_ATTEMPTS = 24 // ~2 minutos
+const MAX_POLL_ATTEMPTS = 24
 
 function stopPolling() {
   clearInterval(pollInterval)
@@ -133,23 +134,15 @@ function startPolling() {
 async function pollForAnalysis() {
   pollAttempts++
 
-  const { data, error: fetchError } = await supabase
-    .from('responses')
-    .select('ai_analysis')
-    .eq('id', props.responseId)
-    .single()
+  const analysis = await responseStore.selectField(props.responseId, 'ai_analysis')
 
-  if (fetchError) {
-    console.error('Erro ao consultar análise:', fetchError)
-  }
-
-  if (data?.ai_analysis) {
-    text.value = data.ai_analysis
+  if (analysis) {
+    text.value = analysis
     loading.value = false
     error.value = null
 
     stopPolling()
-    subscription?.unsubscribe()
+    aiStore.unsubscribe(props.responseId)
   } else if (pollAttempts >= MAX_POLL_ATTEMPTS) {
     loading.value = false
     stopPolling()
@@ -163,7 +156,7 @@ async function generateAnalysis(force = false) {
 
   try {
     if (force) {
-      const aiAnalysis = await regenerateAiAnalysis(
+      const aiAnalysis = await aiStore.regenerate(
         props.responseId,
         props.responseName
       )
@@ -176,20 +169,7 @@ async function generateAnalysis(force = false) {
       return aiAnalysis
     }
 
-    const { error: invokeError } = await supabase.functions.invoke(
-      'generate-ai',
-      {
-        body: {
-          responseId: props.responseId,
-          force,
-        },
-      }
-    )
-
-    if (invokeError) {
-      throw invokeError
-    }
-
+    await aiStore.generate(props.responseId, '', false)
     startPolling()
     return true
   } catch (err) {
@@ -212,33 +192,20 @@ defineExpose({
 onMounted(() => {
   if (text.value) return
 
-  subscription = supabase
-    .channel(`response-ai-${props.responseId}`)
-    .on(
-      'postgres_changes',
-      {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'responses',
-        filter: `id=eq.${props.responseId}`,
-      },
-      (payload) => {
-        if (payload.new?.ai_analysis) {
-          text.value = payload.new.ai_analysis
-          loading.value = false
-          error.value = null
-
-          stopPolling()
-        }
-      }
-    )
-    .subscribe()
+  aiStore.subscribe(props.responseId, (newData) => {
+    if (newData?.ai_analysis) {
+      text.value = newData.ai_analysis
+      loading.value = false
+      error.value = null
+      stopPolling()
+    }
+  })
 
   generateAnalysis(false)
 })
 
 onUnmounted(() => {
-  subscription?.unsubscribe()
+  aiStore.unsubscribe(props.responseId)
   stopPolling()
 })
 </script>

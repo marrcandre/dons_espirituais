@@ -57,8 +57,9 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuizStore } from '../stores/quiz.js'
 import { useAuthStore } from '../stores/auth.js'
+import { useResponsesStore } from '../stores/responses.js'
+import { useAiStore } from '../stores/ai.js'
 import { calculateScores } from '../services/scoring.js'
-import { supabase } from '../services/supabase.js'
 import UserInfoForm from '../components/UserInfoForm.vue'
 import QuizProgress from '../components/QuizProgress.vue'
 import QuestionStep from '../components/QuestionStep.vue'
@@ -72,6 +73,8 @@ import LoadingState from '../components/ui/LoadingState.vue'
 const router = useRouter()
 const quizStore = useQuizStore()
 const authStore = useAuthStore()
+const responseStore = useResponsesStore()
+const aiStore = useAiStore()
 
 const step = ref('loading')
 const showResumeDialog = ref(false)
@@ -178,33 +181,17 @@ async function submitQuiz() {
       scores,
     }
 
-    const { data, error } = await supabase
-      .from('responses')
-      .insert(payload)
-      .select('id')
-      .single()
-
-    if (error) throw error
+    const data = await responseStore.insert(payload)
 
     quizStore.clearState()
 
-    supabase.functions
-      .invoke('notify-admin', { body: { responseId: data.id } })
-      .then(({ error }) => {
-        if (error) console.error('Erro ao enviar notificação:', error)
-      })
-      .catch((err) => {
-        console.error('Erro ao enviar notificação:', err)
-      })
+    aiStore.notifyAdmin(data.id).catch((err) => {
+      console.error('Erro ao enviar notificação:', err)
+    })
 
-    supabase.functions
-      .invoke('generate-ai', { body: { responseId: data.id } })
-      .then(({ error }) => {
-        if (error) console.error('Erro ao iniciar geração IA:', error)
-      })
-      .catch((err) => {
-        console.error('Erro ao iniciar geração IA:', err)
-      })
+    aiStore.generate(data.id).catch((err) => {
+      console.error('Erro ao iniciar geração IA:', err)
+    })
 
     router.push({ name: 'results', params: { id: data.id } })
   } catch (err) {

@@ -101,8 +101,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
+import { useResponsesStore } from '../stores/responses.js'
 import { ANSWER_LABELS } from '../data/questions.js'
-import { supabase } from '../services/supabase.js'
 import AppPage from '../components/ui/AppPage.vue'
 import AppCard from '../components/ui/AppCard.vue'
 import AppButton from '../components/ui/AppButton.vue'
@@ -110,15 +110,13 @@ import PageHeader from '../components/ui/PageHeader.vue'
 import SectionTitle from '../components/ui/SectionTitle.vue'
 
 const authStore = useAuthStore()
+const responseStore = useResponsesStore()
 
 const hasHistory = ref(false)
 
 onMounted(async () => {
-  const { count } = await supabase
-    .from('responses')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', authStore.user?.id)
-  hasHistory.value = (count ?? 0) > 0
+  const count = await responseStore.countByUserId(authStore.user?.id)
+  hasHistory.value = count > 0
 })
 
 const reflectionQuestions = [

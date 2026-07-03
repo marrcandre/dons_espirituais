@@ -55,7 +55,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { supabase } from '../services/supabase.js'
+import * as authRepository from '../repositories/authRepository.js'
+import * as userRepository from '../repositories/userRepository.js'
 
 const emit = defineEmits(['submit'])
 
@@ -81,25 +82,12 @@ onMounted(loadUserData)
 
 async function loadUserData() {
   try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
+    const user = await authRepository.getUser()
     if (!user) return
 
-    const { data, error } = await supabase
-      .from('users')
-      .select('name')
-      .eq('id', user.id)
-      .single()
-
-    if (error) {
-      console.error('Erro ao carregar nome do usuário:', error)
-      return
-    }
-
-    if (data?.name) {
-      form.value.name = data.name
+    const profile = await userRepository.findById(user.id)
+    if (profile?.name) {
+      form.value.name = profile.name
     }
   } catch (err) {
     console.error('Erro ao carregar usuário:', err)

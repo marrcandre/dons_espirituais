@@ -1,4 +1,5 @@
-import { supabase } from './supabase.js'
+import * as aiRepository from '../repositories/aiRepository.js'
+import * as responseRepository from '../repositories/responseRepository.js'
 
 export async function regenerateAiAnalysis(responseId, name) {
   if (!responseId) {
@@ -9,30 +10,7 @@ export async function regenerateAiAnalysis(responseId, name) {
     throw new Error('name obrigatório')
   }
 
-  const { error: invokeError } = await supabase.functions.invoke(
-    'generate-ai',
-    {
-      body: {
-        responseId,
-        name,
-        force: true,
-      },
-    }
-  )
+  await aiRepository.invokeGenerateAI(responseId, name, true)
 
-  if (invokeError) {
-    throw invokeError
-  }
-
-  const { data, error: fetchError } = await supabase
-    .from('responses')
-    .select('ai_analysis')
-    .eq('id', responseId)
-    .single()
-
-  if (fetchError) {
-    throw fetchError
-  }
-
-  return data?.ai_analysis || null
+  return responseRepository.selectField(responseId, 'ai_analysis')
 }

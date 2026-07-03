@@ -187,7 +187,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth.js'
-import { supabase } from '../services/supabase.js'
+import { useResponsesStore } from '../stores/responses.js'
 
 import GrowthSection from '../components/GrowthSection.vue'
 import GiftBadges from '../components/GiftBadges.vue'
@@ -199,12 +199,13 @@ import LoadingState from '../components/ui/LoadingState.vue'
 
 const route = useRoute()
 const authStore = useAuthStore()
+const responseStore = useResponsesStore()
 
 const aiAnalysisRef = ref(null)
 
-const loading = ref(true)
-const error = ref(null)
-const response = ref(null)
+const response = computed(() => responseStore.current)
+const loading = computed(() => responseStore.loading)
+const error = computed(() => responseStore.error)
 
 const uiState = reactive({
   showRegenerateAction: false,
@@ -228,24 +229,7 @@ const isOwner = computed(() =>
 )
 
 async function loadResponse() {
-  loading.value = true
-  error.value = null
-
-  try {
-    const { data, error: fetchError } = await supabase
-      .from('responses')
-      .select('*')
-      .eq('id', route.params.id)
-      .single()
-
-    if (fetchError) throw fetchError
-
-    response.value = data
-  } catch {
-    error.value = 'Resultado não encontrado.'
-  } finally {
-    loading.value = false
-  }
+  await responseStore.fetchById(route.params.id)
 }
 
 function formatDate(iso) {
@@ -292,14 +276,14 @@ async function saveName() {
   nameEditor.error = ''
 
   try {
-    const { error: updateError } = await supabase
-      .from('responses')
-      .update({ name })
-      .eq('id', response.value.id)
+    const updated = await responseStore.updateField(response.value.id, 'name', name)
 
-    if (updateError) throw updateError
+    if (!updated) {
+      nameEditor.error = 'Não foi possível atualizar o nome.'
+      return
+    }
 
-    response.value.name = name
+    responseStore.current.name = name
     uiState.showRegenerateAction = true
     uiState.dismissedRegenerateBanner = false
 

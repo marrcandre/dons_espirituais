@@ -1,10 +1,8 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import { supabase } from "../services/supabase.js";
-import { runSupabaseQuery } from "../services/supabaseQuery.js";
+import * as authRepository from "../repositories/authRepository.js";
+import * as userRepository from "../repositories/userRepository.js";
 import router from "../router";
-
-const AUTH_TIMEOUT_MS = 8000;
 
 export const useAuthStore = defineStore("auth", () => {
   const user = ref(null);
@@ -27,20 +25,15 @@ export const useAuthStore = defineStore("auth", () => {
 
     initPromise = (async () => {
       try {
-        const { data, error } = await supabase.auth.getSession();
-
-        if (error) throw error;
-
-        const session = data.session;
+        const session = await authRepository.getSession();
         user.value = session?.user ?? null;
 
         if (session?.user) {
           await loadProfile(session.user.id);
         }
 
-        // evita múltiplos listeners
         if (!authSubscription) {
-          const { data } = supabase.auth.onAuthStateChange(
+          authSubscription = authRepository.onAuthStateChange(
             async (_event, session) => {
               user.value = session?.user ?? null;
 
@@ -53,8 +46,6 @@ export const useAuthStore = defineStore("auth", () => {
               }
             },
           );
-
-          authSubscription = data.subscription;
         }
 
         initialized.value = true;
@@ -73,41 +64,28 @@ export const useAuthStore = defineStore("auth", () => {
 
   async function loadProfile(userId) {
     let tries = 0;
-    let data = null;
-    let error = null;
 
     while (tries < 3) {
-      const result = await runSupabaseQuery(
-        supabase.from("users").select("*").eq("id", userId).maybeSingle(),
-        AUTH_TIMEOUT_MS,
-      );
+      const data = await userRepository.findById(userId).catch(() => null);
 
-      data = result.data;
-      error = result.error;
+      if (data) {
+        profile.value = data
+        return
+      }
 
-      if (data) break;
       await new Promise((r) => setTimeout(r, 300));
       tries++;
     }
 
-    if (error) throw error;
-    profile.value = data ?? null;
+    profile.value = null
   }
 
   async function signInWithGoogle() {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        // redirectTo: `${window.location.origin}/`,
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-
-    if (error) throw error;
+    await authRepository.signInWithGoogle()
   }
 
   async function signOut() {
-    await supabase.auth.signOut();
+    await authRepository.signOut()
 
     user.value = null;
     profile.value = null;
