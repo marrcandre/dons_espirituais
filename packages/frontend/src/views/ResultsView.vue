@@ -99,7 +99,7 @@
       </section>
 
       <!-- INSIGHTS -->
-      <section class="mb-4">
+      <section class="mb-3 mb-sm-4">
         <CollapsibleCard title="Pontuação por dom" icon="mdi-chart-bar" v-model="chartOpen">
           <ResultsChart
             :scores="response.scores"
@@ -107,7 +107,7 @@
         </CollapsibleCard>
       </section>
 
-      <section class="mb-4">
+      <section class="mb-3 mb-sm-4">
         <CollapsibleCard title="Análise dos seus dons" icon="mdi-auto-fix" v-model="analysisOpen">
           <AiAnalysis
             :response-id="response.id"
@@ -117,13 +117,13 @@
         </CollapsibleCard>
       </section>
 
-      <section class="mb-4">
+      <section class="mb-3 mb-sm-4">
         <CollapsibleCard title="Desenvolvimento" icon="mdi-sprout" v-model="growthOpen">
           <GrowthSection />
         </CollapsibleCard>
       </section>
 
-      <section class="mb-4">
+      <section class="mb-3 mb-sm-4">
         <CollapsibleCard title="Recursos" icon="mdi-bookshelf" v-model="resourcesOpen">
           <ResourcesSection />
         </CollapsibleCard>

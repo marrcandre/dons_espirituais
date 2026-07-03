@@ -1,12 +1,12 @@
 <template>
-    <div ref="chartWrapperEl" style="position: relative; height: 520px">
+    <div ref="chartWrapperEl" class="chart-wrapper" :style="{ height: chartHeight }">
       <Bar :data="chartData" :options="chartOptions" :plugins="chartPlugins" />
     </div>
 </template>
 
 <script setup>
 import { computed, ref } from 'vue'
-import { useTheme } from 'vuetify'
+import { useTheme, useDisplay } from 'vuetify'
 import { Bar } from 'vue-chartjs'
 import {
   Chart as ChartJS,
@@ -34,6 +34,8 @@ defineExpose({ getChartCanvas })
 
 const theme = useTheme()
 const isDark = computed(() => theme.global.name.value === 'dark')
+const { mobile } = useDisplay()
+const chartHeight = computed(() => mobile.value ? '300px' : '520px')
 
 const textColor = computed(() => isDark.value ? '#E0E0E0' : '#424242')
 const gridColor = computed(() => isDark.value ? 'rgba(255,255,255,0.12)' : '#e0e0e0')

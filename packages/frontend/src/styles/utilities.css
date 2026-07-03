@@ -11,11 +11,13 @@
 .container-reading {
   max-width: var(--container-reading);
   margin: 0 auto;
+  padding: var(--space-md);
 }
 
 .container-form {
   max-width: var(--container-form);
   margin: 0 auto;
+  padding: var(--space-md);
 }
 
 .shadow-sm { box-shadow: var(--shadow-sm); }

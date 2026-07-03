@@ -114,6 +114,7 @@
       <!-- TABLE -->
       <section class="mb-3 mb-sm-4">
         <AppCard variant="flush">
+          <div class="admin-table-wrapper">
           <EmptyState
             v-if="!error && !filteredRows.length"
             class="pa-4"
@@ -235,6 +236,7 @@
               {{ formatDateTime(item.created_at) }}
             </template>
           </v-data-table>
+          </div>
         </AppCard>
       </section>
 
@@ -519,6 +521,10 @@ onMounted(loadRows);
 
 .admin-table :deep(th) {
   white-space: nowrap;
+}
+
+.admin-table-wrapper {
+  overflow-x: auto;
 }
 
 .dashboard-item {

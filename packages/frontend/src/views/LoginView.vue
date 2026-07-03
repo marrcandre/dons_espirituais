@@ -11,7 +11,7 @@
         <v-icon size="56" color="primary" class="mb-2">mdi-gift</v-icon>
       </PageHeader>
 
-      <v-alert v-if="error" type="error" variant="tonal" class="mb-4" closable @click:close="error = null">
+      <v-alert v-if="error" type="error" variant="tonal" class="mb-3 mb-sm-4" closable @click:close="error = null">
         {{ error }}
       </v-alert>
 

@@ -9,7 +9,7 @@
     </PageHeader>
 
     <!-- Sobre o teste -->
-    <CollapsibleCard title="Sobre o teste" icon="mdi-information-outline" v-model="sobreOpen" class="mb-md">
+    <CollapsibleCard title="Sobre o teste" icon="mdi-information-outline" v-model="sobreOpen" class="mb-3 mb-sm-4">
       <p class="body-text mb-md">
         Este teste é baseado no modelo de
         <strong>C. Peter Wagner</strong>
@@ -26,7 +26,7 @@
     </CollapsibleCard>
 
     <!-- Preparação -->
-    <CollapsibleCard title="Preparação para o teste" icon="mdi-clipboard-list" v-model="preparacaoOpen" class="mb-md">
+    <CollapsibleCard title="Preparação para o teste" icon="mdi-clipboard-list" v-model="preparacaoOpen" class="mb-3 mb-sm-4">
       <SectionTitle title="Como responder" class="mb-sm" />
 
       <div class="d-flex flex-wrap ga-2 mb-md">
