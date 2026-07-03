@@ -1,13 +1,7 @@
 <template>
-  <AppCard variant="interactive">
-    <h2 class="text-h6 font-weight-bold text-primary mb-4 d-flex align-center">
-      <v-icon icon="mdi-chart-bar" class="mr-2" />
-      Pontuação por dom
-    </h2>
     <div ref="chartWrapperEl" style="position: relative; height: 520px">
       <Bar :data="chartData" :options="chartOptions" :plugins="chartPlugins" />
     </div>
-  </AppCard>
 </template>
 
 <script setup>
@@ -23,7 +17,6 @@ import {
   Legend,
 } from 'chart.js'
 import { rankGifts } from '../services/scoring.js'
-import AppCard from './ui/AppCard.vue'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend)
 

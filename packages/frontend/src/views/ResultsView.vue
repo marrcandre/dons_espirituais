@@ -100,25 +100,33 @@
 
       <!-- INSIGHTS -->
       <section class="mb-6">
-        <ResultsChart
-          :scores="response.scores"
-        />
+        <CollapsibleCard title="Pontuação por dom" icon="mdi-chart-bar" v-model="chartOpen">
+          <ResultsChart
+            :scores="response.scores"
+          />
+        </CollapsibleCard>
       </section>
 
       <section class="mb-6">
-        <AiAnalysis
-          :response-id="response.id"
-          :response-name="response.name"
-          :initial-text="response.ai_analysis"
-        />
+        <CollapsibleCard title="Análise dos seus dons" icon="mdi-auto-fix" v-model="analysisOpen">
+          <AiAnalysis
+            :response-id="response.id"
+            :response-name="response.name"
+            :initial-text="response.ai_analysis"
+          />
+        </CollapsibleCard>
       </section>
 
       <section class="mb-6">
-        <GrowthSection />
+        <CollapsibleCard title="Desenvolvimento" icon="mdi-sprout" v-model="growthOpen">
+          <GrowthSection />
+        </CollapsibleCard>
       </section>
 
       <section class="mb-6">
-        <ResourcesSection />
+        <CollapsibleCard title="Recursos" icon="mdi-bookshelf" v-model="resourcesOpen">
+          <ResourcesSection />
+        </CollapsibleCard>
       </section>
 
       <!-- SNACKBARS -->
@@ -134,7 +142,7 @@
 </template>
 
 <script setup>
-import { reactive, computed, onMounted } from 'vue'
+import { reactive, computed, ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth.js'
 import { useResponsesStore } from '../stores/responses.js'
@@ -146,6 +154,7 @@ import AiAnalysis from '../components/AiAnalysis.vue'
 import ResourcesSection from '../components/ResourcesSection.vue'
 import AppPage from '../components/ui/AppPage.vue'
 import LoadingState from '../components/ui/LoadingState.vue'
+import CollapsibleCard from '../components/ui/CollapsibleCard.vue'
 import { formatDate } from '../helpers/date.js'
 
 const route = useRoute()
@@ -168,6 +177,11 @@ const isOwner = computed(() =>
   authStore.user &&
   response.value?.user_id === authStore.user.id
 )
+
+const chartOpen = ref(true)
+const analysisOpen = ref(true)
+const growthOpen = ref(true)
+const resourcesOpen = ref(true)
 
 async function loadResponse() {
   await responseStore.fetchById(route.params.id)

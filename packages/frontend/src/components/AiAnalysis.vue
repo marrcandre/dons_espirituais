@@ -1,30 +1,5 @@
 <template>
-  <AppCard>
-    <div class="d-flex align-center justify-space-between mb-4">
-
-      <div>
-        <h2 class="text-h6 font-weight-bold text-primary mb-0">
-          Análise dos seus dons
-        </h2>
-      </div>
-
-      <v-tooltip
-        v-if="authStore.isAdmin || !text"
-        text="Gerar análise"
-      >
-        <template #activator="{ props }">
-          <v-btn
-            icon="mdi-refresh"
-            variant="text"
-            color="primary"
-            v-bind="props"
-            :loading="generating"
-            @click="generateAnalysis(true)"
-          />
-        </template>
-      </v-tooltip>
-    </div>
-
+  <div>
     <!-- Banner: nome alterado -->
     <v-alert
       v-if="showRegenerateBanner"
@@ -59,6 +34,25 @@
         </v-btn>
       </div>
     </v-alert>
+
+    <!-- Refresh -->
+    <div
+      v-if="authStore.isAdmin || !text"
+      class="d-flex justify-center mb-4"
+    >
+      <v-tooltip text="Gerar análise">
+        <template #activator="{ props }">
+          <v-btn
+            icon="mdi-refresh"
+            variant="text"
+            color="primary"
+            v-bind="props"
+            :loading="generating"
+            @click="generateAnalysis(true)"
+          />
+        </template>
+      </v-tooltip>
+    </div>
 
     <!-- Carregando -->
     <div v-if="loading" class="text-center py-6">
@@ -134,7 +128,7 @@
       Não foi possível atualizar a análise agora.
     </v-snackbar>
 
-  </AppCard>
+  </div>
 </template>
 
 <script setup>
@@ -142,7 +136,6 @@ import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
 import { useAiStore } from '../stores/ai.js'
 import { useResponsesStore } from '../stores/responses.js'
-import AppCard from './ui/AppCard.vue'
 
 const props = defineProps({
   responseId: { type: String, required: true },

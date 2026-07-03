@@ -8,40 +8,8 @@
       <v-icon icon="mdi-gift-outline" size="32" color="primary" />
     </PageHeader>
 
-    <!-- Aviso de atualização -->
-    <AppCard variant="flat" color="warning" class="mb-lg">
-      <SectionTitle title="Atualização recente" class="mb-sm" />
-
-      <p class="body-text">
-        Revisamos todas as perguntas do teste de dons espirituais para deixá-las mais claras e mais fiéis ao
-        conteúdo original em inglês.
-      </p>
-
-      <p class="body-text mt-md">
-        Se você já realizou o teste anteriormente, recomendamos refazê-lo para obter um resultado mais preciso.
-      </p>
-    </AppCard>
-
-    <!-- Histórico -->
-    <AppCard v-if="hasHistory" class="mb-lg">
-      <div class="d-flex align-center justify-space-between flex-wrap ga-3">
-        <div>
-          <SectionTitle
-            title="Histórico de resultados"
-            subtitle="Veja seus resultados e análises anteriores."
-          />
-        </div>
-
-        <AppButton variant="tonal" color="primary" size="small" to="/meus-resultados">
-          Ver histórico
-        </AppButton>
-      </div>
-    </AppCard>
-
     <!-- Sobre o teste -->
-    <AppCard class="mb-lg">
-      <SectionTitle title="Sobre o teste" class="mb-sm" />
-
+    <CollapsibleCard title="Sobre o teste" icon="mdi-information-outline" v-model="sobreOpen" class="mb-lg">
       <p class="body-text mb-md">
         Este teste é baseado no modelo de
         <strong>C. Peter Wagner</strong>
@@ -55,12 +23,10 @@
         Responda com sinceridade, considerando como você realmente age e serve hoje.
         Não existem respostas certas ou erradas.
       </p>
-    </AppCard>
+    </CollapsibleCard>
 
     <!-- Preparação -->
-    <AppCard class="mb-lg">
-      <SectionTitle title="Preparação para o teste" class="mb-sm" />
-
+    <CollapsibleCard title="Preparação para o teste" icon="mdi-clipboard-list" v-model="preparacaoOpen" class="mb-lg">
       <SectionTitle title="Como responder" class="mb-sm" />
 
       <div class="d-flex flex-wrap ga-2 mb-md">
@@ -83,7 +49,7 @@
           {{ q }}
         </li>
       </ul>
-    </AppCard>
+    </CollapsibleCard>
 
     <!-- Iniciar Teste -->
     <div class="text-center">
@@ -99,25 +65,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useAuthStore } from '../stores/auth.js'
-import { useResponsesStore } from '../stores/responses.js'
+import { ref } from 'vue'
 import { ANSWER_LABELS } from '../data/questions.js'
 import AppPage from '../components/ui/AppPage.vue'
-import AppCard from '../components/ui/AppCard.vue'
 import AppButton from '../components/ui/AppButton.vue'
 import PageHeader from '../components/ui/PageHeader.vue'
 import SectionTitle from '../components/ui/SectionTitle.vue'
+import CollapsibleCard from '../components/ui/CollapsibleCard.vue'
 
-const authStore = useAuthStore()
-const responseStore = useResponsesStore()
-
-const hasHistory = ref(false)
-
-onMounted(async () => {
-  const count = await responseStore.countByUserId(authStore.user?.id)
-  hasHistory.value = count > 0
-})
+const sobreOpen = ref(true)
+const preparacaoOpen = ref(true)
 
 const reflectionQuestions = [
   'Quais atividades no ministério ou serviço mais te energizam?',

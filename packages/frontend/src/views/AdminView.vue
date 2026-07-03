@@ -7,7 +7,7 @@
     <template v-else>
 
       <!-- FILTERS -->
-      <section class="mb-6">
+      <section class="mb-4 mb-sm-6">
         <AppCard variant="flat">
           <v-text-field
             v-model="search"
@@ -23,7 +23,7 @@
       </section>
 
       <!-- STATS -->
-      <section class="mb-6">
+      <section class="mb-4 mb-sm-6">
         <AppCard variant="flat">
           <v-row dense>
             <v-col cols="6" sm="3">
@@ -102,7 +102,7 @@
       </section>
 
       <!-- ERROR -->
-      <section v-if="error" class="mb-6">
+      <section v-if="error" class="mb-4 mb-sm-6">
         <ErrorState
           title="Erro ao carregar painel admin"
           :description="error"
@@ -112,7 +112,7 @@
       </section>
 
       <!-- TABLE -->
-      <section class="mb-6">
+      <section class="mb-4 mb-sm-6">
         <AppCard variant="flat">
           <EmptyState
             v-if="!error && !filteredRows.length"
@@ -128,7 +128,7 @@
             :items="filteredRows"
             item-value="id"
             class="rounded-xl admin-table"
-            density="comfortable"
+            :density="tableDensity"
             :items-per-page="25"
           >
             <template #item.status="{ item }">
@@ -232,14 +232,14 @@
             </template>
 
             <template #item.created_at="{ item }">
-              {{ formatDateTime(item.created_at) }}
+              {{ mobile ? formatDate(item.created_at, { month: '2-digit' }) : formatDateTime(item.created_at) }}
             </template>
           </v-data-table>
         </AppCard>
       </section>
 
       <!-- ACTIONS -->
-      <section class="mb-6">
+      <section class="mb-4 mb-sm-6">
         <AppCard variant="flat">
           <div class="d-flex align-center flex-wrap ga-2 text-body-2 text-medium-emphasis">
             <v-icon size="18" color="primary">mdi-information-outline</v-icon>
@@ -260,11 +260,11 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useDisplay } from "vuetify";
 import { useAuthStore } from '../stores/auth.js'
 import { useResponsesStore } from '../stores/responses.js'
-import { formatDateTime } from '../helpers/date.js'
+import { formatDate, formatDateTime } from '../helpers/date.js'
 import AppPage from "../components/ui/AppPage.vue";
-import AppCard from "../components/ui/AppCard.vue";
 import LoadingState from "../components/ui/LoadingState.vue";
 import EmptyState from "../components/ui/EmptyState.vue";
 import ErrorState from "../components/ui/ErrorState.vue";
@@ -275,6 +275,8 @@ import ErrorState from "../components/ui/ErrorState.vue";
 const authStore = useAuthStore()
 const responseStore = useResponsesStore()
 const router = useRouter();
+const { mobile } = useDisplay()
+const tableDensity = computed(() => mobile.value ? 'compact' : 'comfortable')
 
 // =========================================================
 // STATE
@@ -505,9 +507,23 @@ onMounted(loadRows);
   flex-wrap: nowrap;
 }
 
+@media (max-width: 599px) {
+  .inline-cell-editor {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
 .inline-edit-input {
   width: 320px;
   max-width: 45vw;
+}
+
+@media (max-width: 599px) {
+  .inline-edit-input {
+    width: 100%;
+    max-width: 100%;
+  }
 }
 
 .admin-table :deep(td) {
@@ -530,6 +546,21 @@ onMounted(loadRows);
   min-height: 44px;
   transition: background-color var(--duration-fast) var(--easing-standard),
     color var(--duration-fast) var(--easing-standard);
+}
+
+@media (max-width: 599px) {
+  .dashboard-item {
+    padding: var(--space-xs);
+    min-height: 36px;
+  }
+
+  .dashboard-item-value {
+    font-size: 11px;
+  }
+
+  .dashboard-item-meta span {
+    font-size: 10px;
+  }
 }
 
 .dashboard-item-value {

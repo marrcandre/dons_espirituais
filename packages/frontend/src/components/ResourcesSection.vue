@@ -1,17 +1,4 @@
 <template>
-  <AppCard variant="interactive">
-    <div class="d-flex align-center mb-4">
-      <v-icon
-        icon="mdi-bookshelf"
-        color="primary"
-        class="mr-2"
-      />
-
-      <h2 class="text-h6 font-weight-bold text-primary mb-2">
-        Recursos
-      </h2>
-    </div>
-
     <v-row>
       <v-col v-for="res in resources" :key="res.title" cols="12" sm="4">
         <AppCard variant="outlined" class="resource-card">
@@ -31,7 +18,6 @@
         </AppCard>
       </v-col>
     </v-row>
-  </AppCard>
 </template>
 
 <script setup>
