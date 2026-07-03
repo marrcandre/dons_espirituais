@@ -2,7 +2,7 @@
 
 > Documento oficial de arquitetura visual e Design System do projeto Dons Espirituais.
 
-> Este documento define os padrões visuais, componentes reutilizáveis, regras de implementação e diretrizes para utilização de IA (GitHub Copilot, Codex e ChatGPT). Toda alteração de interface deve seguir este documento.
+> Este documento define os padrões visuais, componentes reutilizáveis e regras de implementação. Toda alteração de interface deve seguir este documento.
 
 ---
 
@@ -22,19 +22,6 @@ Esta fase **não tem como objetivo adicionar novas funcionalidades**, mas sim:
 - tornar futuras evoluções mais rápidas e consistentes.
 
 Este documento deve ser considerado a referência oficial para qualquer alteração visual no projeto.
-
----
-
-# Objetivos do Design System
-
-O Design System deve garantir que:
-
-- todas as telas pareçam parte do mesmo sistema;
-- os componentes sejam reutilizados sempre que possível;
-- novas funcionalidades sigam automaticamente os padrões existentes;
-- a navegação seja simples e intuitiva;
-- a experiência em smartphones seja excelente;
-- a interface permaneça limpa, moderna e profissional.
 
 ---
 
@@ -79,14 +66,7 @@ Antes de criar qualquer componente novo, verificar se já existe algum equivalen
 Sempre preferir:
 
 ```
-reutilizar
-↓
-
-adaptar
-
-↓
-
-criar novo
+reutilizar → adaptar → criar novo
 ```
 
 ---
@@ -134,9 +114,11 @@ Evitar repetição de:
 
 Frontend:
 
-- Vue 3
+- Vue 3 com `<script setup>`
 - TypeScript
-- Vuetify 3
+- Vuetify 3 (com `useDisplay`, `useTheme`)
+- Pinia (stores)
+- Chart.js (vue-chartjs)
 
 Toda padronização deve utilizar os recursos do Vuetify antes de criar soluções personalizadas.
 
@@ -144,87 +126,100 @@ Toda padronização deve utilizar os recursos do Vuetify antes de criar soluçõ
 
 # Arquitetura
 
-A estrutura desejada é:
+A estrutura atual do frontend:
 
 ```text
 src/
 
 ├── styles/
-│   ├── variables.css
-│   ├── typography.css
-│   ├── spacing.css
-│   ├── utilities.css
-│   ├── animations.css
-│   └── index.css
-│
-├── components/
-│
-├── components/ui/
+│   ├── tokens.css          # Design tokens (cores, espaçamento, bordas, etc.)
+│   ├── variables.css        # Variáveis complementares (motion, containers)
+│   ├── typography.css       # Escala tipográfica e classes utilitárias
+│   ├── spacing.css          # Classes de espaçamento reutilizáveis
+│   ├── utilities.css        # Utilitários diversos
+│   ├── animations.css       # Animações e transições
+│   └── index.css            # Importação centralizada
+
+├── components/ui/           # Componentes base (sem regras de negócio)
 │   ├── AppPage.vue
 │   ├── AppCard.vue
 │   ├── AppButton.vue
+│   ├── CollapsibleCard.vue
 │   ├── PageHeader.vue
 │   ├── SectionTitle.vue
+│   ├── AppStat.vue
 │   ├── EmptyState.vue
 │   ├── LoadingState.vue
-│   ├── ErrorState.vue
-│   └── AppStat.vue
-│
-├── layouts/
-│   ├── FormLayout.vue
-│   ├── ReadingLayout.vue
-│   ├── ResultsLayout.vue
-│   └── QuizLayout.vue
+│   └── ErrorState.vue
+
+├── components/              # Componentes de domínio
+│   ├── AiAnalysis.vue
+│   ├── GiftBadges.vue
+│   ├── GrowthSection.vue
+│   ├── HistoryList.vue
+│   ├── QuestionStep.vue
+│   ├── QuizProgress.vue
+│   ├── ResourcesSection.vue
+│   ├── ResultsChart.vue
+│   └── UserInfoForm.vue
+
+├── views/                   # Páginas da aplicação
+├── stores/                  # Pinia stores (estado + side effects)
+├── services/                # Lógica de negócio pura (scoring)
+├── repositories/            # Camada de acesso a dados (Supabase)
+├── helpers/                 # Funções utilitárias puras
+├── data/                    # Dados estáticos (perguntas, recursos)
+├── router/                  # Configuração de rotas
+└── plugins/                 # Configuração Vuetify
 ```
 
 ---
 
 # Hierarquia de Componentes
 
-Os componentes são divididos em três níveis.
+Os componentes são divididos em três níveis:
 
 ## Componentes Base
 
-São componentes genéricos reutilizados em todo o sistema.
+Componentes genéricos reutilizados em todo o sistema. Localizados em `components/ui/`.
 
-Exemplos:
-
-- AppPage
-- AppCard
-- AppButton
-- SectionTitle
-- PageHeader
+- **AppPage** — container principal da página (com suporte a `layout` prop)
+- **AppCard** — card padrão com variantes visuais
+- **CollapsibleCard** — card colapsável com título, ícone e actions slot
+- **AppButton** — wrapper do `v-btn` com defaults padronizados
+- **PageHeader** — cabeçalho de página (título + subtítulo + slot de ícone)
+- **SectionTitle** — título interno de seção
+- **AppStat** — exibição de valor numérico com label e ícone
+- **EmptyState** — estado vazio (ícone + título + descrição + ação)
+- **LoadingState** — estado de carregamento
+- **ErrorState** — estado de erro com botão de retry
 
 Esses componentes nunca devem conter regras específicas do domínio de Dons Espirituais.
 
----
-
 ## Layouts
 
-Layouts organizam componentes base para formar estruturas reutilizáveis.
+Diferente do plano original, layouts não são componentes isolados em `src/layouts/`. O controle de layout é feito via prop `layout` do `AppPage`:
 
-Exemplos:
+- `layout="default"` — largura padrão (900px)
+- `layout="reading"` — largura reduzida para leitura (700px)
+- `layout="form"` — largura para formulários (600px)
 
-- formulário
-- página de leitura
-- resultado
-- quiz
-
-Layouts não devem conter regras específicas de negócio.
-
----
+Os layouts não devem conter regras específicas de negócio.
 
 ## Componentes de Domínio
 
-Representam elementos específicos do sistema.
+Representam elementos específicos do sistema. Localizados em `components/`.
 
-Exemplos:
-
-- GiftScoreCard
-- RankingCard
-- AnalysisCard
-- ResultCard
-- HistoryCard
+Atuais:
+- **AiAnalysis** — exibição da análise gerada por IA (com banner de regeneração)
+- **GiftBadges** — pódio dos top 3 dons
+- **GrowthSection** — sugestões de desenvolvimento espiritual
+- **HistoryList** — item individual do histórico de resultados
+- **QuestionStep** — pergunta do quiz com alternativas
+- **QuizProgress** — barra de progresso e contador do quiz
+- **ResourcesSection** — recursos e recomendações externas
+- **ResultsChart** — gráfico de barras dos dons (Chart.js)
+- **UserInfoForm** — formulário de dados do usuário antes do quiz
 
 Esses componentes podem utilizar componentes base internamente.
 
@@ -232,110 +227,86 @@ Esses componentes podem utilizar componentes base internamente.
 
 # Design Tokens
 
-Toda a identidade visual deve ser controlada através de tokens.
+Toda a identidade visual deve ser controlada através de tokens CSS.
 
 Nunca utilizar valores arbitrários espalhados pelo projeto.
 
-Os tokens devem controlar:
+A fonte oficial dos tokens são os arquivos em `src/styles/`:
 
-- cores;
-- tipografia;
-- espaçamentos;
-- bordas;
-- sombras;
-- transições;
-- largura de containers.
+| Arquivo | Responsabilidade |
+|---------|------------------|
+| `tokens.css` | Cores, tipografia, espaçamentos, bordas, sombras, containers |
+| `variables.css` | Motion (`--duration-*`, `--easing-*`), containers alternativos |
+| `typography.css` | Escala tipográfica e classes semânticas |
+| `spacing.css` | Classes utilitárias de espaçamento |
 
----
+### Tokens de Cor (atuais)
 
-## Tokens de Cor
+| Token | Light | Dark |
+|-------|-------|------|
+| Primary | `#1B5438` | `#2E7D5E` |
+| Secondary | `#C8A220` | `#D4A830` |
+| Background | `#F4F8F4` | `#121212` |
+| Surface | `#FAFAF8` | `#1E1E1E` |
+| Error | `#B00020` | `#CF6679` |
+| Info | `#2196F3` | `#64B5F6` |
+| Success | `#4CAF50` | `#81C784` |
+| Warning | `#FB8C00` | `#FFB74D` |
 
-Exemplo:
+### Tokens de Espaçamento
 
-```css
---color-primary
---color-secondary
---color-success
---color-warning
---color-error
---color-background
---color-surface
---color-text
---color-text-secondary
-```
+| Nome | Valor |
+|------|-------|
+| `--space-xs` | 4px |
+| `--space-sm` | 8px |
+| `--space-md` | 16px |
+| `--space-lg` | 24px |
+| `--space-xl` | 32px |
+| `--space-xxl` | 48px |
 
----
+### Tokens de Borda
 
-## Tokens de Espaçamento
+| Nome | Valor |
+|------|-------|
+| `--radius-sm` | 8px |
+| `--radius-md` | 12px |
+| `--radius-lg` | 16px |
+| `--radius-xl` | 20px |
 
-```css
---space-xs
---space-sm
---space-md
---space-lg
---space-xl
---space-xxl
-```
+### Tokens de Sombra
 
----
+| Nome | Valor |
+|------|-------|
+| `--shadow-sm` | `0 1px 2px rgba(0,0,0,0.05)` |
+| `--shadow-md` | `0 4px 8px rgba(0,0,0,0.08)` |
+| `--shadow-lg` | `0 8px 16px rgba(0,0,0,0.10)` |
 
-## Tokens de Borda
+### Tokens de Transição
 
-```css
---radius-sm
---radius-md
---radius-lg
---radius-xl
-```
+| Nome | Valor |
+|------|-------|
+| `--duration-fast` | 150ms |
+| `--duration-normal` | 250ms |
+| `--duration-slow` | 350ms |
+| `--easing-standard` | ease |
 
----
+### Tokens de Container
 
-## Tokens de Sombra
-
-```css
---shadow-sm
---shadow-md
---shadow-lg
-```
-
----
-
-## Tokens de Container
-
-```css
---container-default
---container-reading
---container-form
-```
-
----
-
-## Tokens de Transição
-
-```css
---duration-fast
---duration-normal
---duration-slow
-```
+| Nome | Valor | Uso |
+|------|-------|-----|
+| `--page-max-width` | 900px | Layout padrão |
+| `--reading-max-width` | 700px | Conteúdo de leitura |
+| `--form-max-width` | 700px | Formulários |
 
 ---
 
 # Tema Vuetify
 
-Toda cor utilizada pelos componentes deve vir do tema.
+Toda cor utilizada pelos componentes deve vir do tema Vuetify.
 
 Evitar cores hardcoded.
 
-Paleta inicial:
-
-| Token | Cor |
-|--------|------|
-| Primary | #1E40AF |
-| Secondary | #475569 |
-| Accent | #0F766E |
-| Success | #16A34A |
-| Warning | #EA580C |
-| Error | #DC2626 |
+A configuração do tema está em `src/plugins/vuetify.js` com suporte a `light` e `dark`.
 
 A alteração futura da identidade visual deve ocorrer apenas no tema.
 
@@ -346,13 +317,15 @@ A alteração futura da identidade visual deve ocorrer apenas no tema.
 Utilizar os breakpoints oficiais do Vuetify.
 
 | Nome | Largura |
-|--------|---------|
+|------|---------|
 | xs | < 600 px |
 | sm | 600–959 px |
 | md | 960–1279 px |
 | lg | ≥1280 px |
 
 Não criar breakpoints personalizados sem necessidade comprovada.
+
+Para breakpoints reativos em JS, utilizar `useDisplay()` do Vuetify.
 
 ---
 
@@ -362,29 +335,23 @@ A tipografia deve priorizar clareza, consistência e conforto de leitura.
 
 Evitar tamanhos arbitrários definidos diretamente nas páginas.
 
-Toda a escala tipográfica deve ser centralizada em `typography.css`.
-
----
+Toda a escala tipográfica e classes semânticas estão centralizadas em `typography.css`.
 
 ## Escala Tipográfica
 
-| Elemento | Tamanho | Peso |
-|----------|---------|------|
-| Título Principal | 24px | 700 |
-| Título de Página | 22px | 700 |
-| Título de Seção | 18px | 600 |
-| Subtítulo | 16px | 600 |
-| Texto padrão | 16px | 400 |
-| Texto auxiliar | 14px | 400 |
-| Legenda | 12px | 400 |
-
----
+| Elemento | Tamanho | Peso | Classe |
+|----------|---------|------|--------|
+| Título Principal | 24px | 700 | `.main-title` |
+| Título de Página | 22px | 700 | `.page-title` |
+| Título de Seção | 18px | 600 | `.section-title` |
+| Subtítulo | 16px | 600 | — |
+| Texto padrão | 16px | 400 | `.body-text` |
+| Texto auxiliar | 14px | 400 | `.helper-text` |
+| Legenda | 12px | 400 | `.caption-text` |
 
 ## Hierarquia
 
 Uma página normalmente deve possuir apenas três níveis de título.
-
-Exemplo:
 
 ```
 Título da página
@@ -395,8 +362,6 @@ Título da página
 ```
 
 Evitar criar múltiplos níveis visuais desnecessários.
-
----
 
 ## Regras
 
@@ -409,82 +374,33 @@ font-size: 19px;
 
 Preferir classes reutilizáveis ou tokens.
 
-Evitar alterar pesos de fonte sem necessidade.
-
-O texto padrão deve utilizar line-height aproximado de:
-
-```css
-1.6
-```
-
-para facilitar leituras longas.
+O texto padrão deve utilizar `line-height: 1.6` para facilitar leituras longas.
 
 ---
 
 # Espaçamentos
 
-Todo espaçamento do projeto deve utilizar uma escala fixa.
+Todo espaçamento do projeto deve utilizar a escala fixa de tokens.
 
 Não utilizar valores arbitrários.
 
----
-
-## Escala
-
-| Nome | Valor |
-|------|-------|
-| xs | 4px |
-| sm | 8px |
-| md | 16px |
-| lg | 24px |
-| xl | 32px |
-| xxl | 48px |
-
----
-
-## Exemplos
-
-Evitar:
-
-```css
-padding: 13px;
-
-margin-top: 27px;
-```
-
 Preferir:
-
 ```css
 padding: var(--space-md);
-
 margin-top: var(--space-xl);
 ```
 
----
-
-## Margens
-
-Priorizar espaçamento entre blocos ao invés de espaçamentos internos excessivos.
-
-Evitar componentes "espremidos".
-
----
-
-## Padding
-
-Todos os cards semelhantes devem possuir o mesmo padding.
-
-Não criar cards visualmente diferentes apenas por pequenas alterações de padding.
+Utilizar as classes Vuetify sempre que possível:
+- `mb-*`, `mt-*`, `pa-*`, `ga-*`
+- Combine com breakpoints: `mb-4 mb-sm-6`
 
 ---
 
 # Containers
 
-Existem três larguras padrão.
+Existem três larguras padrão, controladas pela prop `layout` do `AppPage`:
 
----
-
-## Página
+## Página (default)
 
 ```css
 max-width: 900px;
@@ -492,85 +408,20 @@ margin: auto;
 padding: var(--space-md);
 ```
 
-Utilizada na maioria das páginas.
-
----
-
-## Conteúdo de Leitura
+## Conteúdo de Leitura (reading)
 
 ```css
 max-width: 700px;
 ```
 
-Utilizado para:
+Utilizado para análises, textos longos e conteúdo explicativo.
 
-- análises
-- textos longos
-- conteúdo explicativo
-
-Objetivo:
-
-Melhorar a leitura em monitores grandes.
-
----
-
-## Formulários
+## Formulários (form)
 
 ```css
-max-width: 600px;
+max-width: 700px;
 margin: auto;
 ```
-
-Utilizado em:
-
-- Login
-- Cadastro
-- Recuperação de senha
-- Alteração de senha
-
----
-
-# Grid
-
-O projeto deve utilizar grids simples.
-
-Evitar layouts excessivamente complexos.
-
----
-
-## Smartphone
-
-Sempre:
-
-```
-1 coluna
-```
-
----
-
-## Tablet
-
-Preferencialmente:
-
-```
-2 colunas
-```
-
-quando fizer sentido.
-
----
-
-## Desktop
-
-Utilizar:
-
-```
-2 ou 3 colunas
-```
-
-apenas quando melhorar a leitura.
-
-Nunca adicionar colunas apenas porque há espaço disponível.
 
 ---
 
@@ -588,7 +439,13 @@ Somente depois validar:
 - Tablet
 - Desktop
 
----
+## Padrões responsivos adotados
+
+- **Margens**: `mb-4 mb-sm-6` — margem menor no mobile, maior no desktop
+- **Densidade de tabela**: `:density="mobile ? 'compact' : 'comfortable'"` via `useDisplay()`
+- **Colunas**: ocultar colunas de baixa prioridade no mobile com `d-none d-sm-table-cell`
+- **Datas**: formato completo no desktop, abreviado no mobile (via `useDisplay()`)
+- **Grid de stats**: `cols="6" sm="3"` — 2 colunas no mobile, 4 no desktop
 
 ## Regras
 
@@ -599,117 +456,68 @@ Evitar:
 - botões muito pequenos;
 - elementos encostados nas bordas.
 
----
-
 ## Área de toque
 
-Todo elemento clicável deve possuir área mínima próxima de:
-
-```css
-44px
-```
-
-de altura.
-
-Essa regra melhora significativamente a experiência mobile.
+Todo elemento clicável deve possuir área mínima próxima de 44px de altura.
 
 ---
 
 # Cards
 
-Todos os cards devem compartilhar a mesma identidade visual.
-
-Sempre utilizar o componente:
-
-```
-<AppCard>
-```
-
----
+Todos os cards devem compartilhar a mesma identidade visual utilizando o componente `<AppCard>`.
 
 ## Aparência padrão
 
-- border-radius: 16px
-- sombra leve
-- padding consistente
+- `border-radius: lg` (16px)
+- sombra leve (elevation 2)
+- padding: `var(--space-lg)`
 - largura fluida
 - fundo baseado no tema
 
----
-
 ## Variantes
 
-O componente deve suportar variantes como:
-
-```
-default
-
-outlined
-
-flat
-
-compact
-
-interactive
-```
+| Variante | Descrição |
+|----------|-----------|
+| `default` | Card elevado com sombra padrão |
+| `outlined` | Card com borda, sem sombra |
+| `flat` | Card sem borda nem sombra |
+| `compact` | Card flat com padding reduzido (`var(--space-md)`) |
+| `interactive` | Card elevado com hover lift (translateY(-2px) + shadow-lg) |
 
 A aparência deve ser controlada por propriedades, nunca por duplicação de componentes.
 
----
+## CollapsibleCard
 
-## Regras
+O componente `<CollapsibleCard>` estende o AppCard com comportamento de expandir/recolher.
 
-Não criar:
+Props:
 
-```
-ResultCardA
+| Prop | Tipo | Padrão | Descrição |
+|------|------|--------|-----------|
+| `title` | string | — | Título do card (obrigatório) |
+| `subtitle` | string | — | Subtítulo opcional |
+| `icon` | string | — | Ícone MDI à esquerda do título |
+| `modelValue` | boolean | true | Estado expandido/recolhido (v-model) |
+| `variant` | string | 'default' | Variante AppCard |
 
-ResultCardB
+Slots:
 
-HistoryCard
+| Slot | Descrição |
+|------|-----------|
+| `default` | Conteúdo interno (visível apenas quando expandido) |
+| `actions` | Ações no cabeçalho (à esquerda do botão de toggle) |
 
-SimpleCard
-```
-
-quando apenas a aparência muda.
-
-A responsabilidade da aparência pertence ao `AppCard`.
+Utiliza `<v-expand-transition>` para animação.
 
 ---
 
 # Botões
 
-Todos os botões devem utilizar o componente:
+Todos os botões devem utilizar o componente `<AppButton>` sempre que possível.
 
-```
-<AppButton>
-```
-
-internamente baseado em `v-btn`.
-
----
-
-## Botão Principal
-
-- color="primary"
-- size="large"
-- rounded="lg"
-
----
-
-## Botão Secundário
-
-- variant="outlined"
-
----
-
-## Botão de Texto
-
-Utilizar apenas quando a ação for claramente secundária.
-
----
-
-## Ícones
+O AppButton define defaults:
+- `size="large"`
+- `rounded="lg"`
 
 Botões apenas com ícone devem possuir tooltip sempre que possível.
 
@@ -717,759 +525,23 @@ Botões apenas com ícone devem possuir tooltip sempre que possível.
 
 # Ícones
 
-Utilizar exclusivamente:
+Utilizar exclusivamente Material Design Icons.
 
-Material Design Icons.
+Tamanho padrão: 24px.
 
-Evitar misturar bibliotecas.
-
----
-
-## Tamanho padrão
-
-24 px
-
----
-
-## Regras
-
-Ícones devem reforçar significado.
-
-Nunca substituir texto importante apenas por ícones.
-
----
-
-# Chips e Badges
-
-Devem ser utilizados para:
-
-- classificação;
-- categorias;
-- status;
-- destaques rápidos.
-
-Evitar utilizá-los como botões.
-
----
-
-# Avatares
-
-Sempre utilizar tamanhos padronizados.
-
-Exemplo:
-
-- pequeno
-- médio
-- grande
-
-Evitar definir pixels diretamente nas páginas.
-
----
-
-# Divisores
-
-Utilizar divisores apenas quando realmente ajudarem na leitura.
-
-Evitar excesso de linhas horizontais.
-
-Muitas vezes um bom espaçamento produz resultado visual melhor.
-
----
-
-# Animações
-
-As animações devem ser discretas.
-
-Nunca chamar mais atenção que o conteúdo.
-
----
-
-## Duração
-
-Utilizar tokens:
-
-```css
---duration-fast
-
---duration-normal
-
---duration-slow
-```
-
----
-
-## Tipos permitidos
-
-- Fade
-- Expand
-- Collapse
-- Slide curto
-
----
-
-## Evitar
-
-- Bounce
-- Zoom exagerado
-- Rotações
-- Animações longas
-
----
-
-# Sombras
-
-Utilizar apenas três níveis.
-
-```
-shadow-sm
-
-shadow-md
-
-shadow-lg
-```
-
-Evitar sombras diferentes para cada componente.
-
----
-
-# Bordas
-
-Utilizar apenas os raios definidos pelos tokens.
-
-Evitar:
-
-```css
-border-radius: 11px;
-
-border-radius: 19px;
-```
-
-Preferir:
-
-```
-radius-sm
-
-radius-md
-
-radius-lg
-
-radius-xl
-```
+Ícones devem reforçar significado. Nunca substituir texto importante apenas por ícones.
 
 ---
 
 # Tabelas
 
-Sempre avaliar se uma tabela realmente é necessária.
+Em smartphones normalmente deve-se preferir cards, listas ou blocos empilhados.
 
-Em smartphones normalmente deve-se preferir:
+Quando uma tabela for necessária (ex: painel admin):
 
-- cards;
-- listas;
-- blocos empilhados.
-
----
-
-## Exemplo
-
-Evitar:
-
-```
-| Dom | Pontuação |
-```
-
-Preferir:
-
-```
-Dom
-
-Ensino
-
-Pontuação
-
-87%
-```
-
-ou
-
-```
-Dom: Ensino
-
-Pontuação: 87%
-```
-
-quando a leitura em celulares for significativamente melhor.
-
----
-
-# Estilos
-
-Evitar:
-
-- estilos inline;
-- CSS duplicado;
-- classes quase idênticas;
-- cores hardcoded;
-- tamanhos hardcoded;
-- espaçamentos arbitrários.
-
-Sempre centralizar regras reutilizáveis no Design System.
-
----
-
-# Componentes Base
-
-Os componentes base representam os blocos fundamentais da interface.
-
-Eles não devem conter regras de negócio ou conhecimento específico sobre o domínio do projeto.
-
-Sua única responsabilidade é padronizar a aparência e a estrutura visual da aplicação.
-
----
-
-# AppPage
-
-Responsável pelo container principal de todas as páginas.
-
-Deve ser utilizado em praticamente todas as Views.
-
-## Responsabilidades
-
-- centralizar conteúdo;
-- aplicar largura máxima;
-- aplicar padding padrão;
-- controlar espaçamento vertical da página.
-
-## Estrutura esperada
-
-```vue
-<AppPage>
-
-    <PageHeader />
-
-    ...
-
-</AppPage>
-```
-
----
-
-# AppCard
-
-Representa o card padrão da aplicação.
-
-Todo conteúdo agrupado deve utilizar este componente.
-
-## Responsabilidades
-
-- bordas;
-- sombra;
-- padding;
-- variantes visuais.
-
-## Variantes
-
-- default
-- outlined
-- flat
-- compact
-- interactive
-
-Não criar componentes diferentes apenas para alterar aparência.
-
----
-
-# AppButton
-
-Wrapper do `v-btn`.
-
-Responsável por padronizar:
-
-- tamanho;
-- raio;
-- comportamento;
-- loading;
-- ícones;
-- cores.
-
-Sempre preferir este componente ao uso direto de `v-btn`.
-
----
-
-# PageHeader
-
-Responsável pelo cabeçalho de todas as páginas.
-
-## Estrutura
-
-```vue
-<PageHeader
-    title=""
-    subtitle=""
-/>
-```
-
-## Responsabilidades
-
-- título;
-- subtítulo;
-- alinhamento;
-- espaçamento inferior.
-
----
-
-# SectionTitle
-
-Representa títulos internos.
-
-Exemplo:
-
-```
-Resumo
-
-Ranking
-
-Análise
-
-Histórico
-```
-
-Evitar criar `<h2>` personalizados em cada página.
-
----
-
-# AppStat
-
-Componente para pequenas informações numéricas.
-
-Exemplo:
-
-```
-42
-
-Respostas
-```
-
-ou
-
-```
-87%
-
-Ensino
-```
-
-Pode ser reutilizado em:
-
-- Dashboard
-- Resultado
-- Histórico
-- Perfil
-
----
-
-# EmptyState
-
-Representa ausência de conteúdo.
-
-Exemplos:
-
-- nenhum teste realizado;
-- nenhum favorito;
-- nenhum histórico.
-
-Deve permitir:
-
-- ícone;
-- título;
-- descrição;
-- ação opcional.
-
----
-
-# LoadingState
-
-Representa carregamento.
-
-Evitar utilizar `CircularProgress` diretamente nas páginas.
-
-Sempre utilizar este componente.
-
----
-
-# ErrorState
-
-Representa erros inesperados.
-
-Deve possuir:
-
-- ícone;
-- mensagem;
-- botão para tentar novamente.
-
----
-
-# Layouts
-
-Layouts organizam componentes base.
-
-Eles não possuem regras de negócio.
-
----
-
-# FormLayout
-
-Utilizado em:
-
-- Login
-- Cadastro
-- Recuperação de senha
-- Alteração de senha
-
-Estrutura:
-
-```
-PageHeader
-
-↓
-
-Card
-
-↓
-
-Campos
-
-↓
-
-Botões
-
-↓
-
-Links auxiliares
-```
-
----
-
-# ReadingLayout
-
-Utilizado em páginas com muito texto.
-
-Exemplo:
-
-- Análise
-- Perfil do Dom
-- Explicações
-
-Características:
-
-- largura reduzida;
-- excelente legibilidade;
-- linhas curtas.
-
----
-
-# QuizLayout
-
-Utilizado durante o teste.
-
-Estrutura:
-
-```
-Barra de progresso
-
-↓
-
-Pergunta
-
-↓
-
-Alternativas
-
-↓
-
-Botões
-```
-
-Todo o fluxo do questionário deve seguir esse padrão.
-
----
-
-# ResultsLayout
-
-Utilizado para apresentação dos resultados.
-
-Estrutura recomendada:
-
-```
-PageHeader
-
-↓
-
-Resumo
-
-↓
-
-Ranking
-
-↓
-
-Gráficos
-
-↓
-
-Análise
-
-↓
-
-Ações
-```
-
-Evitar blocos visuais sem organização clara.
-
----
-
-# Componentes de Domínio
-
-São componentes específicos do projeto.
-
-Podem utilizar componentes base internamente.
-
----
-
-# GiftScoreCard
-
-Representa um dom espiritual.
-
-Pode conter:
-
-- nome;
-- pontuação;
-- categoria;
-- badge.
-
-Não deve controlar layout da página.
-
----
-
-# RankingCard
-
-Representa posições do ranking.
-
-Pode ser reutilizado em:
-
-- Resultado
-- Histórico
-
----
-
-# AnalysisCard
-
-Representa blocos de análise.
-
-Exemplo:
-
-- descrição;
-- pontos fortes;
-- desafios;
-- recomendações.
-
----
-
-# ResultCard
-
-Representa um resumo completo de um resultado.
-
-Pode conter:
-
-- data;
-- nome;
-- principais dons;
-- ações.
-
----
-
-# HistoryCard
-
-Representa um item do histórico.
-
-Responsabilidade apenas visual.
-
-Toda lógica permanece na View.
-
----
-
-# Padrões de Página
-
-Todas as páginas devem seguir estruturas semelhantes.
-
----
-
-# Home
-
-Estrutura recomendada
-
-```
-PageHeader
-
-↓
-
-Resumo
-
-↓
-
-Ações principais
-
-↓
-
-Informações adicionais
-```
-
-Evitar excesso de texto logo na primeira tela.
-
----
-
-# Login
-
-Estrutura
-
-```
-PageHeader
-
-↓
-
-Card
-
-↓
-
-Campos
-
-↓
-
-Entrar
-
-↓
-
-Links auxiliares
-```
-
----
-
-# Cadastro
-
-Mesmo padrão do Login.
-
-Não criar layout diferente.
-
----
-
-# Quiz
-
-Estrutura
-
-```
-Progresso
-
-↓
-
-Pergunta
-
-↓
-
-Alternativas
-
-↓
-
-Navegação
-```
-
-A pergunta deve ser sempre o elemento visual dominante.
-
----
-
-# Resultado
-
-Estrutura recomendada
-
-```
-Resumo
-
-↓
-
-Ranking
-
-↓
-
-Badges
-
-↓
-
-Gráfico
-
-↓
-
-Análise
-
-↓
-
-Compartilhamento
-```
-
-A ordem deve seguir prioridade de leitura.
-
----
-
-# Perfil do Dom
-
-Estrutura
-
-```
-Nome
-
-↓
-
-Descrição
-
-↓
-
-Características
-
-↓
-
-Pontos fortes
-
-↓
-
-Desafios
-
-↓
-
-Aplicações
-```
-
----
-
-# Histórico
-
-Estrutura
-
-```
-PageHeader
-
-↓
-
-Filtros
-
-↓
-
-Lista
-
-↓
-
-Paginação
-```
-
-Caso não existam resultados:
-
-utilizar EmptyState.
+- Usar `density="compact"` no mobile
+- Ocultar colunas de baixa prioridade com `d-none d-sm-table-cell`
+- Garantir scroll horizontal apenas se inevitável
 
 ---
 
@@ -1477,51 +549,17 @@ utilizar EmptyState.
 
 Toda página deve tratar explicitamente seus estados.
 
----
-
 ## Loading
 
-Utilizar:
-
-```
-LoadingState
-```
-
-Nunca mostrar tela vazia durante carregamentos.
-
----
+Utilizar `<LoadingState>`. Nunca mostrar tela vazia durante carregamentos.
 
 ## Empty
 
-Utilizar:
-
-```
-EmptyState
-```
-
-Sempre explicar ao usuário o motivo da ausência de conteúdo.
-
----
+Utilizar `<EmptyState>`. Sempre explicar ao usuário o motivo da ausência de conteúdo.
 
 ## Error
 
-Utilizar:
-
-```
-ErrorState
-```
-
-Sempre oferecer possibilidade de tentar novamente.
-
----
-
-## Offline
-
-Quando possível:
-
-informar que não há conexão.
-
-Evitar mensagens técnicas.
+Utilizar `<ErrorState>`. Sempre oferecer possibilidade de tentar novamente.
 
 ---
 
@@ -1540,27 +578,251 @@ Nunca deixar o usuário sem retorno visual após uma ação.
 
 ---
 
-# Navegação
+# Padrões de Página
 
-As páginas devem manter comportamento consistente.
+Todas as páginas devem seguir estruturas semelhantes.
 
-Sempre que possível:
+## Estrutura Geral (template)
 
-- botão voltar na mesma posição;
-- ações no mesmo local;
-- cabeçalhos semelhantes.
+```vue
+<template>
+  <AppPage :layout="...">
+    <PageHeader
+      v-if="needed"
+      title="..."
+      subtitle="..."
+    >
+      <v-icon ... />
+    </PageHeader>
+
+    <!-- Seções -->
+    <CollapsibleCard ...>
+      ...
+    </CollapsibleCard>
+
+    <!-- Estados -->
+    <LoadingState v-if="loading" ... />
+    <ErrorState v-if="error" ... />
+    <EmptyState v-if="!loading && !items.length" ... />
+
+  </AppPage>
+</template>
+```
+
+## Script
+
+```vue
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { useDisplay } from 'vuetify'
+import { useStore } from '...'
+import AppPage from '...'
+// demais imports
+
+const { mobile } = useDisplay()
+</script>
+```
+
+Convenções:
+- Sempre `<script setup>`
+- Imports primeiro (vue → vuetify → stores → serviços → componentes)
+- Stores no topo do script
+- Computeds e métodos após o estado
+- `onMounted` no final
+
+## Estados por View
+
+| View | Loading | Error | Empty | PageHeader |
+|------|---------|-------|-------|------------|
+| HomeView | — | — | — | ✅ |
+| LoginView | ✅ | — | — | ✅ |
+| QuizView | ✅ | — | — | — (usa QuizProgress) |
+| ResultsView | ✅ | ✅ | — | ✅ |
+| MyResultsView | ✅ | ✅ | ✅ | ✅ |
+| AdminView | ✅ | ✅ | ✅ | — |
 
 ---
 
-# Componentes Reutilizáveis
+# Home
 
-Sempre que um trecho visual aparecer em duas ou mais páginas, avaliar promovê-lo para:
+Estrutura atual:
 
 ```
-components/ui
+PageHeader (título + subtítulo + ícone)
+↓
+CollapsibleCard "Sobre o teste" (ícone: mdi-information-outline)
+↓
+CollapsibleCard "Preparação para o teste" (ícone: mdi-clipboard-list)
+  → Chips de resposta
+  → Perguntas de reflexão
+↓
+CTA "Descobrir meus dons" (AppButton)
 ```
 
-Evitar duplicação de código visual.
+# Login
+
+```
+PageHeader
+↓
+LoadingState (enquanto carrega)
+↓
+Card com formulário (v-text-field)
+↓
+v-btn "Entrar com Google"
+```
+
+# Quiz
+
+```
+QuizProgress (barra de progresso + contador)
+↓
+QuestionStep (pergunta + alternativas)
+↓
+v-btn navegação
+```
+
+# Resultado (ResultsView)
+
+```
+PageHeader (nome + data)
+↓
+GiftBadges (top 3)
+↓
+CollapsibleCard "Gráfico" → ResultsChart
+↓
+CollapsibleCard "Análise" → AiAnalysis
+↓
+CollapsibleCard "Desenvolvimento" → GrowthSection
+↓
+CollapsibleCard "Recursos" → ResourcesSection
+```
+
+# Meus Resultados (MyResultsView)
+
+```
+PageHeader
+↓
+LoadingState / ErrorState / EmptyState
+↓
+Lista de AppCard variant="interactive" (data, nome, top gift, chevron)
+```
+
+# Admin
+
+```
+LoadingState
+↓
+Busca (v-text-field)
+↓
+Stats row (Total, Sem IA, Hoje, 7 dias) — filtros rápidos
+↓
+ErrorState
+↓
+v-data-table (status, nome, GP, respondido em, idade)
+  → inline editors para nome e GP
+```
+
+---
+
+# Componentes Base (Referência Detalhada)
+
+## AppPage
+
+Container principal de todas as páginas.
+
+Props:
+- `layout`: `'default'` | `'reading'` | `'form'` (padrão: `'default'`)
+
+Responsabilidades:
+- centralizar conteúdo
+- aplicar largura máxima conforme layout
+- aplicar padding padrão
+
+## AppCard
+
+Card padrão da aplicação.
+
+Props:
+- `variant`: `'default'` | `'outlined'` | `'flat'` | `'compact'` | `'interactive'` (padrão: `'default'`)
+
+Responsabilidades:
+- bordas
+- sombra
+- padding (lg ou md para compact)
+- variantes visuais
+
+## AppButton
+
+Wrapper do `v-btn`.
+
+Props:
+- `size`: `'x-small'` | `'small'` | `'default'` | `'large'` | `'x-large'` (padrão: `'large'`)
+- `rounded`: `'0'` | `'sm'` | `'md'` | `'lg'` | `'xl'` | `'pill'` (padrão: `'lg'`)
+- `loading`, `prependIcon`, `appendIcon`, `icon`
+
+Sempre preferir este componente ao uso direto de `v-btn`.
+
+## PageHeader
+
+Cabeçalho de página com slot para ícone decorativo.
+
+Props:
+- `title`: string
+- `subtitle`: string (opcional)
+
+Slots:
+- `default`: ícone decorativo à esquerda do título
+
+## SectionTitle
+
+Título interno de seção.
+
+Props:
+- `title`: string
+- `subtitle`: string (opcional)
+
+## CollapsibleCard
+
+Card colapsável com título e ícone. Ver seção "Cards" acima.
+
+## AppStat
+
+Exibição de valor numérico com label e ícone.
+
+Props:
+- `value`: string | number
+- `label`: string
+- `icon`: string (opcional, MDI)
+
+## LoadingState
+
+Estado de carregamento.
+
+Props:
+- `size`: number (padrão: 56)
+- `thickness`: number (padrão: 5)
+
+## EmptyState
+
+Ausência de conteúdo.
+
+Props:
+- `icon`: string (padrão: `'mdi-inbox-outline'`)
+- `title`: string
+- `description`: string (opcional)
+- `button-label`: string (opcional)
+- `action`: emit (opcional)
+- `card-variant`: string (padrão: `'flat'`)
+
+## ErrorState
+
+Erro inesperado.
+
+Props:
+- `title`: string
+- `description`: string (opcional)
+- `button-label`: string (padrão: `"Tentar novamente"`)
+- `action`: emit
 
 ---
 
@@ -1570,14 +832,10 @@ As Views devem conter apenas:
 
 - composição da página;
 - chamadas de stores;
-- chamadas de composables;
+- uso de `useDisplay()` para responsividade;
 - eventos.
 
-Evitar CSS complexo dentro das Views.
-
-Toda regra visual reutilizável deve migrar para componentes.
-
----
+Evitar CSS complexo dentro das Views. Toda regra visual reutilizável deve migrar para componentes.
 
 # Responsabilidade dos Componentes
 
@@ -1599,16 +857,13 @@ Toda alteração visual deve ser revisada utilizando este checklist.
 
 Nenhuma tela deve ser considerada concluída sem atender aos critérios abaixo.
 
----
-
 ## Estrutura
 
-- Utiliza `AppPage`?
-- Utiliza `PageHeader`?
-- Utiliza `AppCard` quando necessário?
+- Utiliza `AppPage` com layout adequado?
+- Utiliza `PageHeader` quando necessário?
+- Utiliza `AppCard` / `CollapsibleCard` quando necessário?
 - Utiliza componentes reutilizáveis antes de criar novos?
-
----
+- Utiliza `LoadingState` / `ErrorState` / `EmptyState` quando necessário?
 
 ## Tipografia
 
@@ -1617,15 +872,11 @@ Nenhuma tela deve ser considerada concluída sem atender aos critérios abaixo.
 - Evita tamanhos hardcoded?
 - Mantém boa legibilidade em smartphones?
 
----
-
 ## Espaçamentos
 
 - Utiliza apenas os tokens oficiais?
 - Existem espaçamentos inconsistentes?
 - Há elementos muito próximos ou muito afastados?
-
----
 
 ## Cores
 
@@ -1633,45 +884,23 @@ Nenhuma tela deve ser considerada concluída sem atender aos critérios abaixo.
 - Evita cores hardcoded?
 - Mantém contraste adequado?
 
----
-
 ## Responsividade
 
 Validado em:
 
-- 360 px
-- 390 px
-- 412 px
-- 430 px
-
-Também validado em:
-
+- 360 px, 390 px, 412 px, 430 px
 - tablet
 - desktop
 
 Não existe scroll horizontal.
 
----
-
 ## Componentes
 
-Existe algum componente duplicado?
-
-Existe algum componente semelhante que poderia ser reutilizado?
-
-Existe CSS repetido?
-
----
+Existe algum componente duplicado? Existe CSS repetido?
 
 ## Estados
 
-A página trata corretamente:
-
-- Loading
-- Empty
-- Error
-
----
+A página trata corretamente: Loading, Empty, Error.
 
 ## Código
 
@@ -1688,213 +917,14 @@ Não existem:
 
 Toda nova interface deve considerar princípios básicos de acessibilidade.
 
----
-
-## Botões
-
-Devem possuir área mínima de toque próxima de:
-
-```
-44 px
-```
+- Botões com área mínima de 44px
+- Contraste adequado (evitar combinações de baixo contraste)
+- Navegação consistente: o usuário deve reconhecer rapidamente onde está, como voltar e como concluir uma ação
+- Ícones com tooltip quando necessário
 
 ---
 
-## Contraste
-
-Evitar combinações de cores com baixo contraste.
-
-Priorizar sempre a legibilidade.
-
----
-
-## Navegação
-
-A navegação deve ser consistente.
-
-O usuário deve reconhecer rapidamente:
-
-- onde está;
-- como voltar;
-- como concluir uma ação.
-
----
-
-## Ícones
-
-Ícones não substituem texto importante.
-
-Sempre que necessário utilizar tooltip.
-
----
-
-# Performance
-
-O Design System também deve favorecer desempenho.
-
----
-
-## Componentes
-
-Evitar componentes muito grandes.
-
-Preferir pequenos componentes reutilizáveis.
-
----
-
-## CSS
-
-Evitar:
-
-- CSS duplicado;
-- seletores muito específicos;
-- regras espalhadas em várias páginas.
-
----
-
-## Renderização
-
-Evitar renderizações desnecessárias.
-
-Os componentes devem receber dados por props sempre que possível.
-
----
-
-# Fluxo de Implementação
-
-A padronização visual deve ocorrer de forma incremental.
-
-Nunca modificar toda a aplicação de uma única vez.
-
----
-
-## Fase 1
-
-Criar infraestrutura.
-
-Implementar:
-
-```
-styles/
-
-variables.css
-
-spacing.css
-
-typography.css
-
-utilities.css
-
-animations.css
-
-index.css
-```
-
-Nenhuma página deve ser alterada nesta etapa.
-
----
-
-## Fase 2
-
-Criar o tema centralizado do Vuetify.
-
-Definir:
-
-- cores;
-- tipografia;
-- densidade;
-- defaults quando possível.
-
----
-
-## Fase 3
-
-Criar componentes base.
-
-Implementar inicialmente:
-
-- AppPage
-- AppCard
-- AppButton
-- PageHeader
-- SectionTitle
-- AppStat
-- EmptyState
-- LoadingState
-- ErrorState
-
-Nenhuma View deve ser modificada antes desta etapa estar concluída.
-
----
-
-## Fase 4
-
-Escolher uma página piloto.
-
-Sugestão:
-
-- Home
-
-ou
-
-- Login
-
-A página piloto servirá para validar todo o Design System.
-
----
-
-## Fase 5
-
-Migrar páginas individualmente.
-
-Uma página por vez.
-
-Após cada migração:
-
-- revisar;
-- testar;
-- realizar commit.
-
-Somente então iniciar a próxima página.
-
----
-
-## Fase 6
-
-Auditoria visual completa.
-
-Verificar:
-
-- consistência;
-- componentes repetidos;
-- CSS desnecessário;
-- oportunidades de reutilização.
-
----
-
-# Ordem Recomendada de Migração
-
-A sequência sugerida é:
-
-1. Home
-2. Login
-3. Cadastro
-4. Perfil
-5. Histórico
-6. Quiz
-7. Resultado
-8. Perfil de Dom
-9. Compartilhamento
-
-As páginas mais complexas devem ser migradas apenas após estabilização dos componentes base.
-
----
-
-# Regras para IA (Copilot / Codex)
-
-Estas regras devem ser consideradas obrigatórias durante qualquer tarefa relacionada à interface.
-
----
+# Regras para IA
 
 ## Escopo
 
@@ -1902,169 +932,34 @@ Alterar apenas:
 
 - componentes visuais;
 - estilos;
-- layouts;
 - organização da interface.
 
----
-
-## Não alterar
-
-Nunca modificar sem solicitação explícita:
+## Não alterar sem solicitação explícita
 
 - regras de negócio;
 - stores;
-- composables;
 - APIs;
 - rotas;
 - autenticação;
-- integração com Supabase;
-- consultas SQL;
-- lógica de cálculo;
-- processamento de resultados.
-
----
+- lógica de cálculo.
 
 ## Componentes
 
-Sempre reutilizar componentes existentes antes de criar novos.
-
-Os componentes de domínio nunca devem conhecer detalhes visuais.
-
-Eles devem consumir componentes base sempre que possível.
-
-Caso um novo componente seja necessário:
-
-- deve ser genérico;
-- reutilizável;
-- independente da regra de negócio.
-
----
+- Sempre reutilizar componentes existentes antes de criar novos.
+- Componentes de domínio devem consumir componentes base.
+- Caso um novo componente seja necessário: genérico, reutilizável, independente da regra de negócio.
 
 ## CSS
 
-Nunca duplicar CSS.
-
-Sempre procurar mover regras reutilizáveis para:
-
-```
-styles/
-```
-
-ou
-
-```
-components/ui
-```
-
----
+- Nunca duplicar CSS.
+- Mover regras reutilizáveis para `src/styles/` ou `components/ui/`.
 
 ## Responsividade
 
-Toda alteração deve considerar primeiro smartphones.
-
-Desktop é adaptação.
-
-Nunca o contrário.
-
----
+- Toda alteração deve considerar primeiro smartphones. Desktop é adaptação.
 
 ## Código
 
-Evitar:
-
-- refatorações não solicitadas;
-- mudanças de arquitetura;
-- alterações de nomenclatura;
-- reorganizações de arquivos sem necessidade.
-
----
-
-## Commits
-
-Cada etapa deve gerar alterações pequenas e fáceis de revisar.
-
-Preferir diversos commits pequenos a um único commit grande.
-
----
-
-## Objetivo
-
-O objetivo da tarefa é exclusivamente melhorar a interface.
-
-Caso alguma alteração funcional pareça necessária, ela deve ser apenas sugerida, nunca implementada automaticamente.
-
----
-
-# Prompts Recomendados
-
-Exemplo de prompt para o Copilot:
-
-```
-Leia o DESIGN_SYSTEM.md.
-
-Implemente apenas o componente AppCard.
-
-Não altere nenhuma View.
-
-Não altere regras de negócio.
-
-Não altere stores.
-
-Não altere composables.
-
-Não altere APIs.
-
-Não altere rotas.
-
-Utilize apenas Vue 3, TypeScript e Vuetify.
-
-Siga rigorosamente os Design Tokens definidos neste documento.
-```
-
----
-
-Outro exemplo:
-
-```
-Leia o DESIGN_SYSTEM.md.
-
-Atualize apenas LoginView.
-
-Utilize exclusivamente componentes existentes do Design System.
-
-Não altere lógica.
-
-Não altere stores.
-
-Não altere autenticação.
-
-Não altere regras de negócio.
-
-Apenas adapte a estrutura visual.
-```
-
----
-
-# Critério de Conclusão
-
-A padronização visual será considerada concluída quando:
-
-- todas as páginas utilizarem os componentes base;
-- não existirem estilos inline relevantes;
-- os Design Tokens forem utilizados em toda a aplicação;
-- todas as telas apresentarem identidade visual consistente;
-- a experiência em smartphones for equivalente ou superior à experiência em desktop;
-- novos componentes possam ser desenvolvidos seguindo este documento sem necessidade de criar novos padrões.
-
----
-
-# Manutenção
-
-Este documento deve evoluir junto com o projeto.
-
-Sempre que um novo padrão visual for criado, ele deve ser documentado aqui antes de ser adotado em outras partes da aplicação.
-
-O Design System é a fonte oficial de verdade para toda a interface do projeto.
-
-Nenhuma decisão visual deve contradizer este documento sem uma revisão explícita do próprio Design System.
-
+- Evitar refatorações não solicitadas.
+- Cada etapa deve gerar alterações pequenas e fáceis de revisar.
+- O objetivo é exclusivamente melhorar a interface.
