@@ -509,9 +509,8 @@ onMounted(loadRows);
 }
 
 .inline-edit-input {
-  flex: 1 1 auto;
-  min-width: 0;
-  max-width: 320px;
+  width: 200px;
+  max-width: 55vw;
 }
 
 .admin-table :deep(td) {
