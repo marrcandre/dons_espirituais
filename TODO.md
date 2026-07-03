@@ -3,12 +3,11 @@
 ## 🔴 Alta Complexidade
 
 ### Implementação Pendente
-- [ ] Admin: esconder coluna "Idade" no mobile
 - [ ] Substituir 21 `<v-btn>` raw por `AppButton` em 7 arquivos
-- [ ] Criar `src/domain/spiritual-gifts.ts` (fonte única dos 27 dons)
-- [ ] Eliminar duplicação dos dons entre frontend e backend
 - [ ] Padronizar botões (Sprint 7)
 - [ ] Padronizar alertas (Sprint 7)
+- [ ] Criar `src/domain/spiritual-gifts.ts` (fonte única dos 27 dons)
+- [ ] Eliminar duplicação dos dons entre frontend e backend
 
 ### ResultsView
 - [ ] Melhorar legibilidade da análise IA
