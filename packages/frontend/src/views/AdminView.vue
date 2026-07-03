@@ -113,7 +113,7 @@
 
       <!-- TABLE -->
       <section class="mb-3 mb-sm-4">
-        <AppCard variant="compact">
+        <AppCard variant="flush">
           <EmptyState
             v-if="!error && !filteredRows.length"
             class="pa-4"

@@ -7,7 +7,7 @@
 		:rounded="resolvedRounded"
 		v-bind="$attrs"
 	>
-		<div class="app-card__content" :class="{ 'app-card__content--compact': variant === 'compact' }">
+		<div class="app-card__content" :class="{ 'app-card__content--compact': variant === 'compact', 'app-card__content--flush': variant === 'flush' }">
 			<slot />
 		</div>
 	</v-card>
@@ -16,7 +16,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-type AppCardVariant = 'default' | 'outlined' | 'flat' | 'compact' | 'interactive'
+type AppCardVariant = 'default' | 'outlined' | 'flat' | 'compact' | 'interactive' | 'flush'
 
 const props = withDefaults(
 	defineProps<{
@@ -34,7 +34,7 @@ const resolvedVariant = computed(() => {
 		return 'outlined'
 	}
 
-	if (variant.value === 'flat' || variant.value === 'compact') {
+	if (variant.value === 'flat' || variant.value === 'compact' || variant.value === 'flush') {
 		return 'flat'
 	}
 
@@ -59,6 +59,10 @@ const resolvedRounded = computed(() => 'lg')
 
 .app-card__content--compact {
 	padding: var(--space-md);
+}
+
+.app-card__content--flush {
+	padding: 0;
 }
 
 .app-card--interactive {
