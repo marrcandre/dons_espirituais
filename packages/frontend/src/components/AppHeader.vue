@@ -35,6 +35,14 @@
         title="Meus resultados"
       />
 
+      <v-btn
+        :icon="theme.global.name.value === 'dark' ? 'mdi-weather-sunny' : 'mdi-weather-night'"
+        color="white"
+        variant="text"
+        :title="theme.global.name.value === 'dark' ? 'Modo claro' : 'Modo escuro'"
+        @click="toggleTheme"
+      />
+
       <v-menu>
         <template #activator="{ props }">
           <v-btn
@@ -88,9 +96,19 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
+import { useTheme } from 'vuetify'
 import { useAuthStore } from '../stores/auth.js'
 
+const theme = useTheme()
 const authStore = useAuthStore()
+
+theme.global.name.value = localStorage.getItem('theme') || 'light'
+
+function toggleTheme() {
+  const newTheme = theme.global.name.value === 'dark' ? 'light' : 'dark'
+  theme.global.name.value = newTheme
+  localStorage.setItem('theme', newTheme)
+}
 
 const avatarError = ref(false)
 

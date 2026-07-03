@@ -8,7 +8,7 @@
       <v-col v-for="({ gift, score }, i) in top3" :key="gift.id" cols="12" sm="4" class="py-1 py-sm-2">
         <div class="d-flex align-center pa-3 rounded-lg border-start" :style="{
           borderLeft: `4px solid ${['#FFD700', '#B0BEC5', '#B08D57'][i]}`,
-          backgroundColor: '#F8F9FA'
+          backgroundColor: 'rgb(var(--v-theme-background))'
         }">
           <div class="mr-3">
             <span class="text-h6 font-weight-bold" :style="{ color: ['#D4AF37', '#78909C', '#8D6E63'][i] }">
