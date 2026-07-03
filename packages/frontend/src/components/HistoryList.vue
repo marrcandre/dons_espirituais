@@ -1,16 +1,16 @@
 <template>
-  <v-card rounded="xl" elevation="2" class="pa-6">
-<div class="d-flex align-center mb-4">
-  <v-icon
-    icon="mdi-history"
-    color="primary"
-    class="mr-2"
-  />
+  <AppCard variant="interactive">
+    <div class="d-flex align-center mb-4">
+      <v-icon
+        icon="mdi-history"
+        color="primary"
+        class="mr-2"
+      />
 
-  <h2 class="text-h6 font-weight-bold text-primary mb-2">
-    Seus testes anteriores
-  </h2>
-</div>
+      <h2 class="text-h6 font-weight-bold text-primary mb-2">
+        Seus testes anteriores
+      </h2>
+    </div>
 
     <div v-if="loading" class="text-center py-4">
       <v-progress-circular indeterminate color="primary" size="32" />
@@ -33,7 +33,7 @@
     </v-list>
 
     <p v-else class="text-body-2 text-medium-emphasis">Nenhum teste anterior.</p>
-  </v-card>
+  </AppCard>
 </template>
 
 <script setup>
@@ -42,6 +42,7 @@ import { useAuthStore } from '../stores/auth.js'
 import { useResponsesStore } from '../stores/responses.js'
 import { formatDate } from '../helpers/date.js'
 import { topGift } from '../helpers/string.js'
+import AppCard from './ui/AppCard.vue'
 
 const props = defineProps({
   currentId: { type: String, required: true },
@@ -60,13 +61,3 @@ onMounted(() => {
   })
 })
 </script>
-
-
-<style scoped>
-.v-card {
-  transition: all 0.2s ease;
-}
-.v-card:hover {
-  transform: translateY(-2px);
-}
-</style>

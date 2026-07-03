@@ -8,7 +8,7 @@
 
       <!-- FILTERS -->
       <section class="mb-6">
-        <v-card rounded="xl" elevation="2" class="pa-4 admin-surface-card">
+        <AppCard variant="flat">
           <v-text-field
             v-model="search"
             label="Buscar..."
@@ -19,12 +19,12 @@
             clearable
             hide-details
           />
-        </v-card>
+        </AppCard>
       </section>
 
       <!-- STATS -->
       <section class="mb-6">
-        <v-card rounded="xl" elevation="2" class="pa-2 admin-surface-card">
+        <AppCard variant="flat">
           <v-row dense>
             <v-col cols="6" sm="3">
               <div
@@ -98,7 +98,7 @@
               </div>
             </v-col>
           </v-row>
-        </v-card>
+        </AppCard>
       </section>
 
       <!-- ERROR -->
@@ -113,7 +113,7 @@
 
       <!-- TABLE -->
       <section class="mb-6">
-        <v-card rounded="xl" elevation="2" class="admin-surface-card">
+        <AppCard variant="flat">
           <EmptyState
             v-if="!error && !filteredRows.length"
             class="pa-4"
@@ -235,19 +235,19 @@
               {{ formatDateTime(item.created_at) }}
             </template>
           </v-data-table>
-        </v-card>
+        </AppCard>
       </section>
 
       <!-- ACTIONS -->
       <section class="mb-6">
-        <v-card rounded="xl" elevation="2" class="pa-4 admin-surface-card">
+        <AppCard variant="flat">
           <div class="d-flex align-center flex-wrap ga-2 text-body-2 text-medium-emphasis">
             <v-icon size="18" color="primary">mdi-information-outline</v-icon>
             <span>
               Ações administrativas: clique no nome ou GP para edição inline e no ícone de status para abrir o resultado.
             </span>
           </div>
-        </v-card>
+        </AppCard>
       </section>
 
       <!-- DIALOGS -->
@@ -264,6 +264,7 @@ import { useAuthStore } from '../stores/auth.js'
 import { useResponsesStore } from '../stores/responses.js'
 import { formatDateTime } from '../helpers/date.js'
 import AppPage from "../components/ui/AppPage.vue";
+import AppCard from "../components/ui/AppCard.vue";
 import LoadingState from "../components/ui/LoadingState.vue";
 import EmptyState from "../components/ui/EmptyState.vue";
 import ErrorState from "../components/ui/ErrorState.vue";
@@ -470,15 +471,6 @@ onMounted(loadRows);
 </script>
 
 <style scoped>
-.v-card {
-  transition: box-shadow var(--duration-fast) var(--easing-standard),
-    border-color var(--duration-fast) var(--easing-standard);
-}
-
-.admin-surface-card {
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
-}
-
 .status-icon {
   cursor: default;
   transition: transform var(--duration-fast) var(--easing-standard),

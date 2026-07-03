@@ -1,5 +1,5 @@
 <template>
-  <v-card rounded="xl" elevation="2" class="pa-6">
+  <AppCard variant="compact">
     <h2 class="text-h6 font-weight-bold text-primary mb-4">
       Sobre você
     </h2>
@@ -50,7 +50,7 @@
         </v-btn>
       </div>
     </v-form>
-  </v-card>
+  </AppCard>
 </template>
 
 <script setup>
@@ -58,6 +58,7 @@ import { ref, onMounted } from 'vue'
 import * as authRepository from '../repositories/authRepository.js'
 import * as userRepository from '../repositories/userRepository.js'
 import { required, ageRange } from '../helpers/validation.js'
+import AppCard from './ui/AppCard.vue'
 
 const emit = defineEmits(['submit'])
 
@@ -93,13 +94,3 @@ async function handleSubmit() {
   emit('submit', { ...form.value })
 }
 </script>
-
-<style scoped>
-.v-card {
-  transition: all 0.2s ease;
-}
-
-.v-card:hover {
-  transform: translateY(-2px);
-}
-</style>

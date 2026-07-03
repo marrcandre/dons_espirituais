@@ -1,5 +1,5 @@
 <template>
-  <AppPage class="container-reading">
+  <AppPage layout="reading">
     <PageHeader
       title="Descubra seus dons espirituais"
       subtitle="Responda com sinceridade. Seu progresso e respostas continuam sendo salvos normalmente."
@@ -154,7 +154,7 @@ async function finishTestNow() {
     if (quizStore.answers[i] === undefined) {
       quizStore.setAnswer(
         i,
-        Math.floor(Math.random() * 6)
+        Math.floor(Math.random() * 4)
       )
     }
   }

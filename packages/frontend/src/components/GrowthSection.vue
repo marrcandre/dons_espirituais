@@ -1,5 +1,5 @@
 <template>
-    <v-card rounded="xl" elevation="2" class="pa-6">
+    <AppCard variant="interactive">
         <div class="d-flex align-center mb-4">
             <v-icon icon="mdi-sprout" color="primary" class="mr-2" />
 
@@ -69,15 +69,9 @@
             do discipulado, da comunhão com a igreja e da direção do Espírito Santo.
         </p>
 
-    </v-card>
+    </AppCard>
 </template>
 
-
-<style scoped>
-.v-card {
-  transition: all 0.2s ease;
-}
-.v-card:hover {
-  transform: translateY(-2px);
-}
-</style>
+<script setup>
+import AppCard from './ui/AppCard.vue'
+</script>

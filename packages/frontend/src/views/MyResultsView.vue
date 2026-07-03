@@ -1,5 +1,5 @@
 <template>
-  <AppPage class="container-reading mt-xl mb-xl">
+  <AppPage class="mt-xl mb-xl">
     <PageHeader title="Histórico de testes" class="mb-lg">
       <AppButton
         color="primary"
@@ -12,82 +12,66 @@
       </AppButton>
     </PageHeader>
 
-    <div v-if="loading" class="text-center py-16">
-      <v-progress-circular
-        indeterminate
-        color="primary"
-        size="48"
-      />
-    </div>
+    <LoadingState v-if="loading" class="py-16" size="48" thickness="4" />
 
-    <v-alert
+    <ErrorState
       v-else-if="error"
-      type="error"
-      variant="tonal"
-      rounded="xl"
-      class="mb-4"
-    >
-      {{ error }}
+      :description="error"
+      button-label="Tentar novamente"
+      @action="loadResults"
+    />
 
-      <template #append>
+    <EmptyState
+      v-else-if="rows.length === 0"
+      icon="mdi-clipboard-text-outline"
+      title="Nenhum teste encontrado"
+      description="Você ainda não fez nenhum teste."
+    >
+      <template #action>
         <AppButton
-          variant="text"
-          color="error"
-          @click="loadResults"
+          color="primary"
+          rounded="xl"
+          prepend-icon="mdi-play-circle"
+          to="/quiz"
+          class="text-none"
         >
-          Tentar novamente
+          Fazer o primeiro teste
         </AppButton>
       </template>
-    </v-alert>
+    </EmptyState>
 
-    <AppCard
-      v-else-if="rows.length === 0"
-      class="pa-8 text-center"
-    >
-      <v-icon
-        size="56"
-        color="grey-lighten-1"
-        class="mb-4"
-      >
-        mdi-clipboard-text-outline
-      </v-icon>
-
-      <p class="text-body-1 text-medium-emphasis mb-4">
-        Você ainda não fez nenhum teste.
-      </p>
-
-      <AppButton
-        color="primary"
-        rounded="xl"
-        prepend-icon="mdi-play-circle"
-        to="/quiz"
-        class="text-none"
-      >
-        Fazer o primeiro teste
-      </AppButton>
-    </AppCard>
-
-    <div v-else>
+    <div v-else class="d-flex flex-column ga-3">
       <div
         v-for="(item, index) in rows"
         :key="item.id"
-        class="history-item"
-        @click="goToResult(item.id)"
       >
-        <div
-          v-if="index === 0"
-          class="text-caption text-primary font-weight-bold mb-1"
-        >
-          Último teste
-        </div>
+        <AppCard variant="interactive" @click="goToResult(item.id)">
+          <div class="d-flex align-center">
+            <div class="flex-grow-1 min-width-0">
+              <div class="d-flex align-center ga-2 mb-1">
+                <span class="text-subtitle-1 font-weight-medium text-truncate">
+                  {{ formatDate(item.created_at) }}
+                </span>
 
-        <div class="text-subtitle-1 font-weight-medium">
-          {{ formatDate(item.created_at) }}
-        </div>
+                <v-chip
+                  v-if="index === 0"
+                  size="x-small"
+                  color="primary"
+                >
+                  Último
+                </v-chip>
+              </div>
 
-        <div class="text-caption text-medium-emphasis">
-          {{ formatRelativeDate(item.created_at) }}
-        </div>
+              <div class="d-flex align-center ga-2">
+                <span class="text-caption text-medium-emphasis text-no-wrap">
+                  {{ formatRelativeDate(item.created_at) }}
+                </span>
+              </div>
+            </div>
+
+            <v-icon icon="mdi-chevron-right" color="medium-emphasis" class="ml-2" />
+          </div>
+        </AppCard>
       </div>
     </div>
   </AppPage>
@@ -101,6 +85,9 @@ import { useResponsesStore } from '../stores/responses.js'
 import AppPage from '../components/ui/AppPage.vue'
 import AppCard from '../components/ui/AppCard.vue'
 import AppButton from '../components/ui/AppButton.vue'
+import LoadingState from '../components/ui/LoadingState.vue'
+import ErrorState from '../components/ui/ErrorState.vue'
+import EmptyState from '../components/ui/EmptyState.vue'
 import PageHeader from '../components/ui/PageHeader.vue'
 import { formatDate, formatRelativeDate } from '../helpers/date.js'
 
@@ -126,20 +113,3 @@ async function loadResults() {
 }
 
 </script>
-
-<style scoped>
-.history-item {
-  padding: 20px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.history-item:hover {
-  opacity: 0.7;
-}
-
-.history-item:first-child {
-  padding-top: 0;
-}
-</style>

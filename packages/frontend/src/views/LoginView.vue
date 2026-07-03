@@ -1,7 +1,6 @@
 <template>
   <AppPage
-    class="fill-height d-flex align-center justify-center"
-    style="min-height: 100vh; background: linear-gradient(160deg, #1B5438 0%, #2d7a50 100%);"
+    class="fill-height d-flex align-center justify-center login-page"
   >
     <AppCard max-width="440" width="100%" class="login-card">
       <PageHeader
@@ -59,5 +58,14 @@ async function handleLogin() {
 }
 .login-card:hover {
   transform: translateY(-2px);
+}
+
+.login-page {
+  min-height: 100vh;
+  background: linear-gradient(
+    160deg,
+    rgb(var(--v-theme-primary)) 0%,
+    color-mix(in srgb, rgb(var(--v-theme-primary)) 80%, white) 100%
+  );
 }
 </style>

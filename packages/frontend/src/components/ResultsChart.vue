@@ -1,5 +1,5 @@
 <template>
-  <v-card rounded="xl" elevation="2" class="pa-4">
+  <AppCard variant="interactive">
     <h2 class="text-h6 font-weight-bold text-primary mb-4 d-flex align-center">
       <v-icon icon="mdi-chart-bar" class="mr-2" />
       Pontuação por dom
@@ -7,11 +7,12 @@
     <div ref="chartWrapperEl" style="position: relative; height: 520px">
       <Bar :data="chartData" :options="chartOptions" :plugins="chartPlugins" />
     </div>
-  </v-card>
+  </AppCard>
 </template>
 
 <script setup>
 import { computed, ref } from 'vue'
+import { useTheme } from 'vuetify'
 import { Bar } from 'vue-chartjs'
 import {
   Chart as ChartJS,
@@ -22,6 +23,7 @@ import {
   Legend,
 } from 'chart.js'
 import { rankGifts } from '../services/scoring.js'
+import AppCard from './ui/AppCard.vue'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend)
 
@@ -36,6 +38,12 @@ function getChartCanvas() {
 }
 
 defineExpose({ getChartCanvas })
+
+const theme = useTheme()
+const isDark = computed(() => theme.global.name.value === 'dark')
+
+const textColor = computed(() => isDark.value ? '#E0E0E0' : '#424242')
+const gridColor = computed(() => isDark.value ? 'rgba(255,255,255,0.12)' : '#e0e0e0')
 
 const ranked = computed(() => rankGifts(props.scores))
 
@@ -68,7 +76,7 @@ const chartPlugins = [
       const { ctx, data } = chart
       ctx.save()
       ctx.font = 'bold 11px sans-serif'
-      ctx.fillStyle = '#424242'
+      ctx.fillStyle = textColor.value
       ctx.textAlign = 'left'
       ctx.textBaseline = 'middle'
 
@@ -77,7 +85,7 @@ const chartPlugins = [
 
       meta.data.forEach((bar, index) => {
         const val = dataset.data[index]
-        const posX = bar.x + 6 // 6px à direita do fim da barra
+        const posX = bar.x + 6
         const posY = bar.y
         ctx.fillText(`${val}`, posX, posY)
       })
@@ -86,13 +94,13 @@ const chartPlugins = [
   }
 ]
 
-const chartOptions = {
+const chartOptions = computed(() => ({
   indexAxis: 'y',
   responsive: true,
   maintainAspectRatio: false,
   layout: {
     padding: {
-      right: 25 // Espaço para não cortar as notas desenhadas à direita das barras
+      right: 25
     }
   },
   plugins: {
@@ -107,23 +115,13 @@ const chartOptions = {
     x: {
       min: 0,
       max: 15,
-      ticks: { stepSize: 3 },
-      grid: { color: '#e0e0e0' },
+      ticks: { stepSize: 3, color: textColor.value },
+      grid: { color: gridColor.value },
     },
     y: {
-      ticks: { font: { size: 12 } },
+      ticks: { font: { size: 12 }, color: textColor.value },
       grid: { display: false },
     },
   },
-}
+}))
 </script>
-
-
-<style scoped>
-.v-card {
-  transition: all 0.2s ease;
-}
-.v-card:hover {
-  transform: translateY(-2px);
-}
-</style>

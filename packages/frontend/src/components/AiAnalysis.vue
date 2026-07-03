@@ -1,5 +1,5 @@
 <template>
-  <v-card rounded="xl" elevation="1" class="pa-6">
+  <AppCard>
     <div class="d-flex align-center justify-space-between mb-4">
 
       <div>
@@ -134,7 +134,7 @@
       Não foi possível atualizar a análise agora.
     </v-snackbar>
 
-  </v-card>
+  </AppCard>
 </template>
 
 <script setup>
@@ -142,6 +142,7 @@ import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
 import { useAiStore } from '../stores/ai.js'
 import { useResponsesStore } from '../stores/responses.js'
+import AppCard from './ui/AppCard.vue'
 
 const props = defineProps({
   responseId: { type: String, required: true },

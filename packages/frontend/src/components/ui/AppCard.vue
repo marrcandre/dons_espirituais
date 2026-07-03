@@ -16,7 +16,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-type AppCardVariant = 'default' | 'outlined' | 'flat' | 'compact'
+type AppCardVariant = 'default' | 'outlined' | 'flat' | 'compact' | 'interactive'
 
 const props = withDefaults(
 	defineProps<{
@@ -42,7 +42,7 @@ const resolvedVariant = computed(() => {
 })
 
 const resolvedElevation = computed(() => {
-	if (variant.value === 'default') {
+	if (variant.value === 'default' || variant.value === 'interactive') {
 		return 2
 	}
 
@@ -59,5 +59,16 @@ const resolvedRounded = computed(() => 'lg')
 
 .app-card__content--compact {
 	padding: var(--space-md);
+}
+
+.app-card--interactive {
+	transition: transform var(--duration-fast, 150ms) var(--easing-standard, ease),
+		box-shadow var(--duration-fast, 150ms) var(--easing-standard, ease);
+	cursor: pointer;
+}
+
+.app-card--interactive:hover {
+	transform: translateY(-2px);
+	box-shadow: var(--shadow-lg);
 }
 </style>
