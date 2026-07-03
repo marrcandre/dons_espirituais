@@ -1,5 +1,5 @@
 <template>
-  <AppPage class="mt-xl mb-xl">
+  <AppPage class="mt-lg mb-lg">
 
     <!-- LOADING -->
     <LoadingState v-if="loading" class="py-16" :size="64" :thickness="6" />
@@ -15,7 +15,7 @@
     <template v-else-if="response">
 
       <!-- HEADER -->
-      <div class="result-header mb-3">
+      <div class="result-header mb-2">
         <div class="result-header-main d-flex align-center justify-space-between flex-wrap ga-2">
 
           <!-- NAME + EDIT -->
@@ -93,13 +93,13 @@
 
       <!-- SUMMARY -->
       <section class="result-summary">
-        <div class="result-header-meta d-flex justify-center mt-1 mb-2 gift-badges-compact">
+        <div class="result-header-meta d-flex justify-center mt-0 mb-1 gift-badges-compact">
           <GiftBadges :scores="response.scores" />
         </div>
       </section>
 
       <!-- INSIGHTS -->
-      <section class="mb-6">
+      <section class="mb-4">
         <CollapsibleCard title="Pontuação por dom" icon="mdi-chart-bar" v-model="chartOpen">
           <ResultsChart
             :scores="response.scores"
@@ -107,7 +107,7 @@
         </CollapsibleCard>
       </section>
 
-      <section class="mb-6">
+      <section class="mb-4">
         <CollapsibleCard title="Análise dos seus dons" icon="mdi-auto-fix" v-model="analysisOpen">
           <AiAnalysis
             :response-id="response.id"
@@ -117,13 +117,13 @@
         </CollapsibleCard>
       </section>
 
-      <section class="mb-6">
+      <section class="mb-4">
         <CollapsibleCard title="Desenvolvimento" icon="mdi-sprout" v-model="growthOpen">
           <GrowthSection />
         </CollapsibleCard>
       </section>
 
-      <section class="mb-6">
+      <section class="mb-4">
         <CollapsibleCard title="Recursos" icon="mdi-bookshelf" v-model="resourcesOpen">
           <ResourcesSection />
         </CollapsibleCard>

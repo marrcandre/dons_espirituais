@@ -1,6 +1,6 @@
 <template>
-  <AppPage class="mt-xl mb-xl">
-    <PageHeader title="Histórico de testes" class="mb-lg">
+  <AppPage class="mt-lg mb-lg">
+    <PageHeader title="Histórico de testes" class="mb-md">
       <AppButton
         color="primary"
         rounded="xl"
@@ -40,7 +40,7 @@
       </template>
     </EmptyState>
 
-    <div v-else class="d-flex flex-column ga-3">
+    <div v-else class="d-flex flex-column ga-2">
       <div
         v-for="(item, index) in rows"
         :key="item.id"

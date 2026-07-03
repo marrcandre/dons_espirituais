@@ -3,13 +3,13 @@
     <PageHeader
       title="Descubra seus dons espirituais"
       subtitle="Um teste para ajudá-lo a identificar os dons espirituais que Deus confiou a você."
-      class="text-center mb-xl"
+      class="text-center mb-lg"
     >
       <v-icon icon="mdi-gift-outline" size="32" color="primary" />
     </PageHeader>
 
     <!-- Sobre o teste -->
-    <CollapsibleCard title="Sobre o teste" icon="mdi-information-outline" v-model="sobreOpen" class="mb-lg">
+    <CollapsibleCard title="Sobre o teste" icon="mdi-information-outline" v-model="sobreOpen" class="mb-md">
       <p class="body-text mb-md">
         Este teste é baseado no modelo de
         <strong>C. Peter Wagner</strong>
@@ -26,7 +26,7 @@
     </CollapsibleCard>
 
     <!-- Preparação -->
-    <CollapsibleCard title="Preparação para o teste" icon="mdi-clipboard-list" v-model="preparacaoOpen" class="mb-lg">
+    <CollapsibleCard title="Preparação para o teste" icon="mdi-clipboard-list" v-model="preparacaoOpen" class="mb-md">
       <SectionTitle title="Como responder" class="mb-sm" />
 
       <div class="d-flex flex-wrap ga-2 mb-md">

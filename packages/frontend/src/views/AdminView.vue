@@ -1,14 +1,14 @@
 <template>
-  <AppPage class="mt-xl mb-xl">
+  <AppPage class="mt-lg mb-lg">
 
     <!-- LOADING -->
-    <LoadingState v-if="loading" class="py-16" :size="56" :thickness="5" />
+    <LoadingState v-if="loading" class="py-8" :size="56" :thickness="5" />
 
     <template v-else>
 
       <!-- FILTERS -->
-      <section class="mb-4 mb-sm-6">
-        <AppCard variant="flat">
+      <section class="mb-3 mb-sm-4">
+        <AppCard variant="compact">
           <v-text-field
             v-model="search"
             label="Buscar..."
@@ -23,8 +23,8 @@
       </section>
 
       <!-- STATS -->
-      <section class="mb-4 mb-sm-6">
-        <AppCard variant="flat">
+      <section class="mb-3 mb-sm-4">
+        <AppCard variant="compact">
           <v-row dense>
             <v-col cols="6" sm="3">
               <div
@@ -102,7 +102,7 @@
       </section>
 
       <!-- ERROR -->
-      <section v-if="error" class="mb-4 mb-sm-6">
+      <section v-if="error" class="mb-3 mb-sm-4">
         <ErrorState
           title="Erro ao carregar painel admin"
           :description="error"
@@ -112,14 +112,14 @@
       </section>
 
       <!-- TABLE -->
-      <section class="mb-4 mb-sm-6">
-        <AppCard variant="flat">
+      <section class="mb-3 mb-sm-4">
+        <AppCard variant="compact">
           <EmptyState
             v-if="!error && !filteredRows.length"
             class="pa-4"
             title="Nenhum resultado para os filtros atuais"
             description="Ajuste a busca ou os filtros rápidos para visualizar os registros."
-            card-variant="flat"
+            card-variant="compact"
           />
 
           <v-data-table
@@ -239,15 +239,16 @@
       </section>
 
       <!-- ACTIONS -->
-      <section class="mb-4 mb-sm-6">
-        <AppCard variant="flat">
-          <div class="d-flex align-center flex-wrap ga-2 text-body-2 text-medium-emphasis">
-            <v-icon size="18" color="primary">mdi-information-outline</v-icon>
-            <span>
-              Ações administrativas: clique no nome ou GP para edição inline e no ícone de status para abrir o resultado.
-            </span>
-          </div>
-        </AppCard>
+      <section class="mb-3 mb-sm-4">
+        <v-alert
+          type="info"
+          variant="tonal"
+          density="compact"
+          class="text-body-2"
+          icon="mdi-information-outline"
+        >
+          Clique no nome ou GP para edição inline e no ícone de status para abrir o resultado.
+        </v-alert>
       </section>
 
       <!-- DIALOGS -->
@@ -529,7 +530,7 @@ onMounted(loadRows);
   border-radius: var(--radius-sm);
   cursor: pointer;
 
-  min-height: 44px;
+  min-height: 40px;
   transition: background-color var(--duration-fast) var(--easing-standard),
     color var(--duration-fast) var(--easing-standard);
 }
