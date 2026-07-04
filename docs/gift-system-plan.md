@@ -1,163 +1,371 @@
-# Spiritual Gifts System — Single Source of Truth
+# Refatoração do Domínio dos Dons Espirituais
 
-## Objetivo
-
-O sistema atualmente possui múltiplas definições da lista de dons espirituais espalhadas entre:
-
-* Frontend (Vue)
-* Backend (Supabase functions)
-* Lógica de questions / quiz
-* Análises de IA
-* Gráficos e relatórios
-
-Isso gera inconsistência e dificuldade de manutenção.
-
-O objetivo deste documento é estabelecer uma **fonte única de verdade (Single Source of Truth)** para todos os dons espirituais do sistema.
+> **Status:** Planejamento
+>
+> **Objetivo:** Consolidar os metadados dos dons espirituais em uma única fonte de verdade (Single Source of Truth), reduzindo a duplicação de código, aumentando a segurança das alterações e melhorando a arquitetura do projeto.
 
 ---
 
-# Princípio central
+# Objetivos
 
-Existe apenas UMA definição oficial dos dons espirituais no sistema.
+Esta refatoração tem como objetivos:
 
-Qualquer outra referência deve derivar desta fonte.
-
----
-
-# Fonte oficial
-
-A lista oficial de dons deve estar centralizada em:
-
-```text
-packages/frontend/src/domain/spiritual-gifts.ts
-```
-
-ou (caso prefira compartilhado futuramente):
-
-```text
-packages/shared/spiritual-gifts.ts
-```
+- Eliminar a duplicação das definições dos dons espirituais.
+- Tornar a manutenção mais simples e segura.
+- Melhorar a organização do domínio da aplicação.
+- Aumentar a cobertura de testes das regras de negócio.
+- Migrar os módulos centrais do domínio para TypeScript.
+- Adotar princípios de Clean Architecture e Clean Code durante toda a implementação.
 
 ---
 
-# Estrutura recomendada
+# Problema Atual
 
-```ts
-export interface SpiritualGift {
-  id: string
-  key: string
-  name: string
-  description?: string
-}
-```
+Atualmente as definições dos dons encontram-se distribuídas em diversos pontos da aplicação.
 
----
+Isso provoca problemas como:
 
-# Regras obrigatórias
+- duplicação de informações;
+- risco de inconsistências;
+- necessidade de alterar diversos arquivos para uma única mudança;
+- dificuldade para manutenção;
+- maior risco de bugs.
 
-## 1. Nenhuma duplicação
-
-A lista de dons NÃO pode existir em:
-
-* Frontend hardcoded
-* Backend duplicado
-* Funções Supabase
-* IA prompts fixos
-* Arquivos de questions duplicados
+O projeto deve evoluir para possuir apenas uma única fonte de verdade para todos os metadados relacionados aos dons espirituais.
 
 ---
 
-## 2. IDs fixos
+# Escopo
 
-Cada dom deve ter um ID estável:
+Esta refatoração contempla apenas a arquitetura do domínio.
 
-* Nunca mudar ID após criação
-* Nome pode ser ajustado
-* ID é referência global
+Ficam fora deste escopo:
 
----
-
-## 3. Fonte única obrigatória
-
-Qualquer uso deve importar:
-
-```ts
-import { SPIRITUAL_GIFTS } from '@/domain/spiritual-gifts'
-```
+- alterações de layout;
+- alterações de UX;
+- novas funcionalidades;
+- mudanças nas regras de negócio;
+- mudanças no banco de dados.
 
 ---
 
-## 4. Uso em scoring
+# Fora do Escopo
 
-O sistema de pontuação deve sempre referenciar essa lista para:
+Esta refatoração não contempla:
 
-* Cálculo de resultados
-* Ranking de dons
-* Gráficos
-* Análise de IA
+- código localizado na pasta `legacy/`;
+- scripts de importação utilizados apenas durante a migração inicial dos dados;
+- protótipos ou ferramentas descartadas;
+- experimentos antigos.
 
----
+Esses arquivos deverão ser tratados apenas como referência histórica e não deverão influenciar as decisões arquiteturais da nova implementação.
 
-## 5. Uso em IA
-
-Prompts de IA NÃO devem conter lista hardcoded.
-
-Devem receber a lista dinamicamente.
 
 ---
 
-## 6. Supabase / Backend
+# Restrições
 
-O backend não deve manter lista própria.
+Durante esta refatoração **não deverá haver**:
 
-Ele deve receber os IDs do frontend ou do shared module.
-
----
-
-# Migração
-
-## Etapas
-
-### Fase 1
-
-Criar arquivo central de dons
-
-### Fase 2
-
-Substituir referências no frontend
-
-### Fase 3
-
-Atualizar Supabase functions
-
-### Fase 4
-
-Atualizar sistema de IA
-
-### Fase 5
-
-Remover listas duplicadas antigas
+- alterações no schema do banco;
+- novas tabelas;
+- alterações em migrations;
+- alterações em RLS;
+- alterações em políticas de segurança;
+- alterações na estrutura dos dados existentes;
+- mudanças nos IDs dos dons;
+- mudanças na lógica de cálculo das pontuações;
+- mudanças na experiência do usuário;
+- alterações na estrutura funcional do questionário.
+-
+O objetivo é exclusivamente arquitetural.
 
 ---
 
-# Critério de sucesso
+# Princípios Arquiteturais
 
-* Existe apenas UMA lista de dons no projeto
-* Todos os sistemas consomem essa lista
-* Nenhuma duplicação hardcoded permanece
-* Mudança de nome em um dom reflete em todo o sistema
+Toda implementação deverá seguir os princípios abaixo.
+
+## Single Source of Truth (SSOT)
+
+Toda informação sobre um dom espiritual deverá existir em apenas um local.
+
+Não serão permitidas listas duplicadas.
 
 ---
 
-# Objetivo final
+## Clean Architecture
 
-Garantir consistência total entre:
+Separar claramente:
 
-* Quiz
-* Resultados
-* Gráficos
-* IA
-* Backend
-* Frontend
+- Domínio
+- Aplicação
+- Infraestrutura
+- Interface (UI)
 
-sem divergência de nomes ou interpretações
+O domínio não deve depender de Vue, Supabase ou componentes visuais.
+
+---
+
+## Clean Code
+
+Todo código novo deverá priorizar:
+
+- nomes claros;
+- funções pequenas;
+- responsabilidade única;
+- baixo acoplamento;
+- alta coesão;
+- eliminação de código morto;
+- eliminação de duplicações;
+- legibilidade.
+
+---
+
+## SOLID
+
+Aplicar os princípios SOLID sempre que fizer sentido, evitando abstrações desnecessárias.
+
+---
+
+## DRY
+
+Não repetir:
+
+- listas;
+- constantes;
+- enums;
+- labels;
+- categorias;
+- IDs;
+- descrições.
+
+---
+
+## KISS
+
+Preferir sempre a solução mais simples possível.
+
+---
+
+## YAGNI
+
+Não implementar funcionalidades pensando em necessidades futuras não existentes.
+
+---
+
+## Type Safety
+
+Sempre que possível:
+
+- utilizar TypeScript;
+- evitar `any`;
+- derivar tipos automaticamente;
+- centralizar os tipos do domínio.
+
+---
+
+## Testabilidade
+
+Toda regra de negócio criada ou refatorada deverá poder ser testada independentemente de:
+
+- Vue;
+- Supabase;
+- Browser;
+- Componentes visuais.
+
+Sempre que possível, o domínio deverá permanecer desacoplado da infraestrutura.
+
+---
+
+## Compatibilidade
+
+Durante toda a refatoração deverá ser preservada a compatibilidade funcional do sistema.
+
+A refatoração não deverá alterar resultados, pontuações, análises ou comportamento esperado da aplicação.
+
+---
+
+# Plano de Execução
+
+## Sprint 0 — Auditoria
+
+Objetivo:
+
+Compreender completamente o estado atual do projeto.
+
+Atividades:
+
+- localizar todas as definições dos dons;
+- localizar enums;
+- localizar arrays;
+- localizar constantes;
+- localizar tipos;
+- localizar componentes que utilizam os dons;
+- localizar serviços;
+- localizar cálculos;
+- localizar gráficos;
+- localizar transformações de dados;
+- identificar duplicações;
+- documentar todos os pontos encontrados.
+
+**Nenhuma alteração de código deverá ser realizada nesta etapa.**
+
+---
+
+## Sprint 1 — Estratégia de Testes
+
+Objetivo:
+
+Garantir uma rede de segurança para a refatoração.
+
+Criar testes para:
+
+- cálculo de pontuação;
+- ranking;
+- geração da análise;
+- ordenação dos dons;
+- transformação dos dados;
+- funções utilitárias do domínio.
+
+Toda a suíte deverá permanecer verde durante toda a refatoração.
+
+---
+
+## Sprint 2 — Migração para TypeScript
+
+Objetivo:
+
+Migrar os módulos centrais do domínio para TypeScript.
+A migração deverá ser incremental.
+Cada arquivo migrado deverá manter todos os testes passando antes da próxima migração.
+Nenhuma alteração funcional deverá ocorrer nesta etapa.
+
+
+Regras:
+
+- preservar comportamento;
+- não alterar lógica;
+- adicionar tipagem;
+- eliminar usos desnecessários de `any`;
+- preparar o domínio para a fonte única.
+
+---
+
+## Sprint 3 — Fonte Única dos Dons
+
+Objetivo:
+
+Criar uma única fonte de verdade para os dons espirituais.
+Antes da implementação deverá ser definida a melhor localização para este módulo.
+A decisão deverá ser justificada durante a auditoria.
+Todo código de produção deverá consumir exclusivamente essa fonte única.
+Nenhum outro arquivo poderá manter definições próprias dos dons.
+Antes da implementação deverá ser confirmada a melhor estratégia para compartilhamento entre Frontend e Edge Functions.
+A solução escolhida deverá evitar, sempre que possível, qualquer duplicação dos metadados dos dons.
+
+---
+
+## Sprint 4 — Migração Gradual
+
+Substituir gradualmente todas as implementações antigas.
+Cada alteração deverá manter todos os testes passando.
+As duplicações deverão ser removidas somente após a migração dos consumidores.
+
+---
+
+## Sprint 5 — Limpeza
+
+Ao final da migração:
+
+- remover código morto;
+- remover listas antigas;
+- remover constantes antigas;
+- remover enums antigos;
+- remover imports não utilizados;
+- simplificar tipos;
+- atualizar documentação;
+- eliminar hardcodes relacionados aos dons.
+
+---
+
+# Critérios de Aceite
+
+A refatoração será considerada concluída quando:
+
+- existir apenas uma definição dos dons;
+- todas as duplicações tiverem sido eliminadas;
+- todos os consumidores utilizarem a fonte única;
+- todos os testes estiverem passando;
+- não houver alteração de comportamento da aplicação;
+- não houver alterações no banco de dados;
+- não houver regressões conhecidas.
+- nenhuma lista paralela dos dons permanece no código de produção;
+- toda alteração em um dom pode ser realizada em apenas um local;
+- todas as regras de negócio relacionadas aos dons estão cobertas por testes.
+
+---
+
+# Definição de Pronto (Definition of Done)
+
+A refatoração somente será considerada concluída quando:
+
+- todos os critérios de aceite forem atendidos;
+- toda a suíte de testes estiver aprovada;
+- não houver duplicações remanescentes no código de produção;
+- a documentação estiver atualizada;
+- o código estiver compatível com os princípios arquiteturais definidos neste documento.
+
+---
+
+# Melhorias Futuras
+
+Após a conclusão desta refatoração poderão ser avaliadas iniciativas como:
+
+- persistir os metadados dos dons em banco de dados;
+- internacionalização dos metadados;
+- geração automática de documentação do domínio;
+- fortalecimento da arquitetura baseada em domínio (DDD);
+- ampliação da cobertura de testes;
+- auditoria completa das demais entidades do sistema.
+
+Estas melhorias não fazem parte desta etapa.
+
+
+> **Importante:** Este documento descreve uma estratégia de migração incremental. A implementação poderá ser adaptada conforme as descobertas da auditoria, desde que os objetivos, princípios arquiteturais e critérios de aceite definidos neste documento sejam preservados.
+
+---
+
+# Checklist
+
+## Auditoria
+
+- [ ] Inventário completo das definições dos dons.
+- [ ] Inventário das duplicações.
+- [ ] Inventário dos consumidores.
+
+## Testes
+
+- [ ] Testes unitários criados.
+- [ ] Testes de integração criados.
+- [ ] Cobertura validada.
+
+## TypeScript
+
+- [ ] Domínio migrado.
+- [ ] Tipagem revisada.
+- [ ] Sem regressões.
+
+## Fonte Única
+
+- [ ] Localização definida.
+- [ ] Fonte única criada.
+- [ ] Consumidores migrados.
+- [ ] Duplicações removidas.
+
+## Finalização
+
+- [ ] Código limpo.
+- [ ] Documentação atualizada.
+- [ ] Todos os testes aprovados.
+- [ ] Refatoração concluída.
