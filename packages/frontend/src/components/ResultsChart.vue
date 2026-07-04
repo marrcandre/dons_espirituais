@@ -35,7 +35,7 @@ defineExpose({ getChartCanvas })
 const theme = useTheme()
 const isDark = computed(() => theme.global.name.value === 'dark')
 const { mobile } = useDisplay()
-const chartHeight = computed(() => mobile.value ? '300px' : '520px')
+const chartHeight = computed(() => mobile.value ? '400px' : '520px')
 
 const textColor = computed(() => isDark.value ? '#E0E0E0' : '#424242')
 const gridColor = computed(() => isDark.value ? 'rgba(255,255,255,0.12)' : '#e0e0e0')
@@ -89,34 +89,37 @@ const chartPlugins = [
   }
 ]
 
-const chartOptions = computed(() => ({
-  indexAxis: 'y',
-  responsive: true,
-  maintainAspectRatio: false,
-  layout: {
-    padding: {
-      right: 25
-    }
-  },
-  plugins: {
-    legend: { display: false },
-    tooltip: {
-      callbacks: {
-        label: (ctx) => ` ${ctx.raw}/15`,
+const chartOptions = computed(() => {
+  const tickFontSize = mobile.value ? 10 : 12
+  return {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    layout: {
+      padding: {
+        right: 25
+      }
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => ` ${ctx.raw}/15`,
+        },
       },
     },
-  },
-  scales: {
-    x: {
-      min: 0,
-      max: 15,
-      ticks: { stepSize: 3, color: textColor.value },
-      grid: { color: gridColor.value },
+    scales: {
+      x: {
+        min: 0,
+        max: 15,
+        ticks: { stepSize: 3, color: textColor.value },
+        grid: { color: gridColor.value },
+      },
+      y: {
+        ticks: { font: { size: tickFontSize }, color: textColor.value, autoSkip: false },
+        grid: { display: false },
+      },
     },
-    y: {
-      ticks: { font: { size: 12 }, color: textColor.value },
-      grid: { display: false },
-    },
-  },
-}))
+  }
+})
 </script>
