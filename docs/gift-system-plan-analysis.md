@@ -8,9 +8,38 @@
 
 ---
 
-## Inventário
+## Decisões Arquiteturais Aprovadas
 
-### Arquivos que DEFINEM dados dos dons
+As decisões abaixo foram aprovadas para esta refatoração e estão vigentes:
+
+- **Refatoração incremental** em 6 sprints, sem big bang
+- **Testes antes da migração** — rede de segurança estabelecida antes de qualquer alteração no domínio
+- **Fonte única localizada em `src/domain/`** (Alternativa A), validada por CI contra a Edge Function
+- **Migração incremental para TypeScript** — cada arquivo migrado individualmente com testes verdes
+- **Compatibilidade funcional preservada** — nenhuma regra de negócio, UX ou banco de dados é alterado
+- **`id` numérico mantido** — compatibilidade com dados existentes no banco (chaves 0-26 no JSONB)
+- **Legacy excluído do escopo** — código em `legacy/` e `scripts/` não influencia as decisões
+- **Vitest como framework de testes** — escolhido por compatibilidade com o ecossistema Vite existente
+
+---
+
+## Premissas
+
+As premissas abaixo foram adotadas durante toda a análise e planejamento:
+
+- O banco de dados (Supabase) permanece inalterado durante toda a refatoração
+- As Edge Functions continuam em runtime Deno durante esta refatoração
+- O frontend continua utilizando Vue 3 + Vite + Vuetify durante esta refatoração
+- A lista de 27 dons espirituais é estática (modelo C. Peter Wagner) — não há necessidade de CRUD dinâmico
+- Os testes são implementados no nível de função pura, sem dependência de Vue, navegador ou Supabase
+- A migração é incremental: cada sprint mantém o sistema funcionando e os testes verdes
+- Nenhuma alteração de layout, UX, regras de negócio ou banco de dados faz parte do escopo
+
+---
+
+## Inventário (constatações)
+
+### Arquivos que definem dados dos dons
 
 | # | Arquivo | O que define | Formato |
 |---|---|---|---|
@@ -19,7 +48,7 @@
 | 3 | `packages/frontend/src/data/questions.js` | 135 perguntas mapeadas aos 27 dons (`i % 27`) | Array de objetos JS |
 | 4 | `supabase/migrations/001_initial.sql` | Schema da tabela `responses` com `scores jsonb` | SQL |
 
-### Arquivos que CONSOMMEM dados dos dons
+### Arquivos que consomem dados dos dons
 
 | # | Arquivo | Como consome | Importa de |
 |---|---|---|---|
@@ -36,7 +65,7 @@
 | 15 | `packages/frontend/src/components/ResourcesSection.vue` | Links externos sobre dons | `data/resources.js` |
 | 16 | `packages/frontend/src/stores/responses.js` | CRUD da tabela `responses` (contém scores) | `repositories/responseRepository.js` |
 
-### Consumidores INDIRETOS (sem acesso direto a gift data)
+### Consumidores indiretos (sem acesso direto a gift data)
 
 | # | Arquivo | Relação |
 |---|---|---|
@@ -47,10 +76,10 @@
 | 21 | `supabase/functions/retry-ai-analysis/index.ts` | Retry de AI analysis para respostas sem análise |
 | 22 | `supabase/functions/notify-admin/index.ts` | Notifica admin sobre nova resposta |
 
-### Fluxo de dados (resumido)
+### Fluxo de dados
 
 ```
-data/gifts.js  (SSOT atual do frontend)
+data/gifts.js  (origem atual no frontend)
   ├── services/scoring.js  (calculateScores, rankGifts)
   │     ├── components/GiftBadges.vue
   │     ├── components/ResultsChart.vue
@@ -72,359 +101,243 @@ supabase/functions/generate-ai/index.ts  (GIFTS_ORDER — duplicado)
 
 ---
 
-## 1. Arquitetura Compartilhada
+## Duplicações Identificadas (constatações)
 
-### Alternativa A — `packages/frontend/src/domain/`
+### Lista dos 27 dons em 4 locais
 
-**Vantagens:**
-- Caminho mais curto dentro do frontend (`src/domain/` vs `../../shared/`)
-- Sem mudanças na estrutura do monorepo
-- Vite compila TypeScript nativamente
-- Separação arquitetural clara (domínio independente de UI/infra)
-- A maioria dos consumidores (11 de 12) está no frontend
+| Local | Nomes idênticos? | Campos extras |
+|---|---|---|
+| `data/gifts.js` | Sim | `id`, `icon`, `color` |
+| `generate-ai/index.ts` | Sim | Nenhum |
+| `import_to_supabase.py` | Sim (fora do escopo) | Nenhum |
+| `legacy/main.py` | Sim (fora do escopo) | Nenhum |
 
-**Desvantagens:**
-- Inacessível para Edge Functions (Deno runtime, importa via `https://esm.sh/`)
-- Scripts Python não podem importar (mas estão fora do escopo)
+Os nomes e a ordem (Peter Wagner) são idênticos entre todos os locais. Os arquivos em `legacy/` e `scripts/` estão fora do escopo desta refatoração.
 
-**Impacto build:** Nenhum. Vite já compila `src/`.
+### Nomes alternativos em CSVs legacy
 
-**Impacto manutenção:** Baixo. Um único arquivo TS para manter.
+Os CSVs em `legacy/` usam abreviações diferentes (ex: "Pastoreio" → "Pastor", "Evangelismo Transcultural" → "Missionário"). Esses arquivos não são consumidos pelo frontend em produção — a divergência é apenas histórica e não representa risco para a aplicação atual.
 
-**Compatibilidade Vite:** ✅ Nativo.
+### Metadados repetidos
 
-**Compatibilidade Deno:** ❌ Impossível importar diretamente.
-
-**Compatibilidade Python:** ❌ Mas fora do escopo.
-
-**Princípios:**
-- SSOT: ✅ (para o frontend; edge function precisaria de validação)
-- Clean Architecture: ✅ (domínio separado)
-- Clean Code: ✅
-- DRY: ✅ (elimina duplicação no frontend)
-- KISS: ✅ (mais simples de implementar)
-- YAGNI: ✅ (não adiciona infraestrutura desnecessária)
+- `color: '#1B5438'` é o mesmo valor em todos os 27 objetos de `gifts.js` — poderia ser um valor default
+- `score / 15` e `max: 15` aparecem em `ResultsChart.vue` e `GiftBadges.vue` — derivam da fórmula (5 perguntas × 3 pontos)
 
 ---
 
-### Alternativa B — `packages/shared/` (novo workspace npm)
+## Dependências (constatações)
 
-Criar `packages/shared/package.json` com a lista de dons em TS/JSON, publicado como workspace npm interno.
+### Cadeia de dependência de gifts.js
 
-**Vantagens:**
-- Separação explícita de responsabilidades
-- Potencial para compartilhar com outros pacotes futuros
-- Pode ser versionado independentemente
+```
+gifts.js (definição)
+  ← services/scoring.js
+      ← components/GiftBadges.vue (também importa gifts.js diretamente)
+      ← components/ResultsChart.vue
+      ← helpers/string.js (= topGift)
+          ← components/HistoryList.vue
+      ← views/QuizView.vue
+```
 
-**Desvantagens:**
-- Edge Functions continuam sem poder importar (Deno não acessa node_modules)
-- Novo workspace = mais complexidade de build
-- `packages/shared/` precisaria ser publicado ou referenciado via `file:` dependecy
-- Atualmente só existe `packages/frontend/` — adicionar um workspace para ~30 linhas de dados é desproporcional
-- O frontend precisaria de `"@dons/shared": "workspace:*"` no package.json
+### Cadeia de dependência de questions.js
 
-**Impacto build:** Novo workspace, novo `tsconfig.json`, novo `package.json`, `npm install` adicional.
+```
+questions.js (135 perguntas, acoplamento posicional)
+  ← stores/quiz.js
+      ← views/QuizView.vue
+  ← views/HomeView.vue (ANSWER_LABELS)
+  ← components/QuestionStep.vue (ANSWER_LABELS)
+```
 
-**Impacto manutenção:** Médio. Um arquivo a mais para gerenciar, com a complexidade de linking entre workspaces.
+### Acoplamento entre questions.js e gifts.js
 
-**Compatibilidade Vite:** ✅ (com alias ou import de workspace)
-
-**Compatibilidade Deno:** ❌
-
-**Compatibilidade Python:** ❌
-
-**Princípios:**
-- SSOT: ✅ (teoricamente)
-- Clean Architecture: ✅
-- Clean Code: ~ (desproporcional para a necessidade)
-- DRY: ✅
-- KISS: ❌ (mais complexo que Alternativa A)
-- YAGNI: ❌ (não há necessidade de versionamento independente)
+Atualmente não há import direto. O acoplamento é posicional (comentário: `questão i % 27`):
+- Alterar a ordem de `gifts.js` sem reordenar `questions.js` → scores incorretos
+- Adicionar ou remover um dom → quebra o mapeamento silenciosamente
 
 ---
 
-### Alternativa C — Geração automática de artefato compartilhado (JSON)
+## Riscos (constatações)
 
-Um script de build gera `packages/shared/gifts.json` a partir da fonte única. O JSON é consumido pelo frontend (Vite importa JSON nativamente) e pela Edge Function (via `Deno.readTextFile` ou HTTP fetch).
+### Risco alto
 
-**Vantagens:**
-- SSOT real — o JSON é o artefato compartilhado
-- Qualquer runtime pode ler JSON
-- Edge Function pode importar com `import` assertions (Deno 2+ suporta JSON imports)
-- Geração automática elimina erro humano
+1. **Acoplamento posicional `i % 27`** — mapeamento entre perguntas e dons é implícito. Nenhuma verificação runtime ou compile-time existe.
+2. **`GIFTS_ORDER` na Edge Function** — duplicado manualmente. Se o frontend mudar e a edge function não for atualizada, a análise de IA fica inconsistente.
+3. **QuizView como orquestrador monolítico** — a função `submitQuiz()` centraliza scoring, payload, persistência e notificação. Qualquer mudança no formato dos dados propaga-se diretamente para a view.
 
-**Desvantagens:**
-- Complexidade adicional: script de geração, sync, validação
-- Edge Function precisaria do JSON no bundle (precisa estar dentro do diretório da função ou acessível via URL)
-- Cold start da Edge Function pode ter latência se fizer fetch HTTP
-- O JSON não carrega tipos — consumidores precisam de typescript duplicados ou inferidos
-- Manutenção de script de geração + tipos derivados
+### Risco médio
 
-**Impacto build:** Novo script de geração, nova etapa no build. O frontend precisaria importar JSON em vez de TS (perde type safety).
+4. Componentes `GiftBadges.vue` e `ResultsChart.vue` acessam campos específicos (`gift.id`, `gift.name`, `gift.icon`, `gift.color`).
+5. `ResultsChart.vue` hardcoda `max: 15` e `stepSize: 3`.
+6. Schema de scores no banco (`jsonb` com chaves 0-26) não tem constraint — definido apenas por convenção.
 
-**Impacto manutenção:** Médio-Alto. Script de geração, sincronização com deploy da edge function.
+### Risco baixo
 
-**Compatibilidade Vite:** ✅ (importa JSON nativamente)
-
-**Compatibilidade Deno:** ✅ (JSON imports com `assert { type: 'json' }` ou `Deno.readTextFile`)
-
-**Compatibilidade Python:** ✅ (`json.load()`)
-
-**Princípios:**
-- SSOT: ✅ (real)
-- Clean Architecture: ✅
-- Clean Code: ~ (complexidade do script de geração)
-- DRY: ✅
-- KISS: ❌ (mais complexo que as alternativas)
-- YAGNI: ❌ (a lista de 27 dons é estática — não precisa de geração dinâmica)
+7. Scripts Python com `GIFT_NAMES` duplicado (fora do escopo).
+8. CSVs legacy com nomes alternativos (não consumidos pelo frontend).
 
 ---
 
-### Recomendação: Alternativa A + CI validation
+## Recomendações
 
-**`packages/frontend/src/domain/spiritual-gifts.ts`** como fonte única, combinado com:
+### Localização da fonte única
 
-1. **Validação em CI** que verifica se `GIFTS_ORDER` na Edge Function corresponde à fonte única
-2. **Script opcional** `scripts/validate-gifts.js` que extrai os nomes de ambos os locais e compara
+**Recomendação para esta refatoração:** `packages/frontend/src/domain/spiritual-gifts.ts`
 
-**Justificativa técnica:**
+Justificativa: a maioria dos consumidores (11 de 12) está no frontend; o diretório `src/domain/` ainda não existe e sua criação reforça a separação Clean Architecture; Vite compila TypeScript nativamente.
 
-| Critério | Alt A | Alt B | Alt C |
-|---|---|---|---|
-| Simplicidade | ★★★ | ★★ | ★ |
-| SSOT | ★★ (com validação: ★★★) | ★★★ | ★★★ |
-| Sem infraestrutura nova | ✅ | ❌ | ❌ |
-| Type safety | ✅ | ✅ | ❌ (JSON perde tipos) |
-| Manutenção futura | ✅ | ~ | ❌ |
-| Compatibilidade Deno | ~ (via validação) | ❌ | ✅ |
-| Compatibilidade Vite | ✅ | ✅ | ✅ |
+Alternativas consideradas e rejeitadas:
+- `packages/shared/` — desproporcional para 27 entradas estáticas; Edge Functions continuam sem acesso
+- Geração automática de JSON — complexidade de build injustificada; perda de type safety
 
-A Alternativa A é a mais simples (KISS), mais adequada ao tamanho do projeto (YAGNI), e a que exige menos infraestrutura nova. A duplicação com a Edge Function de 31 linhas é gerenciada por validação em CI — não justifica a complexidade de uma geração automática de artefatos.
+### Tratamento da duplicação com a Edge Function
 
----
-
-## 2. Eliminação Completa da Duplicação
-
-### Limitação do runtime Deno
-
-As Edge Functions do Supabase rodam em Deno e são bundladas pelo Supabase CLI. Cada função é bundlada separadamente a partir de seu diretório. Não há uma maneira nativa de compartilhar código entre o frontend (npm/Vite) e Deno.
-
-As opções para eliminar totalmente a duplicação seriam:
-
-**Opção A: JSON embutido no diretório da Edge Function + deploy script**
-- Colocar `gifts.json` em `supabase/functions/shared/gifts.json`
-- Script de deploy copia `gifts.json` para `supabase/functions/generate-ai/gifts.json`
-- Frontend importa o JSON via Vite (caminho relativo)
-- **Problema:** O caminho `supabase/functions/shared/` não é acessível ao Vite sem configurar alias; o JSON não teria types inferidos
-
-**Opção B: Fetch HTTP na Edge Function (cold start)**
-- JSON hospedado no Supabase Storage ou no próprio frontend
-- Edge Function faz fetch na inicialização e cacheia
-- **Problema:** Adiciona latência a cada cold start (~200-500ms), complexidade de cache, ponto de falha adicional
-
-**Opção C: Script de geração + inlining**
-- Script TypeScript lê a fonte única e gera o código da Edge Function substituindo `GIFTS_ORDER`
-- **Problema:** Adiciona complexidade significativa de build para um ganho marginal
-
-### Decisão
-
-A duplicação de 31 linhas (`GIFTS_ORDER`) não será **eliminada tecnicamente** — seria antieconômico para o tamanho do projeto. Em vez disso, será **gerenciada por validação**:
+**Decisão para esta refatoração:** a duplicação de 31 linhas (`GIFTS_ORDER`) não será eliminada tecnicamente. Será gerenciada por validação em CI:
 
 1. A fonte única oficial fica em `src/domain/spiritual-gifts.ts`
 2. `GIFTS_ORDER` na Edge Function é mantido como cache local
-3. Um script de validação (CI ou pre-commit) compara as duas listas
-4. Se divergirem, o build/deploy falha
+3. Um script de validação compara as duas listas e falha se divergirem
 
-Isso atende ao espírito do SSOT sem adicionar complexidade desnecessária (KISS, YAGNI).
+Isso atende ao SSOT sem adicionar complexidade desnecessária (KISS, YAGNI).
+
+### Organização dos testes
+
+**Recomendação adotada na Sprint 1:** testes unitários puros (sem Vue/Supabase) usando Vitest, co-localizados com os módulos em diretórios `__tests__/`.
+
+### Extração de constantes
+
+**Recomendação para esta refatoração:** as constantes do domínio (`GIFT_COUNT`, `QUESTIONS_PER_GIFT`, `MAX_SCORE`, `TOTAL_QUESTIONS`) devem ser derivadas automaticamente da fonte única, nunca definidas manualmente.
+
+### Inversão de dependência
+
+**Recomendação para sprints futuras:** `topGift()` deve ser movido de `helpers/string.js` para junto de `scoring.js` (responsabilidade única).
 
 ---
 
-## 3. Estratégia de Testes
+## Arquitetura Compartilhada — Comparação
 
-### Situação atual
+As três alternativas abaixo foram analisadas durante a auditoria. A recomendação final está documentada na seção anterior.
 
-**Zero testes** em todo o projeto. Nenhum framework de teste instalado. Nenhum arquivo `.test.*` ou `.spec.*` existe.
+### Alternativa A — `packages/frontend/src/domain/` ✅ Adotada
 
-### Lacunas identificadas
+| Aspecto | Avaliação |
+|---|---|
+| SSOT | ✅ (com validação CI) |
+| KISS | ✅ Mais simples |
+| YAGNI | ✅ Sem infra desnecessária |
+| Vite | ✅ Nativo |
+| Deno | ❌ (gerenciado por validação) |
+| Build | Sem impacto |
 
-Todas as regras de negócio do domínio estão sem cobertura:
+### Alternativa B — `packages/shared/` (novo workspace)
 
-| Regra de negócio | Arquivo | Risco sem teste |
+| Aspecto | Avaliação |
+|---|---|
+| SSOT | ✅ |
+| KISS | ❌ Desproporcional |
+| YAGNI | ❌ Versionamento não necessário |
+| Deno | ❌ Continua sem acesso |
+| Build | Novo workspace, linking |
+
+### Alternativa C — Geração automática de JSON
+
+| Aspecto | Avaliação |
+|---|---|
+| SSOT | ✅ (real, runtime-agnóstico) |
+| KISS | ❌ Script + CI + distribuição |
+| YAGNI | ❌ Complexidade excessiva |
+| Deno | ✅ |
+| Type safety | ❌ JSON não carrega tipos |
+
+---
+
+## Estratégia de Testes
+
+A estratégia abaixo foi definida durante a auditoria e implementada na Sprint 1.
+
+### Cobertura atual (Sprint 1)
+
+75 testes implementados com Vitest, divididos em 4 arquivos:
+
+| Arquivo | Testes | O que cobre |
 |---|---|---|
-| `calculateScores(answers)` | `services/scoring.js` | Score errado silenciosamente |
-| `rankGifts(scores)` | `services/scoring.js` | Ordem incorreta |
-| `formatScoresForAI(scores)` | `services/scoring.js` | Prompt mal formatado |
-| `topGift(scores)` | `helpers/string.js` | Label incorreta |
-| Mapeamento `i % 27` | `data/questions.js` → `stores/quiz.js` | Pergunta errada para o dom |
-| Payload de submissão | `views/QuizView.vue` | Dados inconsistentes no banco |
-| Consistência dos nomes dos dons | `data/gifts.js` vs Edge Function | AI analysis com nomes errados |
-| Serialização dos scores no backend | `responseRepository.js` | Scores corrompidos no banco |
+| `src/services/__tests__/scoring.test.js` | 9 | `calculateScores`, `rankGifts`, `formatScoresForAI` |
+| `src/helpers/__tests__/string.test.js` | 3 | `topGift` |
+| `src/data/__tests__/gifts.test.js` | 6 | IDs, nomes, ordem, tipos, ícones |
+| `src/data/__tests__/questions.test.js` | 57 | 135 perguntas, mapeamento `i % 27` |
 
-### Proposta de testes
+### Testes propostos para sprints futuras
 
-Os testes devem ser implementados antes de qualquer refatoração (Sprint 1).
-
-#### Testes Unitários — Prioridade Alta
-
-| # | Teste | Objetivo | Arquivos envolvidos |
-|---|---|---|---|
-| 1 | `calculateScores` com answers válidas | Score correto para cada dom (0-15) | `services/scoring.js`, `data/gifts.js` |
-| 2 | `calculateScores` com answers vazias | Score zero para todos os dons | `services/scoring.js` |
-| 3 | `calculateScores` com 135 answers | Verifica total de 135 entradas | `services/scoring.js` |
-| 4 | `calculateScores` usando o mapeamento `i % 27` | Cada grupo de 5 perguntas mapeia para o dom correto | `services/scoring.js`, `data/questions.js` |
-| 5 | `rankGifts` ordenação decrescente | Primeiro = maior score, último = menor | `services/scoring.js` |
-| 6 | `rankGifts` com empates | Ordem consistente para scores iguais | `services/scoring.js` |
-| 7 | `rankGifts` com scores vazios | Todos os dons com score 0, ordenados por id | `services/scoring.js` |
-| 8 | `formatScoresForAI` | String formatada corretamente (`nome: X/15`) | `services/scoring.js` |
-| 9 | `formatScoresForAI` ordenação | Linhas em ordem decrescente de score | `services/scoring.js` |
-| 10 | `topGift` | Retorna "Dom principal: {nome}" correto | `helpers/string.js`, `services/scoring.js` |
-| 11 | `topGift` com scores vazios | Retorna string vazia | `helpers/string.js` |
-
-#### Testes de Domínio — Prioridade Alta
-
-| # | Teste | Objetivo | Arquivos envolvidos |
-|---|---|---|---|
-| 12 | IDs dos dons (0-26 contínuos) | Nenhum ID ausente ou duplicado | `data/gifts.js` |
-| 13 | Nomes dos dons únicos | Nenhum nome duplicado | `data/gifts.js` |
-| 14 | Ordem dos dons consistente | Ordem igual ao Wagner test | `data/gifts.js` |
-| 15 | Quantidade de perguntas (135) | 5 perguntas por dom × 27 dons | `data/questions.js`, `data/gifts.js` |
-| 16 | Mapeamento pergunta→dom | `questions[i]` mede `gifts[i % 27]` | `data/questions.js`, `data/gifts.js` |
-| 17 | Consistência com Edge Function | `GIFTS_ORDER` contém os mesmos 27 nomes na mesma ordem | `supabase/functions/generate-ai/index.ts` |
-
-#### Testes de Integração — Prioridade Média
-
-| # | Teste | Objetivo | Arquivos envolvidos |
-|---|---|---|---|
-| 18 | Ciclo completo: answers → scores → payload | Dados consistentes antes da submissão | `views/QuizView.vue`, `services/scoring.js` |
-| 19 | Serialização/deserialização dos scores | Scores salvos e lidos do banco são consistentes | `responseRepository.js` |
-| 20 | edge function `formatScores` | A edge function produz o mesmo output que o frontend | `supabase/functions/generate-ai/index.ts` |
-
-#### Testes de Regressão — Prioridade Baixa
-
-| # | Teste | Objetivo | Arquivos envolvidos |
-|---|---|---|---|
-| 21 | Compatibilidade com respostas existentes | Scores antigos (0-26) ainda funcionam após refatoração | Todos |
-| 22 | Quiz completo (135 perguntas) | Navegação, respostas, submissão | `stores/quiz.js`, `views/QuizView.vue` |
-
-### Ordem recomendada
-
-```
-Sprint 1:
-  1-4   calculateScores (básico, vazio, 135, mapeamento)
-  5-7   rankGifts (ordenacão, empates, vazio)
-  8-9   formatScoresForAI
-  10-11 topGift
-  12-16 Domínio (IDs, nomes, ordem, perguntas, mapeamento)
-
-Sprint 2:
-  17     Consistência Edge Function (script validação)
-
-Sprint 3-4 (durante migração):
-  18-20 Integração
-
-Sprint 5 (após migração):
-  21-22 Regressão
-```
-
-### Framework
-
-Usar **Vitest** — já está no ecossistema Vite, zero configuração extra, compatível com o `vite.config.js` existente. Instalar como devDependency:
-
-```bash
-npm install -D vitest --workspace=packages/frontend
-```
-
-Os testes de domínio (12-16) rodam sem Vue — apenas JS puro. Testes de integração (18-20) podem usar `@vue/test-utils` se necessário mockar componentes, mas o ideal é manter os testes no nível de serviço/função pura.
+| # | Teste | Prioridade | Tipo | Sprint |
+|---|---|---|---|---|
+| 17 | Consistência Edge Function vs fonte única | Alta | Script validação | 2 |
+| 18 | Ciclo completo answers → scores → payload | Média | Integração | 3-4 |
+| 19 | Serialização/deserialização dos scores | Média | Integração | 3-4 |
+| 20 | Edge function `formatScores` vs frontend | Média | Integração | 3-4 |
+| 21 | Compatibilidade com respostas existentes | Baixa | Regressão | 5 |
+| 22 | Quiz completo (135 perguntas) | Baixa | Regressão | 5 |
 
 ---
 
-## 4. Dívida Técnica
+## Dívida Técnica (constatações)
 
 ### Alta
 
-| Item | Descrição | Arquivo |
-|---|---|---|
-| Acoplamento posicional `i % 27` | Mapeamento entre perguntas e dons é implícito (comentário, não código). Quebra silenciosamente se a ordem mudar. | `data/questions.js`, `data/gifts.js` |
-| Orquestração centralizada em QuizView | `submitQuiz()` monta payload manualmente, chama scoring, persiste, dispara AI. Qualquer mudança no formato de dados impacta este ponto. | `views/QuizView.vue:165-202` |
-| Sem validação de input | `calculateScores()` não verifica `answers.length === 135`. Answers com tamanho errado produzem scores silenciosamente incorretos. | `services/scoring.js` |
-| GIFTS_ORDER duplicado | Edge function mantém lista manual sem validação automática. Pode divergir do frontend. | `supabase/functions/generate-ai/index.ts` |
-| Sem testes | Zero cobertura. Qualquer refatoração é feita sem rede de segurança. | (projeto inteiro) |
+| Item | Descrição | Arquivo | Status |
+|---|---|---|---|
+| Acoplamento posicional `i % 27` | Mapeamento implícito entre perguntas e dons | `data/questions.js`, `data/gifts.js` | Pendente |
+| QuizView orquestrador monolítico | `submitQuiz()` centraliza scoring, payload, persistência, notificação | `views/QuizView.vue` | Pendente |
+| Sem validação de input | `calculateScores()` não verifica `answers.length === 135` | `services/scoring.js` | Pendente |
+| GIFTS_ORDER duplicado | Edge function mantém lista manual sem validação automática | `supabase/functions/generate-ai/index.ts` | Pendente |
+| Zero testes | Projeto sem nenhum teste antes da Sprint 1 | Projeto inteiro | **Resolvido** (75 testes) |
 
 ### Média
 
 | Item | Descrição | Arquivo |
 |---|---|---|
-| Hardcode `score / 15` | ResultadosChart e GiftBadges hardcodam o max score (15). Se a fórmula mudar (ex: 0-4 por pergunta), ambos quebram. | `ResultsChart.vue`, `GiftBadges.vue` |
-| Hardcode `stepSize: 3` | Gráfico assume escala 0-15 com step 3. | `ResultsChart.vue:115` |
-| `topGift()` em helpers/string.js | Função de domínio misturada com utilitário de string. Deveria estar perto de `scoring.js`. | `helpers/string.js` |
-| `color: '#1B5438'` repetido 27x | Mesmo valor em todos os objetos. Poderia ser valor default. | `data/gifts.js` |
-| `ANSWER_LABELS` em data/questions.js | Dado de apresentação (escala Likert) misturado com dados de domínio (perguntas). | `data/questions.js` |
-| `insert()` e `countByUserId()` sem timeout | Inconsistência: outros métodos do repositório usam timeout de 10s, estes dois não. | `repositories/responseRepository.js` |
-| `selectField()` lê registro inteiro | Consulta N+1 evitável se usasse `.select(field)` diretamente. | `repositories/responseRepository.js` |
+| Hardcode `score / 15` | Max score fixo em componentes de exibição | `ResultsChart.vue`, `GiftBadges.vue` |
+| `topGift()` em local inadequado | Função de domínio misturada com utilitário de string | `helpers/string.js` |
+| `color` repetido 27x | Mesmo valor poderia ser default | `data/gifts.js` |
+| `ANSWER_LABELS` misturado | Escala Likert (apresentação) junto com dados de domínio | `data/questions.js` |
+| Inconsistência de timeout | `insert()` e `countByUserId()` sem timeout, diferindo dos demais | `repositories/responseRepository.js` |
 
 ### Baixa
 
 | Item | Descrição | Arquivo |
 |---|---|---|
-| Código comentado em questions.js | Comentários grandes (original inglês, rascunhos) poluem o arquivo. | `data/questions.js` |
-| Alinhamento inconsistente | Gifts `id: 25` (Apóstolo) com formatação diferente dos demais. | `data/gifts.js:30` |
-| Sem paginação em listAll() | Pode ser problema com muitas respostas. | `repositories/responseRepository.js` |
-| README desatualizado | Descreve o pipeline Python legado, não o app atual. | `README.md` |
+| Código comentado | Comentários grandes poluindo o arquivo | `data/questions.js` |
+| Formatação inconsistente | Gift id:25 com alinhamento diferente | `data/gifts.js` |
+| README desatualizado | Descreve pipeline legado, não o app atual | `README.md` |
 
 ---
 
-## 5. Modelo do Domínio
+## Modelo do Domínio
 
-### Proposta de estrutura para a fonte única
+A estrutura abaixo é a proposta para a fonte única, a ser implementada na Sprint 2.
 
 ```typescript
 export interface Gift {
-  /** ID numérico 0-26, usado como chave no JSONB scores do banco */
-  id: number
-  /** Nome completo em português (ex: "Discernimento de Espíritos") */
-  name: string
-  /** Ícone Material Design para exibição (mdi-*) */
-  icon: string
-  /** Cor hexadecimal para exibição (ex: "#1B5438") */
-  color: string
+  id: number     // 0-26, chave no JSONB scores do banco
+  name: string   // Nome completo em português
+  icon: string   // Ícone Material Design (mdi-*)
+  color: string  // Cor hexadecimal para exibição
 }
-
-export const GIFT_COUNT = 27
-export const QUESTIONS_PER_GIFT = 5
-export const MAX_SCORE = 15
-export const TOTAL_QUESTIONS = 135
-
-export const gifts: readonly Gift[]
 ```
 
 ### Decisões sobre cada campo
 
-**`id: number` (0-26)**
-- ✅ **Manter numérico.** É o identificador usado em todo o sistema:
-  - Chave no objeto `scores` salvo no banco (`scores jsonb` com chaves `"0"`, `"1"`, etc.)
-  - Indexador do mapeamento `i % 27` para perguntas
-  - Propriedade `gift.id` acessada por componentes e serviços
-- Mudar para string ou UUID quebraria: (a) dados existentes no banco, (b) o cálculo de scores no frontend, (c) `formatScores` no edge function
-- Se `id` for alterado, todos os registros existentes no banco com scores keyed por ID numérico ficam inconsistentes
-
-**`slug?: string`**
-- ❌ **Não adicionar agora (YAGNI).** Não há funcionalidade que precise de slug (URLs amigáveis, rotas). O projeto usa IDs de resposta (UUID), não IDs de gift.
-
-**`category?: string`** (ex: "Revelação", "Poder", "Ministério")
-- ❌ **Não adicionar agora (YAGNI).** O modelo Wagner classifica dons em categorias, mas a aplicação atual não usa essa classificação em lugar nenhum.
-
-**`description?: string`**
-- ❌ **Não adicionar agora (YAGNI).** Não há tela de detalhes do dom nem tooltip. O conteúdo descritivo está nos recursos externos (links).
-
-**`icon: string`**
-- ✅ **Manter no domínio.** Embora seja um dado de apresentação (MDI icon), não há uma camada de apresentação separada. Remover do domínio exigiria criar um mapping paralelo, violando KISS.
-
-**`color: string`**
-- ✅ **Manter no domínio** pela mesma razão do `icon`. Extrair o valor `'#1B5438'` como constante default em vez de repeti-lo 27 vezes.
+| Campo | Decisão | Justificativa |
+|---|---|---|
+| `id: number` | Mantido numérico | Chave no JSONB do banco, indexador `i % 27`, acessado por componentes. Mudar quebraria dados existentes |
+| `slug` | Não adicionado (YAGNI) | Nenhuma funcionalidade atual precisa |
+| `category` | Não adicionado (YAGNI) | Modelo Wagner não é usado pela aplicação |
+| `description` | Não adicionado (YAGNI) | Sem tela de detalhes ou tooltip |
+| `icon` | Mantido pragmaticamente | Dado de apresentação, mas não há camada separada. Remover exigiria mapping paralelo |
+| `color` | Mantido pragmaticamente | Mesma razão do `icon`. Valor `#1B5438` pode ser extraído como default |
 
 ### Derivadas automáticas
 
-As seguintes constantes devem ser DERIVADAS da fonte única, não definidas manualmente:
+As constantes devem ser derivadas, nunca definidas manualmente:
 
 ```typescript
 export const GIFT_COUNT = gifts.length
@@ -432,80 +345,61 @@ export const giftNames: readonly string[] = gifts.map(g => g.name)
 export const giftById: ReadonlyMap<number, Gift>
 ```
 
-Isso garante que se a lista mudar, as constantes acompanham — sem chance de divergência.
+### O que não pertence à fonte única
 
-### O que NÃO pertence ao domínio
-
-| Dado | Motivo | Deve ficar em |
+| Dado | Motivo | Local atual |
 |---|---|---|
-| `ANSWER_LABELS` | Escala Likert (apresentação) | `data/questions.js` ou mover para `config/answerScale.js` |
+| `ANSWER_LABELS` | Escala Likert (apresentação) | `data/questions.js` |
 | `resources` | Links externos (conteúdo) | `data/resources.js` |
-| `questions` (perguntas) | Dado de questionário, não de gift. Mas tem acoplamento posicional que precisa ser resolvido | `data/questions.js` (mantido, com validação) |
+| `questions` | Dado do questionário, não do gift | `data/questions.js` |
 
 ---
 
-## 6. Conclusão Arquitetural
+## Arquitetura Alvo
 
-### Qual é a melhor arquitetura?
-
-**Alternativa A** — fonte única em `packages/frontend/src/domain/spiritual-gifts.ts` com validação CI para a Edge Function. É a mais simples (KISS), mais adequada ao tamanho do projeto (YAGNI), e que atende ao SSOT com o mínimo de infraestrutura nova.
-
-### Qual será a fonte única definitiva?
+Ao final da Sprint 5, espera-se a seguinte organização do domínio:
 
 ```
-packages/frontend/src/domain/spiritual-gifts.ts
+packages/frontend/src/
+  domain/
+    spiritual-gifts.ts       # Fonte única: tipo Gift + lista + constantes derivadas
+  services/
+    scoring.ts               # calculateScores, rankGifts, formatScoresForAI, topGift
+    __tests__/
+      scoring.test.js
+  helpers/
+    string.js                # Apenas initials (topGift movido para scoring)
+    __tests__/
+      string.test.js
+  data/
+    gifts.js                 # Removido (substituído por domain/spiritual-gifts.ts)
+    questions.js             # Mantido, com validação de consistência
+    __tests__/
+      gifts.test.js
+      questions.test.js
 ```
 
-Tipo `Gift` com campos `id`, `name`, `icon`, `color`.
-Constantes derivadas automaticamente.
-Gifts exportados como `readonly` array.
-
-### Como eliminar totalmente as duplicações?
-
-A duplicação com a Edge Function (`GIFTS_ORDER`) não será eliminada tecnicamente — o custo de infraestrutura para compartilhar dados entre Vite e Deno é desproporcional para 27 nomes estáticos. Em vez disso, será **gerenciada por validação**:
-
-- Script `scripts/validate-gifts.js` (ou task npm) que extrai os nomes de `gifts.js` e do `generate-ai/index.ts` e compara
-- CI ou pre-commit hook impede deploy se divergirem
-- Também valida a consistência entre `gifts.js` e `questions.js` (quantidade, mapeamento)
-
-No frontend, a duplicação atual entre `data/gifts.js`, `scoring.js`, e `helpers/string.js` será eliminada pela migração:
-- `data/gifts.js` → `domain/spiritual-gifts.ts` (única fonte)
-- `helpers/string.js` tem `topGift()` movido para junto de `scoring.js`
-- `data/gifts.js` original removido
-
-### Quais são os maiores riscos restantes?
-
-1. **Acoplamento posicional `i % 27`** — o risco mais alto. `questions.js` e `gifts.js` não têm ligação programática. Uma validação runtime ou compile-time precisa ser adicionada.
-2. **Dados existentes no banco** — scores com chaves 0-26. Qualquer mudança no esquema de IDs quebra registros históricos.
-3. **QuizView como orquestrador monolítico** — a função `submitQuiz()` faz tudo: scoring, payload, persistência, notificação. Precisa ser desacoplada.
-
-### O projeto está pronto para iniciar a Sprint 1?
-
-**Sim, com ressalvas.** Os pré-requisitos para Sprint 1 são:
-
-1. ✅ Auditoria completa (Sprint 0 concluída)
-2. ✅ Decisão arquitetural tomada (Alternativa A + CI validation)
-3. ⬜ **Instalar Vitest** como devDependency
-4. ⬜ **Validar a decisão** com o usuário (esta análise)
-
-Após aprovação, Sprint 1 pode começar: criar testes unitários para `calculateScores`, `rankGifts`, `formatScoresForAI`, `topGift`, e validações de domínio.
+Características da arquitetura final:
+- **Única definição** dos 27 dons em `domain/spiritual-gifts.ts`
+- **Validação CI** que garante que `GIFTS_ORDER` na Edge Function coincide com a fonte única
+- **`data/gifts.js` removido** — todos os consumidores importam de `domain/spiritual-gifts.ts`
+- **`topGift()` movido** para junto de `scoring.js` (responsabilidade única)
+- **75+ testes** protegendo scoring, ranking, topGift, consistência dos dados estáticos
+- **Constantes derivadas** automaticamente (`GIFT_COUNT`, `giftNames`, `giftById`)
+- **Zero alteração funcional** — comportamento da aplicação preservado
 
 ---
 
-## 7. Dívida Técnica
+## Questões em Aberto
 
-| Prioridade | Item | Arquivo | Impacto |
-|---|---|---|---|
-| **Alta** | Acoplamento posicional `i % 27` | `data/questions.js` | Scores errados se ordem mudar |
-| **Alta** | QuizView orquestrador monolítico | `views/QuizView.vue` | Mudanças no domínio propagam para view |
-| **Alta** | Sem validação de input em calculateScores | `services/scoring.js` | Answers inválidas geram scores silenciosamente incorretos |
-| **Alta** | GIFTS_ORDER duplicado sem validação | `supabase/functions/generate-ai/index.ts` | AI analysis inconsistente |
-| **Alta** | Zero testes | Projeto inteiro | Refatoração sem rede de segurança |
-| **Média** | Hardcode max score (15) | `ResultsChart.vue`, `GiftBadges.vue` | Quebra se fórmula mudar |
-| **Média** | topGift() em local errado | `helpers/string.js` | Violação de responsabilidade única |
-| **Média** | color repetido 27x | `data/gifts.js` | Ruído, propenso a erro |
-| **Média** | ANSWER_LABELS misturado com domínio | `data/questions.js` | Coesão baixa |
-| **Média** | insert/count sem timeout | `repositories/responseRepository.js` | Comportamento inconsistente |
-| **Baixa** | Código comentado poluindo arquivo | `data/questions.js` | Legibilidade |
-| **Baixa** | Formatação inconsistente (gift 25) | `data/gifts.js` | Estética |
-| **Baixa** | README desatualizado | `README.md` | Documentação enganosa |
+Os assuntos abaixo foram propositalmente adiados para etapas futuras e **não fazem parte do escopo desta refatoração**:
+
+- **Migração do frontend para Nuxt** ou outro framework — não há plano atual
+- **Adoção de ORM** no lugar do Supabase client direto — fora do escopo
+- **CI/CD** — pipeline de validação automática será definido futuramente
+- **Internacionalização** (i18n) dos metadados dos dons — melhoria futura
+- **Persistência dos metadados dos dons em banco de dados** — não justificado para lista estática
+- **Geração automática de documentação do domínio** — pós-refatoração
+- **Fortalecimento DDD** com agregados, repositórios de domínio, etc. — avaliação futura
+- **Eliminação técnica da duplicação com Edge Functions** — a validação CI foi considerada suficiente para esta etapa
+- **Reorganização completa da aplicação** além do domínio dos dons — fora do escopo

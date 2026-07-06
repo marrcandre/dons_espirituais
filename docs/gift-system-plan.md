@@ -1,6 +1,6 @@
 # Refatoração do Domínio dos Dons Espirituais
 
-> **Status:** Planejamento
+> **Status:** Sprint 1 concluída
 >
 > **Objetivo:** Consolidar os metadados dos dons espirituais em uma única fonte de verdade (Single Source of Truth), reduzindo a duplicação de código, aumentando a segurança das alterações e melhorando a arquitetura do projeto.
 
@@ -346,9 +346,9 @@ Estas melhorias não fazem parte desta etapa.
 
 ## Testes
 
-- [ ] Testes unitários criados.
+- [x] Testes unitários criados (75 testes, Vitest).
 - [ ] Testes de integração criados.
-- [ ] Cobertura validada.
+- [x] Cobertura validada (scoring, ranking, topGift, gifts, questions).
 
 ## TypeScript
 
