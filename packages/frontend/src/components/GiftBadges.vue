@@ -32,7 +32,7 @@
 <script setup>
 import { computed } from 'vue'
 import { gifts } from '../domain/spiritual-gifts'
-import { rankGifts } from '../services/scoring.js'
+import { rankGifts } from '../domain/scoring'
 import AppCard from './ui/AppCard.vue'
 
 const props = defineProps({

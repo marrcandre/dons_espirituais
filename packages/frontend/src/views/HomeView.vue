@@ -66,7 +66,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { ANSWER_LABELS } from '../data/questions.js'
+import { ANSWER_LABELS } from '../constants/likert.js'
 import AppPage from '../components/ui/AppPage.vue'
 import AppButton from '../components/ui/AppButton.vue'
 import PageHeader from '../components/ui/PageHeader.vue'

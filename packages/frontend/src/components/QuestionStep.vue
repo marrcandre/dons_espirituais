@@ -45,7 +45,7 @@
 </template>
 
 <script setup>
-import { ANSWER_LABELS } from '../data/questions.js'
+import { ANSWER_LABELS } from '../constants/likert.js'
 
 defineProps({
   question: { type: Object, required: true },

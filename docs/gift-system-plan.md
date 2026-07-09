@@ -1,6 +1,6 @@
 # Refatoração do Domínio dos Dons Espirituais
 
-> **Status:** Sprint 3 concluída
+> **Status:** Sprint 4 concluída
 >
 > **Objetivo:** Consolidar os metadados dos dons espirituais em uma única fonte de verdade (Single Source of Truth), reduzindo a duplicação de código, aumentando a segurança das alterações e melhorando a arquitetura do projeto.
 
@@ -266,20 +266,19 @@ A solução escolhida deverá evitar, sempre que possível, qualquer duplicaçã
 
 ---
 
-## Sprint 4 — Migração Gradual
+## Sprint 4 — Organização Arquitetural ✅ Concluída
 
-Substituir gradualmente todas as implementações antigas.
-Cada alteração deverá manter todos os testes passando.
+Mover regras de domínio para `domain/`, eliminar re-exports temporários, separar responsabilidades.
 
-Atividades planejadas:
+Atividades executadas:
 
-- migrar `data/questions.js` para o domínio ou validar sua permanência como dado de questionário (não de gift);
-- extrair `ANSWER_LABELS` de `data/questions.js` para a camada de apresentação;
-- revisar `helpers/` — avaliar se `array.js`, `validation.js`, `date.js` devem permanecer ou ser reorganizados;
-- revisar `services/scoring.ts` — avaliar se pertence ao domínio (`domain/`) ou permanece em `services/`;
-- verificar uso de constantes derivadas (`GIFT_COUNT`, `giftNames`, `giftById`) nos consumidores;
-- remover re-exports temporários sempre que possível (ex: `topGift` em `string.js`);
-- validar que `HistoryList.vue` pode importar `topGift` diretamente de `scoring.ts`.
+- `services/scoring.ts` movido para `domain/scoring.ts` ✅
+- Re-export de `topGift` removido de `helpers/string.js` ✅
+- `HistoryList.vue` importa `topGift` diretamente de `domain/scoring` ✅
+- `ANSWER_LABELS` extraído para `constants/likert.js` ✅
+- Comentários enormes removidos de `data/questions.js` ✅
+- `GIFT_COUNT` adotado em `domain/scoring.ts` (em vez de `27` literal) ✅
+- Helpers revisados — nenhuma alteração necessária ✅
 
 ---
 
@@ -376,4 +375,4 @@ Estas melhorias não fazem parte desta etapa.
 - [ ] Código limpo (Sprint 5).
 - [x] Documentação atualizada.
 - [x] Todos os testes aprovados (78/78).
-- [ ] Refatoração concluída (após Sprints 4 e 5).
+- [ ] Refatoração concluída (após Sprint 5).

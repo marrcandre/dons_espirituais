@@ -41,7 +41,7 @@ import { computed, onMounted } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
 import { useResponsesStore } from '../stores/responses.js'
 import { formatDate } from '../helpers/date.js'
-import { topGift } from '../helpers/string.js'
+import { topGift } from '../domain/scoring'
 import AppCard from './ui/AppCard.vue'
 
 const props = defineProps({

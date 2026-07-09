@@ -1,4 +1,4 @@
-import { gifts } from '../domain/spiritual-gifts'
+import { gifts, GIFT_COUNT } from './spiritual-gifts'
 
 export interface Scores {
   [giftId: number]: number
@@ -15,7 +15,7 @@ export function calculateScores(answers: number[]): Scores {
   gifts.forEach((gift) => {
     let total = 0
     for (let block = 0; block < 5; block++) {
-      const questionId = gift.id + block * 27
+      const questionId = gift.id + block * GIFT_COUNT
       total += answers[questionId] ?? 0
     }
     scores[gift.id] = total

@@ -4,7 +4,7 @@
 >
 > **Data:** 2026-07-04
 >
-> **Última atualização:** 2026-07-09 (Sprint 3 concluída)
+> **Última atualização:** 2026-07-09 (Sprint 4 concluída)
 >
 > **Status:** Concluída
 
@@ -367,33 +367,35 @@ Estado atual após a Sprint 3. A organização abaixo reflete o momento presente
 ```
 packages/frontend/src/
   domain/
-    spiritual-gifts.ts       # ✅ Fonte única: tipo Gift + lista + constantes derivadas (Sprint 2) — consumida por toda a produção (Sprint 3)
-  services/
-    scoring.ts               # ✅ calculateScores, rankGifts, formatScoresForAI, topGift (Sprint 2)
+    spiritual-gifts.ts       # ✅ Fonte única: tipo Gift + lista + constantes derivadas (Sprint 2)
+    scoring.ts               # ✅ Regras de domínio: calculateScores, rankGifts, formatScoresForAI, topGift (Sprint 4)
+  services/                  # ✅ (vazio de domínio — apenas serviços de infraestrutura)
     __tests__/
-      scoring.test.js        # ✅ 12 testes — importa da fonte única (Sprint 3)
+      scoring.test.js        # ✅ 12 testes — importa de domain/ (Sprint 3/4)
+  constants/
+    likert.js                # ✅ ANSWER_LABELS — escala Likert (apresentação) (Sprint 4)
   helpers/
-    string.js                # ✅ Apenas initials (topGift re-exportado de scoring) (Sprint 2)
+    string.js                # ✅ Apenas initials (topGift removido na Sprint 4)
     __tests__/
       string.test.js
   data/
-    gifts.js                 # ✅ Apenas re-export: export { gifts } from '../domain/spiritual-gifts' — sem dados próprios (Sprint 3)
-    questions.js             # Mantido, com validação de consistência
+    gifts.js                 # ⏳ Adapter de compatibilidade (re-export) — remoção Sprint 5
+    questions.js             # ✅ Apenas perguntas (ANSWER_LABELS extraído na Sprint 4)
     __tests__/
-      gifts.test.js          # ✅ Importa da fonte única (Sprint 3)
-      questions.test.js      # ✅ Importa da fonte única (Sprint 3)
+      gifts.test.js          # ✅ Importa de domain/spiritual-gifts
+      questions.test.js      # ✅ Importa de domain/spiritual-gifts
 ```
 
-Características da arquitetura após Sprint 3:
-- **Única definição física** dos 27 dons em `domain/spiritual-gifts.ts` ✅ (Sprint 2 + ajuste Sprint 3)
-- **Fonte única consumida por toda a produção** ✅ (Sprint 3 — GiftBadges.vue migrado)
-- **Testes validam a fonte de verdade** ✅ (Sprint 3 — todos os 4 arquivos de teste importam de `domain/spiritual-gifts`)
-- **`data/gifts.js` é apenas um adapter de compatibilidade** (re-export), sem dados próprios ✅ (ajuste Sprint 3)
-- **`data/gifts.js` será removido** na Sprint 5, juntamente com os demais adapters temporários ⏳
+Características da arquitetura após Sprint 4:
+- **Única definição física** dos 27 dons em `domain/spiritual-gifts.ts` ✅
+- **Regras de domínio em `domain/`** — scoring.ts movido de `services/` para `domain/` ✅ (Sprint 4)
+- **Re-exports temporários eliminados** — `topGift` não é mais re-exportado por `string.js` ✅ (Sprint 4)
+- **`ANSWER_LABELS` na camada de apresentação** — em `constants/likert.js` ✅ (Sprint 4)
+- **Helpers limpos** — apenas utilitários puros, sem funções de domínio ✅ (Sprint 4)
+- **`data/gifts.js` é apenas adapter de compatibilidade** ⏳ (remoção Sprint 5)
+- **`data/questions.js` contém apenas perguntas** — sem escala Likert ou comentários enormes ✅ (Sprint 4)
 - **Validação CI** da Edge Function ⏳ (pendente)
-- **`topGift()` movido** para junto de `scoring.ts` ✅ (Sprint 2)
 - **78 testes** protegendo scoring, ranking, topGift, consistência dos dados ✅
-- **Constantes derivadas** automaticamente (`GIFT_COUNT`, `giftNames`, `giftById`) ✅ (Sprint 2)
 - **Zero alteração funcional** — comportamento da aplicação preservado ✅
 
 ---
@@ -402,7 +404,10 @@ Características da arquitetura após Sprint 3:
 
 Os assuntos abaixo foram propositalmente adiados para etapas futuras e **não fazem parte do escopo desta refatoração**:
 
-- **Sprint 5** — terá como escopo a remoção de adapters temporários (`data/gifts.js`), código morto e re-exports de compatibilidade, e não mais a consolidação da fonte única (já concluída)
+- **Sprint 5** — terá como escopo a remoção de adapters temporários (`data/gifts.js`), código morto e re-exports de compatibilidade
+- **TypeScript completo** — migração de stores, repositories, views, helpers, data e componentes de domínio para `.ts`
+- **Refatoração do QuizView** — extrair `submitQuiz()` para um use-case ou service dedicado
+- **CI/CD** — pipeline de validação automática (testes, build, type-check)
 - **Migração do frontend para Nuxt** ou outro framework — não há plano atual
 - **Adoção de ORM** no lugar do Supabase client direto — fora do escopo
 - **CI/CD** — pipeline de validação automática será definido futuramente

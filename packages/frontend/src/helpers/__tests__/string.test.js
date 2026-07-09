@@ -1,20 +1,18 @@
 import { describe, it, expect } from 'vitest'
-import { topGift } from '../string.js'
+import { initials } from '../string.js'
 
-describe('topGift', () => {
+describe('initials', () => {
 
-  it('retorna o nome do dom principal formatado', () => {
-    const scores = { 0: 15, 1: 10 }
-    const result = topGift(scores)
-    expect(result).toBe('Dom principal: Profecia')
+  it('retorna as duas primeiras iniciais em maiúsculas', () => {
+    expect(initials('João Silva')).toBe('JS')
   })
 
-  it('retorna string vazia para scores nulos', () => {
-    expect(topGift(null)).toBe('')
+  it('retorna string vazia para nome vazio', () => {
+    expect(initials('')).toBe('')
   })
 
-  it('retorna string vazia para objeto vazio', () => {
-    expect(topGift({})).toBe('Dom principal: Profecia')
+  it('retorna string vazia para null', () => {
+    expect(initials(null)).toBe('')
   })
 
 })

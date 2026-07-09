@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { calculateScores, rankGifts, formatScoresForAI, topGift } from '../scoring.js'
+import { calculateScores, rankGifts, formatScoresForAI, topGift } from '../../domain/scoring'
 import { gifts } from '../../domain/spiritual-gifts'
 
 function makeAnswers(giftIndex, score) {

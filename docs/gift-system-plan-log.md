@@ -332,20 +332,88 @@ Após a conclusão da Sprint 3, identificou-se que `data/gifts.js` ainda continh
 
 ---
 
+## Sprint 4 — Organização Arquitetural
+
+> **Início:** 2026-07-09
+>
+> **Término:** 2026-07-09
+>
+> **Status:** Concluída
+
+### Atividades executadas
+
+**1. Migração de `services/scoring.ts` → `domain/scoring.ts`**
+
+- Arquivo movido para `src/domain/scoring.ts` (regras puras de domínio: cálculo, ranking, topGift, formatação)
+- Import corrigido de `'../domain/spiritual-gifts'` para `'./spiritual-gifts'` (mesmo diretório)
+- Imports atualizados em: `helpers/string.js`, `QuizView.vue`, `ResultsChart.vue`, `GiftBadges.vue`, `scoring.test.js`
+
+**2. Remoção de re-export temporário de `topGift` em `helpers/string.js`**
+
+- Re-export de `topGift` removido de `string.js`
+- `HistoryList.vue` passou a importar `topGift` diretamente de `domain/scoring`
+- Testes de `string.test.js` migrados de `topGift` (redundante com scoring.test.js) para `initials`
+
+**3. Separação de `ANSWER_LABELS` de `data/questions.js`**
+
+- Criado `src/constants/likert.js` com `ANSWER_LABELS`
+- Removido `ANSWER_LABELS` de `data/questions.js`
+- Removido comentários enormes com originais em inglês (~138 linhas)
+- Imports atualizados em: `HomeView.vue`, `QuestionStep.vue`
+
+**4. Adoção de constante derivada `GIFT_COUNT` no `domain/scoring.ts`**
+
+- `block * 27` substituído por `block * GIFT_COUNT` (uso da constante existente)
+- Import de `GIFT_COUNT` adicionado
+
+**5. Revisão de `helpers/`**
+
+- Verificados todos os 4 utilitários (`string.js`, `array.js`, `validation.js`, `date.js`)
+- Todos são funções puras de utilidade geral, sem dependências de domínio
+- Nenhuma função de domínio misturada — diretório limpo, sem alterações
+
+### Decisões tomadas
+
+- **`scoring.ts` movido para `domain/`** — reconhecido que suas funções são regras puras de negócio (scoring, ranking), sem dependência de infraestrutura
+- **`topGift` não é mais re-exportado** — `HistoryList.vue` importa diretamente da fonte de domínio
+- **`ANSWER_LABELS` separado de `questions.js`** — libera o arquivo de perguntas para ser apenas dado de domínio, e a escala Likert fica na camada de apresentação
+- **Helpers revisados e aprovados** — sem necessidade de reorganização
+
+### Dificuldades encontradas
+
+- Nenhuma. As alterações foram diretas e todos os testes permaneceram verdes em cada etapa.
+
+### Validação
+
+| Item | Resultado |
+|---|---|
+| Testes executados | 78 |
+| Testes aprovados | 78 |
+| Build | ✅ (784 módulos, ~878ms) |
+| Regressões | Nenhuma |
+
+### Métricas
+
+| Item | Valor |
+|---|---|
+| Arquivos criados | 2 (`domain/scoring.ts`, `constants/likert.js`) |
+| Arquivos movidos | 1 (`services/scoring.ts` → `domain/scoring.ts`) |
+| Arquivos modificados | 7 (`string.js`, `QuizView.vue`, `ResultsChart.vue`, `GiftBadges.vue`, `HistoryList.vue`, `HomeView.vue`, `QuestionStep.vue`) |
+| Arquivos de teste modificados | 2 (`scoring.test.js`, `string.test.js`) |
+| Total de sprints concluídas | 5 |
+
+---
+
 ## Próxima Sprint
 
-### Sprint 4 — Migração Gradual
+### Sprint 5 — Limpeza e Remoção de Compatibilidade
 
-Objetivo: Substituir gradualmente implementações antigas e consolidar a organização do código, com foco em:
+Remover adapters temporários e código legado:
 
-- avaliar `services/scoring.ts` — pertence ao domínio (`domain/`) ou permanece em `services/`?
-- extrair `ANSWER_LABELS` de `data/questions.js` para a camada de apresentação
-- revisar `helpers/` — avaliar necessidade de cada utilitário
-- remover re-exports temporários (ex: `topGift` em `string.js`)
-- migrar `HistoryList.vue` para importar `topGift` diretamente de `scoring.ts`
-- verificar adoção de constantes derivadas (`GIFT_COUNT`, `giftNames`, `giftById`) nos consumidores
-
-Cada alteração deverá manter todos os testes passando.
+- remover `data/gifts.js` (adapter de compatibilidade — re-export)
+- remover imports obsoletos
+- atualizar documentação final da arquitetura
+- executar última validação completa da aplicação
 
 ---
 
@@ -353,5 +421,4 @@ Cada alteração deverá manter todos os testes passando.
 
 As sprints abaixo serão executadas sequencialmente, dependendo de aprovação:
 
-- Sprint 4 — Migração Gradual
 - Sprint 5 — Limpeza (remoção de adapters temporários, código morto e re-exports de compatibilidade)

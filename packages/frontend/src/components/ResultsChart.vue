@@ -16,7 +16,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js'
-import { rankGifts } from '../services/scoring.js'
+import { rankGifts } from '../domain/scoring'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend)
 

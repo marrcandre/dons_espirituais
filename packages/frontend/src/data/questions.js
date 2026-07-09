@@ -138,17 +138,9 @@ export const questions = [
   { id: 132, text: "Respondo com alegria quando me pedem tarefas simples, mesmo que sejam humildes." },
   { id: 133, text: "Quando convoco líderes cristãos, muitos respondem ao chamado." },
   { id: 134, text: "Tenho um desejo intenso de levar outras pessoas a um encontro com Deus." }
-];
-
-export const ANSWER_LABELS = [
-  { value: 0, label: 'Raramente / Nunca' },
-  { value: 1, label: 'Às vezes' },
-  { value: 2, label: 'Frequentemente' },
-  { value: 3, label: 'Muito frequentemente' },
 ]
 
 
-// export const questions =  [
 //   {"id": 0, "text": "I have a desire to speak direct messages that I receive from God in order to edify, exhort or comfort others."},
 //   {"id": 1, "text": "I have enjoyed ministering to a certain group of people over a long period of time, sharing personally in their successes and their failures."},
 //   {"id": 2, "text": "People have told me that I have helped them learn biblical truths in a meaningful way."},
