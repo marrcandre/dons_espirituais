@@ -68,8 +68,38 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 * Ajuste de margens e espaçamentos em todas as views para otimizar espaço vertical.
 * Redução de ~120px no AdminView, ~60px na ResultsView, ~28px no MyResultsView, ~24px na HomeView.
 * Correção de overflow em nomes longos no GiftBadges.
+---
+
+## [1.5.0] - Julho/2026
+
+### Domínio — Migração para TypeScript (Sprint 2)
+
+* Criação do módulo `domain/spiritual-gifts.ts` como fonte única de verdade.
+* Criação da interface `Gift` tipada (`id`, `name`, `icon`, `color`).
+* Constantes derivadas automáticas: `GIFT_COUNT`, `giftNames`, `giftById()`.
+* Migração de `services/scoring.js` → `services/scoring.ts` com tipagem completa.
+* Movimentação de `topGift()` de `helpers/string.js` para `services/scoring.ts`.
+
+### Domínio — Fonte Única (Sprint 3)
+
+* Migração de todos os consumidores para importar de `domain/spiritual-gifts.ts`.
+* `GiftBadges.vue` alterado para importar da fonte única (único consumidor de produção que ainda usava `data/gifts.js`).
+* `data/gifts.js` transformado em adapter de compatibilidade (re-export da fonte única), eliminando duplicação física de dados.
+* Testes migrados para validar diretamente o domínio (`domain/spiritual-gifts.ts`).
+
+### Testes
+
+* Suíte expandida para 78 testes (Vitest).
+* Todos os testes importam da fonte única de domínio.
+
+### Documentação
+
+* Atualização dos documentos de planejamento (`gift-system-plan.md`).
+* Atualização da análise arquitetural (`gift-system-plan-analysis.md`).
+* Atualização do log de execução (`gift-system-plan-log.md`).
 
 ---
+
 ## [1.2.0] - Junho/2026
 
 ### Experiência do Usuário

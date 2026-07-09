@@ -288,9 +288,9 @@
 
 ### Decisões tomadas
 
-- **`data/gifts.js` mantido** no código — servirá apenas como referência de compatibilidade; será removido exclusivamente na Sprint 5
+- **`data/gifts.js` transformado em adapter** — seu conteúdo foi substituído por `export { gifts } from '../domain/spiritual-gifts'`, eliminando a duplicação física de dados
 - **Testes migrados para a fonte de verdade** — agora os testes validam diretamente `domain/spiritual-gifts.ts`, não o legado
-- **Nenhuma lógica alterada** — apenas caminhos de import foram modificados
+- **Nenhuma lógica alterada** — apenas caminhos de import foram modificados; compatibilidade total preservada
 
 ### Dificuldades encontradas
 
@@ -336,9 +336,16 @@ Após a conclusão da Sprint 3, identificou-se que `data/gifts.js` ainda continh
 
 ### Sprint 4 — Migração Gradual
 
-Substituir gradualmente todas as implementações antigas.
+Objetivo: Substituir gradualmente implementações antigas e consolidar a organização do código, com foco em:
+
+- avaliar `services/scoring.ts` — pertence ao domínio (`domain/`) ou permanece em `services/`?
+- extrair `ANSWER_LABELS` de `data/questions.js` para a camada de apresentação
+- revisar `helpers/` — avaliar necessidade de cada utilitário
+- remover re-exports temporários (ex: `topGift` em `string.js`)
+- migrar `HistoryList.vue` para importar `topGift` diretamente de `scoring.ts`
+- verificar adoção de constantes derivadas (`GIFT_COUNT`, `giftNames`, `giftById`) nos consumidores
+
 Cada alteração deverá manter todos os testes passando.
-As duplicações deverão ser removidas somente após a migração dos consumidores.
 
 ---
 

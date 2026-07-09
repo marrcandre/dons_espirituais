@@ -1,6 +1,6 @@
 # Refatoração do Domínio dos Dons Espirituais
 
-> **Status:** Sprint 1 concluída
+> **Status:** Sprint 3 concluída
 >
 > **Objetivo:** Consolidar os metadados dos dons espirituais em uma única fonte de verdade (Single Source of Truth), reduzindo a duplicação de código, aumentando a segurança das alterações e melhorando a arquitetura do projeto.
 
@@ -270,22 +270,30 @@ A solução escolhida deverá evitar, sempre que possível, qualquer duplicaçã
 
 Substituir gradualmente todas as implementações antigas.
 Cada alteração deverá manter todos os testes passando.
-As duplicações deverão ser removidas somente após a migração dos consumidores.
+
+Atividades planejadas:
+
+- migrar `data/questions.js` para o domínio ou validar sua permanência como dado de questionário (não de gift);
+- extrair `ANSWER_LABELS` de `data/questions.js` para a camada de apresentação;
+- revisar `helpers/` — avaliar se `array.js`, `validation.js`, `date.js` devem permanecer ou ser reorganizados;
+- revisar `services/scoring.ts` — avaliar se pertence ao domínio (`domain/`) ou permanece em `services/`;
+- verificar uso de constantes derivadas (`GIFT_COUNT`, `giftNames`, `giftById`) nos consumidores;
+- remover re-exports temporários sempre que possível (ex: `topGift` em `string.js`);
+- validar que `HistoryList.vue` pode importar `topGift` diretamente de `scoring.ts`.
 
 ---
 
-## Sprint 5 — Limpeza
+## Sprint 5 — Limpeza e Remoção de Compatibilidade
 
-Ao final da migração:
+Após a conclusão das migrações:
 
+- remover adapters temporários (`data/gifts.js`);
+- remover re-exports temporários (ex: `topGift` em `string.js`, se ainda existir);
 - remover código morto;
-- remover listas antigas;
-- remover constantes antigas;
-- remover enums antigos;
 - remover imports não utilizados;
 - simplificar tipos;
-- atualizar documentação;
-- eliminar hardcodes relacionados aos dons.
+- atualizar documentação final da arquitetura;
+- executar última validação completa da aplicação.
 
 ---
 
@@ -340,32 +348,32 @@ Estas melhorias não fazem parte desta etapa.
 
 ## Auditoria
 
-- [ ] Inventário completo das definições dos dons.
-- [ ] Inventário das duplicações.
-- [ ] Inventário dos consumidores.
+- [x] Inventário completo das definições dos dons.
+- [x] Inventário das duplicações.
+- [x] Inventário dos consumidores.
 
 ## Testes
 
-- [x] Testes unitários criados (75 testes, Vitest).
+- [x] Testes unitários criados (78 testes, Vitest).
 - [ ] Testes de integração criados.
 - [x] Cobertura validada (scoring, ranking, topGift, gifts, questions).
 
 ## TypeScript
 
-- [ ] Domínio migrado.
-- [ ] Tipagem revisada.
-- [ ] Sem regressões.
+- [x] Domínio migrado (`domain/spiritual-gifts.ts`, `services/scoring.ts`).
+- [x] Tipagem revisada.
+- [x] Sem regressões.
 
 ## Fonte Única
 
-- [ ] Localização definida.
-- [ ] Fonte única criada.
-- [ ] Consumidores migrados.
-- [ ] Duplicações removidas.
+- [x] Localização definida (`domain/spiritual-gifts.ts`).
+- [x] Fonte única criada.
+- [x] Consumidores migrados.
+- [x] Duplicações físicas removidas (`data/gifts.js` agora é re-export).
 
 ## Finalização
 
-- [ ] Código limpo.
-- [ ] Documentação atualizada.
-- [ ] Todos os testes aprovados.
-- [ ] Refatoração concluída.
+- [ ] Código limpo (Sprint 5).
+- [x] Documentação atualizada.
+- [x] Todos os testes aprovados (78/78).
+- [ ] Refatoração concluída (após Sprints 4 e 5).

@@ -106,14 +106,15 @@ supabase/functions/generate-ai/index.ts  (GIFTS_ORDER — duplicado)
 
 ## Duplicações Identificadas (constatações)
 
-### Lista dos 27 dons em 4 locais
+### Lista dos 27 dons — locais com definição física
 
-| Local | Nomes idênticos? | Campos extras |
-|---|---|---|
-| `data/gifts.js` | Sim | `id`, `icon`, `color` |
-| `generate-ai/index.ts` | Sim | Nenhum |
-| `import_to_supabase.py` | Sim (fora do escopo) | Nenhum |
-| `legacy/main.py` | Sim (fora do escopo) | Nenhum |
+| Local | Nomes idênticos? | Campos extras | Status |
+|---|---|---|---|
+| `domain/spiritual-gifts.ts` | — | `id`, `icon`, `color` | **Fonte única oficial** |
+| `data/gifts.js` | — | — | Apenas re-export; sem dados próprios desde a Sprint 3 |
+| `generate-ai/index.ts` | Sim | Nenhum | Duplicado (gerenciado por validação CI futura) |
+| `import_to_supabase.py` | Sim (fora do escopo) | Nenhum | Legacy |
+| `legacy/main.py` | Sim (fora do escopo) | Nenhum | Legacy |
 
 Os nomes e a ordem (Peter Wagner) são idênticos entre todos os locais. Os arquivos em `legacy/` e `scripts/` estão fora do escopo desta refatoração.
 
@@ -123,26 +124,24 @@ Os CSVs em `legacy/` usam abreviações diferentes (ex: "Pastoreio" → "Pastor"
 
 ### Metadados repetidos
 
-- `color: '#1B5438'` é o mesmo valor em todos os 27 objetos de `gifts.js` — poderia ser um valor default
+- `color: '#1B5438'` é o mesmo valor em todos os 27 objetos de `domain/spiritual-gifts.ts` — poderia ser um valor default
 - `score / 15` e `max: 15` aparecem em `ResultsChart.vue` e `GiftBadges.vue` — derivam da fórmula (5 perguntas × 3 pontos)
 
 ---
 
 ## Dependências (constatações)
 
-### Cadeia de dependência de gifts.js
+### Cadeia de dependência dos gifts
 
 ```
-spiritual-gifts.ts (fonte única — Sprint 2)
+domain/spiritual-gifts.ts (fonte única — Sprint 2)
   ← services/scoring.ts (TS, com topGift)
       ← components/GiftBadges.vue (via rankGifts)
       ← components/ResultsChart.vue
-      ← helpers/string.js (re-export de topGift)
+      ← helpers/string.js (re-export de topGift — Sprint 4)
           ← components/HistoryList.vue
       ← views/QuizView.vue
-
-gifts.js (legado — Sprint 5)
-  ← components/GiftBadges.vue (import direto — Sprint 3)
+  ← data/gifts.js (adapter — re-export, removido na Sprint 5)
 ```
 
 ### Cadeia de dependência de questions.js
@@ -155,10 +154,10 @@ questions.js (135 perguntas, acoplamento posicional)
   ← components/QuestionStep.vue (ANSWER_LABELS)
 ```
 
-### Acoplamento entre questions.js e gifts.js
+### Acoplamento entre questions.js e a fonte única
 
-Atualmente não há import direto. O acoplamento é posicional (comentário: `questão i % 27`):
-- Alterar a ordem de `gifts.js` sem reordenar `questions.js` → scores incorretos
+Atualmente não há import direto entre `questions.js` e `domain/spiritual-gifts.ts`. O acoplamento é posicional (comentário: `questão i % 27`):
+- Alterar a ordem dos dons na fonte única sem reordenar `questions.js` → scores incorretos
 - Adicionar ou remover um dom → quebra o mapeamento silenciosamente
 
 ---
@@ -261,7 +260,7 @@ As três alternativas abaixo foram analisadas durante a auditoria. A recomendaç
 
 A estratégia abaixo foi definida durante a auditoria e implementada na Sprint 1.
 
-### Cobertura atual (Sprint 2)
+### Cobertura atual (Sprint 3)
 
 78 testes implementados com Vitest, divididos em 4 arquivos:
 
@@ -276,10 +275,10 @@ A estratégia abaixo foi definida durante a auditoria e implementada na Sprint 1
 
 | # | Teste | Prioridade | Tipo | Sprint |
 |---|---|---|---|---|
-| 17 | Consistência Edge Function vs fonte única | Alta | Script validação | Futura (não implementado na Sprint 2) |
-| 18 | Ciclo completo answers → scores → payload | Média | Integração | 3-4 |
-| 19 | Serialização/deserialização dos scores | Média | Integração | 3-4 |
-| 20 | Edge function `formatScores` vs frontend | Média | Integração | 3-4 |
+| 17 | Consistência Edge Function vs fonte única | Alta | Script validação | Futura |
+| 18 | Ciclo completo answers → scores → payload | Média | Integração | 4 |
+| 19 | Serialização/deserialização dos scores | Média | Integração | 4 |
+| 20 | Edge function `formatScores` vs frontend | Média | Integração | 4 |
 | 21 | Compatibilidade com respostas existentes | Baixa | Regressão | 5 |
 | 22 | Quiz completo (135 perguntas) | Baixa | Regressão | 5 |
 
