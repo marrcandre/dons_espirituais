@@ -100,6 +100,31 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 
 ---
 
+## [1.6.0] - Julho/2026
+
+### Domínio — Organização Arquitetural (Sprint 4)
+
+* Movimentação de `services/scoring.ts` → `domain/scoring.ts` (regras de negócio no lugar correto).
+* Eliminação do re-export de `topGift` em `helpers/string.js` — `HistoryList.vue` importa diretamente de `domain/scoring`.
+* Separação de `ANSWER_LABELS` de `data/questions.js` para `constants/likert.js` (escala Likert na camada de apresentação).
+* Adoção de `GIFT_COUNT` derivado em vez de `27` literal no `domain/scoring.ts`.
+* Revisão de `helpers/` — confirmado que todos são utilitários puros, sem funções de domínio.
+
+### Domínio — Limpeza Final (Sprint 5)
+
+* Remoção definitiva do adapter `data/gifts.js` (consumidores já importavam da fonte única).
+* Remoção de ~162 linhas de código comentado (traduções em inglês desatualizadas) de `data/questions.js`.
+* README.md reescrito — descreve a aplicação Vue/Supabase real (não mais o pipeline Python legado).
+* TODO.md limpo — itens de refatoração concluídos removidos.
+* Documentação final da arquitetura atualizada.
+
+### Testes
+
+* 78/78 testes passando (inalterado, sem regressões).
+* Build validado (784 módulos, ~847ms).
+
+---
+
 ## [1.2.0] - Junho/2026
 
 ### Experiência do Usuário
