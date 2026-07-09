@@ -1,6 +1,6 @@
 # Refatoração do Domínio dos Dons Espirituais
 
-> **Status:** Sprint 4 concluída
+> **Status:** Sprint 5 concluída
 >
 > **Objetivo:** Consolidar os metadados dos dons espirituais em uma única fonte de verdade (Single Source of Truth), reduzindo a duplicação de código, aumentando a segurança das alterações e melhorando a arquitetura do projeto.
 
@@ -282,17 +282,14 @@ Atividades executadas:
 
 ---
 
-## Sprint 5 — Limpeza e Remoção de Compatibilidade
+## Sprint 5 — Limpeza e Remoção de Compatibilidade ✅ Concluída
 
-Após a conclusão das migrações:
+Atividades executadas:
 
-- remover adapters temporários (`data/gifts.js`);
-- remover re-exports temporários (ex: `topGift` em `string.js`, se ainda existir);
-- remover código morto;
-- remover imports não utilizados;
-- simplificar tipos;
-- atualizar documentação final da arquitetura;
-- executar última validação completa da aplicação.
+- `data/gifts.js` removido (adapter de compatibilidade) ✅
+- Comentários desatualizados removidos de `data/questions.js` ✅
+- Documentação final da arquitetura atualizada ✅
+- Última validação completa da aplicação executada (78/78 testes, build intacto) ✅
 
 ---
 
@@ -372,7 +369,7 @@ Estas melhorias não fazem parte desta etapa.
 
 ## Finalização
 
-- [ ] Código limpo (Sprint 5).
+- [x] Código limpo (Sprint 5).
 - [x] Documentação atualizada.
 - [x] Todos os testes aprovados (78/78).
-- [ ] Refatoração concluída (após Sprint 5).
+- [x] Refatoração concluída.

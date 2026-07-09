@@ -6,8 +6,6 @@
 - [ ] Substituir 21 `<v-btn>` raw por `AppButton` em 7 arquivos
 - [ ] Padronizar botões (Sprint 7)
 - [ ] Padronizar alertas (Sprint 7)
-- [ ] Criar `src/domain/spiritual-gifts.ts` (fonte única dos 27 dons)
-- [ ] Eliminar duplicação dos dons entre frontend e backend
 
 ### ResultsView
 - [ ] Melhorar legibilidade da análise IA
@@ -38,7 +36,6 @@
 - [ ] Revisar densidade de informações por tela
 
 ### Arquitetura (Clean Code)
-- [ ] Inverter dependência: mover `topGift()` de `helpers/string.js` para `services/scoring.js`
 - [ ] Refatorar `UserInfoForm.vue` para usar store (remove chamada direta a repositories)
 - [ ] Análise de viabilidade: substituir Supabase SDK por REST API
   - Mapear endpoints CRUD + auth + IA + notificações
@@ -94,7 +91,7 @@
 - [ ] Compatibilidade com leitores de tela
 
 ### Documentação
-- [ ] Atualizar README.md (remove descrição Python, documenta app real)
+- [x] README.md atualizado — descreve app Vue/Supabase
 - [ ] Manter CHANGELOG atualizado
 - [ ] Documentar arquitetura geral
 - [ ] Documentar banco de dados

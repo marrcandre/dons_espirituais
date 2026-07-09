@@ -4,7 +4,7 @@
 >
 > **Data:** 2026-07-04
 >
-> **Última atualização:** 2026-07-09 (Sprint 4 concluída)
+> **Última atualização:** 2026-07-09 (Sprint 5 concluída)
 >
 > **Status:** Concluída
 
@@ -46,7 +46,7 @@ As premissas abaixo foram adotadas durante toda a análise e planejamento:
 | # | Arquivo | O que define | Formato |
 |---|---|---|---|
 | 1 | `packages/frontend/src/domain/spiritual-gifts.ts` | **27 dons tipados:** `id`, `name`, `icon`, `color` + constantes derivadas | Array de objetos TS | criado na Sprint 2 — **fonte única oficial** |
-| 2 | `packages/frontend/src/data/gifts.js` | Apenas re-export: `export { gifts } from '../domain/spiritual-gifts'` | Adapter JS | sem dados próprios — adapter de compatibilidade (removido na Sprint 5) |
+| 2 | ~~`packages/frontend/src/data/gifts.js`~~ | ~~Adapter removido na Sprint 5~~ | ~~Removido~~ | ~~Sem dados próprios~~ |
 | 3 | `supabase/functions/generate-ai/index.ts` | 27 dons: apenas `name` (array `GIFTS_ORDER`) | Array de strings TS |
 | 4 | `packages/frontend/src/data/questions.js` | 135 perguntas mapeadas aos 27 dons (`i % 27`) | Array de objetos JS |
 | 5 | `supabase/migrations/001_initial.sql` | Schema da tabela `responses` com `scores jsonb` | SQL |
@@ -91,7 +91,7 @@ domain/spiritual-gifts.ts  (fonte única — Sprint 2)
         └── views/QuizView.vue  (via calculateScores)
               └── (payload → API → responses table)
 
-data/gifts.js  (legado — sem consumidores desde a Sprint 3, removido na Sprint 5)
+~~data/gifts.js~~  (legado — removido na Sprint 5)
 
 data/questions.js  (135 perguntas, acoplamento posicional i%27)
   ├── stores/quiz.js
@@ -141,7 +141,7 @@ domain/spiritual-gifts.ts (fonte única — Sprint 2)
       ← helpers/string.js (re-export de topGift — Sprint 4)
           ← components/HistoryList.vue
       ← views/QuizView.vue
-  ← data/gifts.js (adapter — re-export, removido na Sprint 5)
+  ← ~~data/gifts.js~~ (adapter — removido na Sprint 5)
 ```
 
 ### Cadeia de dependência de questions.js
@@ -310,9 +310,9 @@ A estratégia abaixo foi definida durante a auditoria e implementada na Sprint 1
 
 | Item | Descrição | Arquivo | Status |
 |---|---|---|---|
-| Código comentado | Comentários grandes poluindo o arquivo | `data/questions.js` | Pendente |
-| Formatação inconsistente | Gift id:25 com alinhamento diferente | `data/gifts.js` | **Resolvido na Sprint 2** (fonte única consistente; legado removido na Sprint 5) |
-| README desatualizado | Descreve pipeline legado, não o app atual | `README.md` | Pendente |
+| Código comentado | Comentários grandes poluindo o arquivo | `data/questions.js` | **Resolvido (Sprint 5)** |
+| Formatação inconsistente | Gift id:25 com alinhamento diferente | `data/gifts.js` | **Resolvido na Sprint 2** (arquivo removido na Sprint 5) |
+| README desatualizado | Descreve pipeline legado, não o app atual | `README.md` | **Resolvido (Sprint 5)** |
 
 ---
 
@@ -369,32 +369,31 @@ packages/frontend/src/
   domain/
     spiritual-gifts.ts       # ✅ Fonte única: tipo Gift + lista + constantes derivadas (Sprint 2)
     scoring.ts               # ✅ Regras de domínio: calculateScores, rankGifts, formatScoresForAI, topGift (Sprint 4)
-  services/                  # ✅ (vazio de domínio — apenas serviços de infraestrutura)
+  services/
     __tests__/
-      scoring.test.js        # ✅ 12 testes — importa de domain/ (Sprint 3/4)
+      scoring.test.js        # ✅ 12 testes — importa de domain/
   constants/
     likert.js                # ✅ ANSWER_LABELS — escala Likert (apresentação) (Sprint 4)
   helpers/
-    string.js                # ✅ Apenas initials (topGift removido na Sprint 4)
+    string.js                # ✅ Apenas initials (Sprint 4)
     __tests__/
       string.test.js
   data/
-    gifts.js                 # ⏳ Adapter de compatibilidade (re-export) — remoção Sprint 5
-    questions.js             # ✅ Apenas perguntas (ANSWER_LABELS extraído na Sprint 4)
+    questions.js             # ✅ Apenas perguntas (Sprint 4), sem comentários (Sprint 5)
     __tests__/
       gifts.test.js          # ✅ Importa de domain/spiritual-gifts
       questions.test.js      # ✅ Importa de domain/spiritual-gifts
 ```
 
-Características da arquitetura após Sprint 4:
+Características da arquitetura final (pós-Sprint 5):
 - **Única definição física** dos 27 dons em `domain/spiritual-gifts.ts` ✅
-- **Regras de domínio em `domain/`** — scoring.ts movido de `services/` para `domain/` ✅ (Sprint 4)
-- **Re-exports temporários eliminados** — `topGift` não é mais re-exportado por `string.js` ✅ (Sprint 4)
-- **`ANSWER_LABELS` na camada de apresentação** — em `constants/likert.js` ✅ (Sprint 4)
-- **Helpers limpos** — apenas utilitários puros, sem funções de domínio ✅ (Sprint 4)
-- **`data/gifts.js` é apenas adapter de compatibilidade** ⏳ (remoção Sprint 5)
-- **`data/questions.js` contém apenas perguntas** — sem escala Likert ou comentários enormes ✅ (Sprint 4)
-- **Validação CI** da Edge Function ⏳ (pendente)
+- **Regras de domínio em `domain/`** — scoring.ts movido de `services/` para `domain/` ✅
+- **Re-exports temporários eliminados** — `topGift` não é mais re-exportado por `string.js` ✅
+- **`ANSWER_LABELS` na camada de apresentação** — em `constants/likert.js` ✅
+- **Helpers limpos** — apenas utilitários puros, sem funções de domínio ✅
+- **`data/gifts.js` removido** ✅ (Sprint 5)
+- **`data/questions.js` contém apenas perguntas** — sem escala Likert ou comentários ✅
+- **Código comentado removido** ✅ (Sprint 5)
 - **78 testes** protegendo scoring, ranking, topGift, consistência dos dados ✅
 - **Zero alteração funcional** — comportamento da aplicação preservado ✅
 
@@ -404,7 +403,7 @@ Características da arquitetura após Sprint 4:
 
 Os assuntos abaixo foram propositalmente adiados para etapas futuras e **não fazem parte do escopo desta refatoração**:
 
-- **Sprint 5** — terá como escopo a remoção de adapters temporários (`data/gifts.js`), código morto e re-exports de compatibilidade
+- ~~**Sprint 5** — terá como escopo a remoção de adapters temporários (`data/gifts.js`), código morto e re-exports de compatibilidade~~ ✅ Concluída
 - **TypeScript completo** — migração de stores, repositories, views, helpers, data e componentes de domínio para `.ts`
 - **Refatoração do QuizView** — extrair `submitQuiz()` para um use-case ou service dedicado
 - **CI/CD** — pipeline de validação automática (testes, build, type-check)

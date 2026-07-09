@@ -8,7 +8,7 @@
 
 **Estratégia:** Migração incremental em 6 sprints, com testes como rede de segurança desde a Sprint 1. Nenhuma alteração funcional é realizada — o comportamento da aplicação é preservado integralmente.
 
-**Situação atual:** Sprints 0–3 concluídas. Fonte única `domain/spiritual-gifts.ts` consumida por todo código de produção. `data/gifts.js` mantido como compatibilidade temporária (remoção na Sprint 5). 78 testes passando. Projeto pronto para Sprint 4 (Migração Gradual).
+**Situação atual:** Sprints 0–5 concluídas. Fonte única `domain/spiritual-gifts.ts` consumida por todo código de produção. Adapter `data/gifts.js` removido. Comentários desatualizados removidos. 78 testes passando. Refatoração concluída.
 
 ---
 
@@ -20,8 +20,8 @@
 | Sprint 1 — Estratégia de Testes | ✅ Concluída |
 | Sprint 2 — Migração para TypeScript | ✅ Concluída |
 | Sprint 3 — Fonte Única dos Dons | ✅ Concluída |
-| Sprint 4 — Migração Gradual | ⏳ Não iniciada |
-| Sprint 5 — Limpeza | ⏳ Não iniciada |
+| Sprint 4 — Organização Arquitetural | ✅ Concluída |
+| Sprint 5 — Limpeza | ✅ Concluída |
 
 ---
 
@@ -400,25 +400,58 @@ Após a conclusão da Sprint 3, identificou-se que `data/gifts.js` ainda continh
 | Arquivos movidos | 1 (`services/scoring.ts` → `domain/scoring.ts`) |
 | Arquivos modificados | 7 (`string.js`, `QuizView.vue`, `ResultsChart.vue`, `GiftBadges.vue`, `HistoryList.vue`, `HomeView.vue`, `QuestionStep.vue`) |
 | Arquivos de teste modificados | 2 (`scoring.test.js`, `string.test.js`) |
-| Total de sprints concluídas | 5 |
+| Total de sprints concluídas | 6 |
 
 ---
 
-## Próxima Sprint
+## Sprint 5 — Limpeza e Remoção de Compatibilidade
 
-### Sprint 5 — Limpeza e Remoção de Compatibilidade
+> **Início:** 2026-07-09
+>
+> **Término:** 2026-07-09
+>
+> **Status:** Concluída
 
-Remover adapters temporários e código legado:
+### Atividades executadas
 
-- remover `data/gifts.js` (adapter de compatibilidade — re-export)
-- remover imports obsoletos
-- atualizar documentação final da arquitetura
-- executar última validação completa da aplicação
+1. **Remoção de `data/gifts.js`** — adapter de compatibilidade (re-export) removido:
+   - Arquivo deletado
+   - Busca global confirmou zero consumidores restantes
+   - Testes e build validados (78/78, build intacto)
 
----
+2. **Remoção de comentários desatualizados em `data/questions.js`**:
+   - ~162 linhas de traduções em inglês comentadas removidas
+   - Arquivo limpo, apenas perguntas ativas
 
-## Roadmap
+3. **Atualização da documentação final da arquitetura**:
+   - `gift-system-plan.md`: checklist finalizado, Sprint 5 marcado como concluído
+   - `gift-system-plan-analysis.md`: diagrama de arquitetura atualizado, dívida técnica revisada, referências a `data/gifts.js` removidas
+   - `gift-system-plan-log.md`: Sprint 5 documentada
 
-As sprints abaixo serão executadas sequencialmente, dependendo de aprovação:
+4. **Validação final**:
+   - 78/78 testes passando
+   - Build bem-sucedido (784 módulos)
+   - Zero regressões
 
-- Sprint 5 — Limpeza (remoção de adapters temporários, código morto e re-exports de compatibilidade)
+### Decisões tomadas
+
+- **`data/gifts.js` removido definitivamente** — sem adapter de compatibilidade; todo consumo é direto de `domain/spiritual-gifts.ts`
+- **Código comentado removido** — sem razão para manter traduções em inglês desatualizadas no código de produção
+- **Refatoração arquitetural concluída** — todos os critérios de aceite atendidos
+
+### Validação
+
+| Item | Resultado |
+|---|---|
+| Testes executados | 78 |
+| Testes aprovados | 78 |
+| Build | ✅ (784 módulos) |
+| Regressões | Nenhuma |
+
+### Métricas
+
+| Item | Valor |
+|---|---|
+| Arquivos removidos | 1 (`data/gifts.js`) |
+| Arquivos modificados | 4 (`data/questions.js`, `gift-system-plan.md`, `gift-system-plan-analysis.md`, `gift-system-plan-log.md`) |
+| Total de sprints concluídas | 6 |
