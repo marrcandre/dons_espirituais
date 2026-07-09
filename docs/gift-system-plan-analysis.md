@@ -4,6 +4,8 @@
 >
 > **Data:** 2026-07-04
 >
+> **Última atualização:** 2026-07-09 (Sprint 3 concluída)
+>
 > **Status:** Concluída
 
 ---
@@ -43,19 +45,20 @@ As premissas abaixo foram adotadas durante toda a análise e planejamento:
 
 | # | Arquivo | O que define | Formato |
 |---|---|---|---|
-| 1 | `packages/frontend/src/data/gifts.js` | 27 dons: `id`, `name`, `icon`, `color` | Array de objetos JS |
-| 2 | `supabase/functions/generate-ai/index.ts` | 27 dons: apenas `name` (array `GIFTS_ORDER`) | Array de strings TS |
-| 3 | `packages/frontend/src/data/questions.js` | 135 perguntas mapeadas aos 27 dons (`i % 27`) | Array de objetos JS |
-| 4 | `supabase/migrations/001_initial.sql` | Schema da tabela `responses` com `scores jsonb` | SQL |
+| 1 | `packages/frontend/src/domain/spiritual-gifts.ts` | **27 dons tipados:** `id`, `name`, `icon`, `color` + constantes derivadas | Array de objetos TS | criado na Sprint 2 — **fonte única oficial** |
+| 2 | `packages/frontend/src/data/gifts.js` | Apenas re-export: `export { gifts } from '../domain/spiritual-gifts'` | Adapter JS | sem dados próprios — adapter de compatibilidade (removido na Sprint 5) |
+| 3 | `supabase/functions/generate-ai/index.ts` | 27 dons: apenas `name` (array `GIFTS_ORDER`) | Array de strings TS |
+| 4 | `packages/frontend/src/data/questions.js` | 135 perguntas mapeadas aos 27 dons (`i % 27`) | Array de objetos JS |
+| 5 | `supabase/migrations/001_initial.sql` | Schema da tabela `responses` com `scores jsonb` | SQL |
 
 ### Arquivos que consomem dados dos dons
 
 | # | Arquivo | Como consome | Importa de |
 |---|---|---|---|
-| 5 | `packages/frontend/src/services/scoring.js` | `calculateScores`, `rankGifts`, `formatScoresForAI` | `data/gifts.js` |
-| 6 | `packages/frontend/src/components/GiftBadges.vue` | Exibe top 3 dons (ícone + nome + score) | `data/gifts.js`, `services/scoring.js` |
+| 5 | `packages/frontend/src/services/scoring.ts` | `calculateScores`, `rankGifts`, `formatScoresForAI`, `topGift` | `domain/spiritual-gifts.ts` | migrado na Sprint 2 |
+| 6 | `packages/frontend/src/components/GiftBadges.vue` | Exibe top 3 dons (ícone + nome + score) | `domain/spiritual-gifts.ts`, `services/scoring.ts` | **Migrado na Sprint 3** — importa de `domain/spiritual-gifts` |
 | 7 | `packages/frontend/src/components/ResultsChart.vue` | Gráfico de barras horizontal com 27 dons | `services/scoring.js` |
-| 8 | `packages/frontend/src/helpers/string.js` | `topGift()` — string "Dom principal: {nome}" | `services/scoring.js` |
+| 8 | `packages/frontend/src/helpers/string.js` | `topGift()` — re-exportado de `scoring.ts` | `services/scoring.js` (`topGift` movido na Sprint 2) |
 | 9 | `packages/frontend/src/components/HistoryList.vue` | Exibe dom principal de cada resultado | `helpers/string.js` (via `topGift`) |
 | 10 | `packages/frontend/src/views/QuizView.vue` | Orquestra quiz, chama `calculateScores`, monta payload | `services/scoring.js` |
 | 11 | `packages/frontend/src/views/ResultsView.vue` | Exibe resultado via GiftBadges + ResultsChart | (delega para componentes) |
@@ -79,16 +82,16 @@ As premissas abaixo foram adotadas durante toda a análise e planejamento:
 ### Fluxo de dados
 
 ```
-data/gifts.js  (origem atual no frontend)
-  ├── services/scoring.js  (calculateScores, rankGifts)
-  │     ├── components/GiftBadges.vue
-  │     ├── components/ResultsChart.vue
-  │     ├── helpers/string.js → topGift()
-  │     │     └── components/HistoryList.vue
-  │     └── views/QuizView.vue
-  │           └── (payload → API → responses table)
-  └── (consumido diretamente por)
-        └── components/GiftBadges.vue
+domain/spiritual-gifts.ts  (fonte única — Sprint 2)
+  └── services/scoring.ts  (TS, com topGift)
+        ├── components/GiftBadges.vue  (via rankGifts)
+        ├── components/ResultsChart.vue  (via rankGifts)
+        ├── helpers/string.js  (re-export de topGift)
+        │     └── components/HistoryList.vue
+        └── views/QuizView.vue  (via calculateScores)
+              └── (payload → API → responses table)
+
+data/gifts.js  (legado — sem consumidores desde a Sprint 3, removido na Sprint 5)
 
 data/questions.js  (135 perguntas, acoplamento posicional i%27)
   ├── stores/quiz.js
@@ -130,13 +133,16 @@ Os CSVs em `legacy/` usam abreviações diferentes (ex: "Pastoreio" → "Pastor"
 ### Cadeia de dependência de gifts.js
 
 ```
-gifts.js (definição)
-  ← services/scoring.js
-      ← components/GiftBadges.vue (também importa gifts.js diretamente)
+spiritual-gifts.ts (fonte única — Sprint 2)
+  ← services/scoring.ts (TS, com topGift)
+      ← components/GiftBadges.vue (via rankGifts)
       ← components/ResultsChart.vue
-      ← helpers/string.js (= topGift)
+      ← helpers/string.js (re-export de topGift)
           ← components/HistoryList.vue
       ← views/QuizView.vue
+
+gifts.js (legado — Sprint 5)
+  ← components/GiftBadges.vue (import direto — Sprint 3)
 ```
 
 ### Cadeia de dependência de questions.js
@@ -210,7 +216,7 @@ Isso atende ao SSOT sem adicionar complexidade desnecessária (KISS, YAGNI).
 
 ### Inversão de dependência
 
-**Recomendação para sprints futuras:** `topGift()` deve ser movido de `helpers/string.js` para junto de `scoring.js` (responsabilidade única).
+**Recomendação adotada na Sprint 2:** `topGift()` foi movido de `helpers/string.js` para `services/scoring.ts` (responsabilidade única). `string.js` mantém re-export para compatibilidade com `HistoryList.vue`.
 
 ---
 
@@ -255,14 +261,14 @@ As três alternativas abaixo foram analisadas durante a auditoria. A recomendaç
 
 A estratégia abaixo foi definida durante a auditoria e implementada na Sprint 1.
 
-### Cobertura atual (Sprint 1)
+### Cobertura atual (Sprint 2)
 
-75 testes implementados com Vitest, divididos em 4 arquivos:
+78 testes implementados com Vitest, divididos em 4 arquivos:
 
 | Arquivo | Testes | O que cobre |
 |---|---|---|
-| `src/services/__tests__/scoring.test.js` | 9 | `calculateScores`, `rankGifts`, `formatScoresForAI` |
-| `src/helpers/__tests__/string.test.js` | 3 | `topGift` |
+| `src/services/__tests__/scoring.test.js` | 12 | `calculateScores`, `rankGifts`, `formatScoresForAI`, `topGift` |
+| `src/helpers/__tests__/string.test.js` | 3 | `topGift` (via re-export) |
 | `src/data/__tests__/gifts.test.js` | 6 | IDs, nomes, ordem, tipos, ícones |
 | `src/data/__tests__/questions.test.js` | 57 | 135 perguntas, mapeamento `i % 27` |
 
@@ -270,7 +276,7 @@ A estratégia abaixo foi definida durante a auditoria e implementada na Sprint 1
 
 | # | Teste | Prioridade | Tipo | Sprint |
 |---|---|---|---|---|
-| 17 | Consistência Edge Function vs fonte única | Alta | Script validação | 2 |
+| 17 | Consistência Edge Function vs fonte única | Alta | Script validação | Futura (não implementado na Sprint 2) |
 | 18 | Ciclo completo answers → scores → payload | Média | Integração | 3-4 |
 | 19 | Serialização/deserialização dos scores | Média | Integração | 3-4 |
 | 20 | Edge function `formatScores` vs frontend | Média | Integração | 3-4 |
@@ -285,35 +291,35 @@ A estratégia abaixo foi definida durante a auditoria e implementada na Sprint 1
 
 | Item | Descrição | Arquivo | Status |
 |---|---|---|---|
-| Acoplamento posicional `i % 27` | Mapeamento implícito entre perguntas e dons | `data/questions.js`, `data/gifts.js` | Pendente |
+| Acoplamento posicional `i % 27` | Mapeamento implícito entre perguntas e dons | `data/questions.js` ↔ `domain/spiritual-gifts.ts` | Pendente |
 | QuizView orquestrador monolítico | `submitQuiz()` centraliza scoring, payload, persistência, notificação | `views/QuizView.vue` | Pendente |
-| Sem validação de input | `calculateScores()` não verifica `answers.length === 135` | `services/scoring.js` | Pendente |
+| Sem validação de input | `calculateScores()` não verifica `answers.length === 135` | `services/scoring.ts` | Pendente |
 | GIFTS_ORDER duplicado | Edge function mantém lista manual sem validação automática | `supabase/functions/generate-ai/index.ts` | Pendente |
 | Zero testes | Projeto sem nenhum teste antes da Sprint 1 | Projeto inteiro | **Resolvido** (75 testes) |
 
 ### Média
 
-| Item | Descrição | Arquivo |
-|---|---|---|
-| Hardcode `score / 15` | Max score fixo em componentes de exibição | `ResultsChart.vue`, `GiftBadges.vue` |
-| `topGift()` em local inadequado | Função de domínio misturada com utilitário de string | `helpers/string.js` |
-| `color` repetido 27x | Mesmo valor poderia ser default | `data/gifts.js` |
-| `ANSWER_LABELS` misturado | Escala Likert (apresentação) junto com dados de domínio | `data/questions.js` |
-| Inconsistência de timeout | `insert()` e `countByUserId()` sem timeout, diferindo dos demais | `repositories/responseRepository.js` |
+| Item | Descrição | Arquivo | Status |
+|---|---|---|---|
+| Hardcode `score / 15` | Max score fixo em componentes de exibição | `ResultsChart.vue`, `GiftBadges.vue` | Pendente |
+| `topGift()` em local inadequado | Função de domínio misturada com utilitário de string | `helpers/string.js` → `scoring.ts` | **Resolvido** (Sprint 2) |
+| `color` repetido 27x | Mesmo valor poderia ser default | `domain/spiritual-gifts.ts` | Pendente |
+| `ANSWER_LABELS` misturado | Escala Likert (apresentação) junto com dados de domínio | `data/questions.js` | Pendente |
+| Inconsistência de timeout | `insert()` e `countByUserId()` sem timeout, diferindo dos demais | `repositories/responseRepository.js` | Pendente |
 
 ### Baixa
 
-| Item | Descrição | Arquivo |
-|---|---|---|
-| Código comentado | Comentários grandes poluindo o arquivo | `data/questions.js` |
-| Formatação inconsistente | Gift id:25 com alinhamento diferente | `data/gifts.js` |
-| README desatualizado | Descreve pipeline legado, não o app atual | `README.md` |
+| Item | Descrição | Arquivo | Status |
+|---|---|---|---|
+| Código comentado | Comentários grandes poluindo o arquivo | `data/questions.js` | Pendente |
+| Formatação inconsistente | Gift id:25 com alinhamento diferente | `data/gifts.js` | **Resolvido na Sprint 2** (fonte única consistente; legado removido na Sprint 5) |
+| README desatualizado | Descreve pipeline legado, não o app atual | `README.md` | Pendente |
 
 ---
 
 ## Modelo do Domínio
 
-A estrutura abaixo é a proposta para a fonte única, a ser implementada na Sprint 2.
+A estrutura abaixo foi implementada na Sprint 2 e é a versão atual do código.
 
 ```typescript
 export interface Gift {
@@ -340,9 +346,9 @@ export interface Gift {
 As constantes devem ser derivadas, nunca definidas manualmente:
 
 ```typescript
-export const GIFT_COUNT = gifts.length
+export const GIFT_COUNT = gifts.length          // = 27
 export const giftNames: readonly string[] = gifts.map(g => g.name)
-export const giftById: ReadonlyMap<number, Gift>
+export function giftById(id: number): Gift | undefined  // acesso direto ao array (0-26)
 ```
 
 ### O que não pertence à fonte única
@@ -357,36 +363,39 @@ export const giftById: ReadonlyMap<number, Gift>
 
 ## Arquitetura Alvo
 
-Ao final da Sprint 5, espera-se a seguinte organização do domínio:
+Estado atual após a Sprint 3. A organização abaixo reflete o momento presente do código:
 
 ```
 packages/frontend/src/
   domain/
-    spiritual-gifts.ts       # Fonte única: tipo Gift + lista + constantes derivadas
+    spiritual-gifts.ts       # ✅ Fonte única: tipo Gift + lista + constantes derivadas (Sprint 2) — consumida por toda a produção (Sprint 3)
   services/
-    scoring.ts               # calculateScores, rankGifts, formatScoresForAI, topGift
+    scoring.ts               # ✅ calculateScores, rankGifts, formatScoresForAI, topGift (Sprint 2)
     __tests__/
-      scoring.test.js
+      scoring.test.js        # ✅ 12 testes — importa da fonte única (Sprint 3)
   helpers/
-    string.js                # Apenas initials (topGift movido para scoring)
+    string.js                # ✅ Apenas initials (topGift re-exportado de scoring) (Sprint 2)
     __tests__/
       string.test.js
   data/
-    gifts.js                 # Removido (substituído por domain/spiritual-gifts.ts)
+    gifts.js                 # ✅ Apenas re-export: export { gifts } from '../domain/spiritual-gifts' — sem dados próprios (Sprint 3)
     questions.js             # Mantido, com validação de consistência
     __tests__/
-      gifts.test.js
-      questions.test.js
+      gifts.test.js          # ✅ Importa da fonte única (Sprint 3)
+      questions.test.js      # ✅ Importa da fonte única (Sprint 3)
 ```
 
-Características da arquitetura final:
-- **Única definição** dos 27 dons em `domain/spiritual-gifts.ts`
-- **Validação CI** que garante que `GIFTS_ORDER` na Edge Function coincide com a fonte única
-- **`data/gifts.js` removido** — todos os consumidores importam de `domain/spiritual-gifts.ts`
-- **`topGift()` movido** para junto de `scoring.js` (responsabilidade única)
-- **75+ testes** protegendo scoring, ranking, topGift, consistência dos dados estáticos
-- **Constantes derivadas** automaticamente (`GIFT_COUNT`, `giftNames`, `giftById`)
-- **Zero alteração funcional** — comportamento da aplicação preservado
+Características da arquitetura após Sprint 3:
+- **Única definição física** dos 27 dons em `domain/spiritual-gifts.ts` ✅ (Sprint 2 + ajuste Sprint 3)
+- **Fonte única consumida por toda a produção** ✅ (Sprint 3 — GiftBadges.vue migrado)
+- **Testes validam a fonte de verdade** ✅ (Sprint 3 — todos os 4 arquivos de teste importam de `domain/spiritual-gifts`)
+- **`data/gifts.js` é apenas um adapter de compatibilidade** (re-export), sem dados próprios ✅ (ajuste Sprint 3)
+- **`data/gifts.js` será removido** na Sprint 5, juntamente com os demais adapters temporários ⏳
+- **Validação CI** da Edge Function ⏳ (pendente)
+- **`topGift()` movido** para junto de `scoring.ts` ✅ (Sprint 2)
+- **78 testes** protegendo scoring, ranking, topGift, consistência dos dados ✅
+- **Constantes derivadas** automaticamente (`GIFT_COUNT`, `giftNames`, `giftById`) ✅ (Sprint 2)
+- **Zero alteração funcional** — comportamento da aplicação preservado ✅
 
 ---
 
@@ -394,6 +403,7 @@ Características da arquitetura final:
 
 Os assuntos abaixo foram propositalmente adiados para etapas futuras e **não fazem parte do escopo desta refatoração**:
 
+- **Sprint 5** — terá como escopo a remoção de adapters temporários (`data/gifts.js`), código morto e re-exports de compatibilidade, e não mais a consolidação da fonte única (já concluída)
 - **Migração do frontend para Nuxt** ou outro framework — não há plano atual
 - **Adoção de ORM** no lugar do Supabase client direto — fora do escopo
 - **CI/CD** — pipeline de validação automática será definido futuramente

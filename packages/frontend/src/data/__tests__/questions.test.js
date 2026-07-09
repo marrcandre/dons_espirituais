@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { questions } from '../questions.js'
-import { gifts } from '../gifts.js'
+import { gifts } from '../../domain/spiritual-gifts'
 
 describe('Questions data consistency', () => {
 

@@ -8,7 +8,7 @@
 
 **Estratégia:** Migração incremental em 6 sprints, com testes como rede de segurança desde a Sprint 1. Nenhuma alteração funcional é realizada — o comportamento da aplicação é preservado integralmente.
 
-**Situação atual:** Sprint 0 (Auditoria) e Sprint 1 (Estratégia de Testes) concluídas. 75 testes implementados com Vitest cobrindo scoring, ranking, topGift e consistência dos dados estáticos. Projeto pronto para iniciar a Sprint 2 (Migração para TypeScript).
+**Situação atual:** Sprints 0–3 concluídas. Fonte única `domain/spiritual-gifts.ts` consumida por todo código de produção. `data/gifts.js` mantido como compatibilidade temporária (remoção na Sprint 5). 78 testes passando. Projeto pronto para Sprint 4 (Migração Gradual).
 
 ---
 
@@ -18,8 +18,8 @@
 |---|---|
 | Sprint 0 — Auditoria | ✅ Concluída |
 | Sprint 1 — Estratégia de Testes | ✅ Concluída |
-| Sprint 2 — Migração para TypeScript | ⏳ Não iniciada |
-| Sprint 3 — Fonte Única dos Dons | ⏳ Não iniciada |
+| Sprint 2 — Migração para TypeScript | ✅ Concluída |
+| Sprint 3 — Fonte Única dos Dons | ✅ Concluída |
 | Sprint 4 — Migração Gradual | ⏳ Não iniciada |
 | Sprint 5 — Limpeza | ⏳ Não iniciada |
 
@@ -187,13 +187,158 @@
 
 ---
 
+## Sprint 2 — Migração para TypeScript
+
+> **Início:** 2026-07-06
+>
+> **Término:** 2026-07-06
+>
+> **Status:** Concluída
+
+### Atividades executadas
+
+1. **Criação de `src/domain/spiritual-gifts.ts`** — fonte única de verdade:
+   - Interface `Gift` tipada (`id`, `name`, `icon`, `color`)
+   - Array `gifts` com os 27 dons espirituais (dados idênticos ao `data/gifts.js`)
+   - Constantes derivadas: `GIFT_COUNT`, `giftNames`, `giftById()`
+   - Formatação consistente (inclusive dom `Apóstolo` que estava desalinhado no arquivo legado)
+
+2. **Migração de `services/scoring.js` → `services/scoring.ts`**:
+   - Tipagem completa das funções (`Scores`, `RankedGift`)
+   - Import da nova fonte única (`domain/spiritual-gifts`)
+   - Lógica preservada (mesmo comportamento, tipos adicionados)
+
+3. **Movimentação de `topGift()` para `scoring.ts`**:
+   - Função removida de `helpers/string.js` e adicionada a `services/scoring.ts`
+   - `string.js` agora re-exporta `topGift` de `scoring.ts` (backward compatibility)
+   - Responsabilidade única: funções de scoring/ranking ficam no mesmo módulo
+
+4. **Atualização de testes**:
+   - 3 novos testes para `topGift` adicionados a `scoring.test.js` (scores válidos, null/undefined, objeto vazio)
+   - Nenhum importador precisou ser alterado — Vite resolve `.js` → `.ts` automaticamente
+
+5. **Verificação de build**:
+   - 78 testes passando (75 herdados + 3 novos)
+   - Build em ~735ms, 784 módulos (1 a mais: `domain/spiritual-gifts.ts`)
+
+### Decisões tomadas
+
+- **Extensão `.ts` sem `tsconfig.json`** — Vite/esbuild compila TypeScript nativamente; a adição de configuração formal de TS será feita quando houver mais arquivos `.ts` no projeto
+- **`topGift` re-exportado via `string.js`** — `HistoryList.vue` continua importando de `'../helpers/string.js'` sem alteração; a migração do consumidor é Sprint 3
+- **`data/gifts.js` mantido** — `GiftBadges.vue` ainda importa dele diretamente; será removido na Sprint 5
+- **Importadores mantiveram extensão `.js`** — Vite resolve para `.ts` automaticamente; nenhuma linha de import foi alterada
+
+### Dificuldades encontradas
+
+- Nenhuma. A migração foi direta porque o módulo `scoring.js` já era pequeno e sem dependências circulares.
+
+### Observações importantes
+
+- `giftById()` foi implementado como acesso direto ao array (índices 0-26), não como `Map` — mais simples e sem alocação extra
+- As constantes derivadas (`GIFT_COUNT`, `giftNames`, `giftById`) já estão exportadas, mas ainda não são usadas por consumidores (Sprint 3)
+- `helpers/string.js` agora contém apenas `initials()` e o re-export de `topGift`
+
+### Validação
+
+| Item | Resultado |
+|---|---|
+| Testes executados | 78 |
+| Testes aprovados | 78 |
+| Testes falhando | 0 |
+| Build preservado | ✅ (784 módulos, ~735ms) |
+| Regressões identificadas | Nenhuma |
+
+### Métricas
+
+| Item | Valor |
+|---|---|
+| Arquivos criados | 2 (`domain/spiritual-gifts.ts`, `services/scoring.ts`) |
+| Arquivos removidos | 1 (`services/scoring.js`) |
+| Arquivos modificados | 2 (`helpers/string.js`, `services/__tests__/scoring.test.js`) |
+| Testes criados | 3 (topGift) |
+| Total de sprints concluídas | 3 |
+
+---
+
+## Sprint 3 — Fonte Única dos Dons
+
+> **Início:** 2026-07-09
+>
+> **Término:** 2026-07-09
+>
+> **Status:** Concluída
+
+### Atividades executadas
+
+1. **Busca global** de todos os consumidores de `data/gifts.js` — confirmados 4 consumidores:
+   - Produção: `GiftBadges.vue`
+   - Testes: `scoring.test.js`, `gifts.test.js`, `questions.test.js`
+
+2. **Migração de imports** em todos os consumidores para `domain/spiritual-gifts`:
+   - `GiftBadges.vue` — alterado de `'../data/gifts.js'` para `'../domain/spiritual-gifts'`
+   - `scoring.test.js` — alterado de `'../../data/gifts.js'` para `'../../domain/spiritual-gifts'`
+   - `gifts.test.js` — alterado de `'../gifts.js'` para `'../../domain/spiritual-gifts'`
+   - `questions.test.js` — alterado de `'../gifts.js'` para `'../../domain/spiritual-gifts'`
+
+3. **Correção de path relativo** nos testes em `src/data/__tests__/` — o path `../domain/spiritual-gifts` resolvia para `src/data/domain/spiritual-gifts` (inexistente). Corrigido para `../../domain/spiritual-gifts`.
+
+4. **Validação**:
+   - 78/78 testes passando
+   - Build bem-sucedido (783 módulos, ~1.74s)
+
+### Decisões tomadas
+
+- **`data/gifts.js` mantido** no código — servirá apenas como referência de compatibilidade; será removido exclusivamente na Sprint 5
+- **Testes migrados para a fonte de verdade** — agora os testes validam diretamente `domain/spiritual-gifts.ts`, não o legado
+- **Nenhuma lógica alterada** — apenas caminhos de import foram modificados
+
+### Dificuldades encontradas
+
+- Path relativo incorreto nos testes de `src/data/__tests__/` — esses arquivos estão a 2 níveis de profundidade (`src/data/__tests__/`), exigindo `../../` em vez de `../` para alcançar `src/domain/`
+
+### Validação
+
+| Item | Resultado |
+|---|---|
+| Testes executados | 78 |
+| Testes aprovados | 78 |
+| Testes falhando | 0 |
+| Build preservado | ✅ (783 módulos, ~1.74s) |
+| Consumidores de produção migrados | 1 de 1 |
+| Regressões identificadas | Nenhuma |
+
+### Métricas
+
+| Item | Valor |
+|---|---|
+| Arquivos modificados | 4 (`GiftBadges.vue`, `scoring.test.js`, `gifts.test.js`, `questions.test.js`) |
+| Consumidores de produção migrados | 1 (`GiftBadges.vue`) |
+| Consumidores de teste migrados | 3 |
+| Total de sprints concluídas | 4 |
+
+### Ajuste pós-Sprint 3 — Eliminação da duplicação física
+
+Após a conclusão da Sprint 3, identificou-se que `data/gifts.js` ainda continha uma cópia completa dos metadados dos dons, mantendo duplicação física que contrariava o princípio Single Source of Truth.
+
+**Correção aplicada:**
+- `data/gifts.js` foi transformado em um adapter de compatibilidade — seu conteúdo foi substituído por um re-export da fonte única: `export { gifts } from '../domain/spiritual-gifts'`
+- Os dados físicos dos 27 dons passaram a existir em **apenas um local**: `domain/spiritual-gifts.ts`
+- Nenhum import precisou ser alterado — compatibilidade total mantida
+
+**Validação:**
+- 78/78 testes passando
+- Build bem-sucedido
+- Busca global confirmou: apenas `domain/spiritual-gifts.ts` contém dados físicos dos dons
+
+---
+
 ## Próxima Sprint
 
-### Sprint 2 — Migração para TypeScript
+### Sprint 4 — Migração Gradual
 
-- Migrar `data/gifts.js` → `domain/spiritual-gifts.ts`
-- Migrar `services/scoring.js` → TypeScript
-- Migrar `helpers/string.js` → TypeScript (função topGift)
+Substituir gradualmente todas as implementações antigas.
+Cada alteração deverá manter todos os testes passando.
+As duplicações deverão ser removidas somente após a migração dos consumidores.
 
 ---
 
@@ -201,6 +346,5 @@
 
 As sprints abaixo serão executadas sequencialmente, dependendo de aprovação:
 
-- Sprint 3 — Fonte Única dos Dons
 - Sprint 4 — Migração Gradual
-- Sprint 5 — Limpeza
+- Sprint 5 — Limpeza (remoção de adapters temporários, código morto e re-exports de compatibilidade)

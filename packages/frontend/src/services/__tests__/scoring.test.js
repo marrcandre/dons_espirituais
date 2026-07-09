@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { calculateScores, rankGifts, formatScoresForAI } from '../scoring.js'
-import { gifts } from '../../data/gifts.js'
+import { calculateScores, rankGifts, formatScoresForAI, topGift } from '../scoring.js'
+import { gifts } from '../../domain/spiritual-gifts'
 
 function makeAnswers(giftIndex, score) {
   const answers = new Array(135).fill(0)
@@ -96,6 +96,25 @@ describe('formatScoresForAI', () => {
     const lines = result.split('\n')
     expect(lines[0]).toMatch(/^Profecia/)
     expect(lines[1]).toMatch(/^Pastoreio/)
+  })
+
+})
+
+describe('topGift', () => {
+
+  it('retorna o nome do dom principal formatado', () => {
+    const scores = { 0: 15, 1: 10 }
+    const result = topGift(scores)
+    expect(result).toBe('Dom principal: Profecia')
+  })
+
+  it('retorna string vazia para scores nulos ou undefined', () => {
+    expect(topGift(null)).toBe('')
+    expect(topGift(undefined)).toBe('')
+  })
+
+  it('retorna o primeiro dom quando scores estão vazios', () => {
+    expect(topGift({})).toBe('Dom principal: Profecia')
   })
 
 })

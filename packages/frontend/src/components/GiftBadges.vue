@@ -31,7 +31,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { gifts } from '../data/gifts.js'
+import { gifts } from '../domain/spiritual-gifts'
 import { rankGifts } from '../services/scoring.js'
 import AppCard from './ui/AppCard.vue'
 
