@@ -152,7 +152,7 @@
 
 ## ADR-010: Testes antes da refatoração (padrão Sprint 1)
 
-**Data:** 2026-07-09 (Sprint 6)
+**Data:** 2026-07-09
 
 **Contexto:** A Sprint 1 estabeleceu o padrão de criar testes antes de refatorar. Este padrão foi bem-sucedido e deve ser replicado.
 
@@ -161,5 +161,28 @@
 **Consequências:**
 - Positivas: Rede de segurança; confiança para refatorar
 - Negativas: Esforço adicional de testes antes da entrega
+
+**Status:** ✅ Decidido
+
+---
+
+## ADR-011: Experiência institucional como fase independente
+
+**Data:** 2026-07-09
+
+**Contexto:** A análise comparativa com o projeto Cinco Ministérios revelou que o Dons não possui elementos institucionais básicos esperados em uma aplicação pública: página Sobre, footer, SEO, Open Graph, identidade visual consolidada.
+
+**Decisão:** A experiência institucional (página Sobre, header/footer definitivos, SEO, Open Graph, sitemap, robots, identidade visual) será tratada como uma **Fase 3 independente** do roadmap, após a conclusão da evolução arquitetural (Fase 2).
+
+**Justificativa:**
+- A Fase 2 reorganizará a camada de apresentação (composables, componentes modulares), estabelecendo os padrões que a Fase 3 utilizará
+- Os componentes institucionais (AppFooter, AppLogo) seguem os mesmos padrões do Design System que será consolidado na Fase 2
+- Fazer antes da Fase 2 poderia gerar retrabalho quando a estrutura de componentes for reorganizada
+- O escopo é bem isolado e não conflita com as mudanças arquiteturais
+- Usuários finais se beneficiam diretamente (página Sobre, compartilhamento enriquecido)
+
+**Consequências:**
+- Positivas: Roadmap completo e coerente; cada fase entrega valor distinto; sem retrabalho
+- Negativas: Usuários continuam sem página Sobre e footer até o final da Fase 3
 
 **Status:** ✅ Decidido

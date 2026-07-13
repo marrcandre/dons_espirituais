@@ -98,6 +98,31 @@ helpers/      → Utilitários puros (já existe)
 4. **Sprint 9:** Composables + organização de componentes
 5. **Sprint 10:** CI/CD, cobertura, SEO, documentação final
 
+### Revisão de planejamento — Inclusão da Fase 3
+
+**Data:** 2026-07-09
+
+Durante a comparação detalhada com o projeto Cinco Ministérios, identificou-se que um conjunto importante de melhorias não havia sido incorporado ao roadmap:
+
+- Página Sobre (metodologia, autor, licença)
+- Footer institucional
+- SEO, Open Graph, Sitemap, Robots
+- Identidade visual consolidada (logo, assets)
+- Informações de contribuição e projetos relacionados
+
+**Decisão:** Estes itens passam a compor a **Fase 3 — Experiência Institucional** (Sprints 11–13), após a conclusão da evolução arquitetural.
+
+**Documentos alterados nesta revisão:**
+- `docs/comparativo-arquitetural.md` — nova seção "Experiência Institucional"
+- `docs/architecture-evolution-analysis.md` — nova seção "Evolução Institucional"
+- `docs/architecture-evolution-plan.md` — reestruturado em 3 fases; Sprints 11–13 adicionadas
+- `docs/architecture-evolution-log.md` — este registro
+- `docs/decisions.md` — ADR-011 adicionada
+
+**Nenhuma alteração de código foi realizada.**
+
+---
+
 ### Métricas atuais (baseline para comparação)
 
 | Métrica | Valor |

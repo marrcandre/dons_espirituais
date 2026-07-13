@@ -1,6 +1,6 @@
-# Plano de Evolução Arquitetural — Dons Espirituais
+# Plano de Evolução — Dons Espirituais
 
-> **Fase:** Pós-refatoração do domínio (Sprints 0–5 concluídas)
+> **Fase:** Planejamento geral (Sprints 0–5 de refatoração do domínio concluídas)
 >
 > **Data:** 2026-07-09
 >
@@ -8,11 +8,23 @@
 
 ---
 
-## 1. Objetivo da Fase
+## 1. Estrutura Geral do Projeto
+
+O projeto está organizado em 3 fases:
+
+| Fase | Sprints | Status |
+|------|---------|--------|
+| **Fase 1 — Refatoração do Domínio** | Sprints 0–5 | ✅ Concluída |
+| **Fase 2 — Evolução Arquitetural** | Sprints 6–10 | ⏳ Planejamento |
+| **Fase 3 — Experiência Institucional** | Sprints 11–13 | 📋 Planejado |
+
+---
+
+## 2. Objetivo da Fase 2
 
 Evoluir a arquitetura do projeto Dons Espirituais de um estado **monolítico com orquestração na view** para uma arquitetura **em camadas com separação clara de responsabilidades**, incorporando os aprendizados do projeto Cinco Ministérios.
 
-A fase atual cobre Sprints 6–10 e tem como metas:
+A Fase 2 cobre Sprints 6–10 e tem como metas:
 
 - Criar a camada de **Application** (casos de uso)
 - Isolar **Infrastructure** (repositories com testes)
@@ -22,7 +34,21 @@ A fase atual cobre Sprints 6–10 e tem como metas:
 
 ---
 
-## 2. Princípios
+## 3. Objetivo da Fase 3
+
+Transformar o Dons Espirituais de "aplicação funcional" para "produto público completo", incorporando elementos institucionais e de publicação que transmitam credibilidade, facilitem o compartilhamento e melhorem a descoberta orgânica.
+
+A Fase 3 cobre Sprints 11–13 e tem como metas:
+
+- Página institucional (Sobre, metodologia, autor)
+- Header e footer definitivos com navegação institucional
+- SEO, Open Graph, Sitemap, Robots e metadados
+- Identidade visual consolidada (logo, cores, assets)
+- Informações de licença, contribuição e projetos relacionados
+
+---
+
+## 4. Princípios
 
 ### Derivados do Dons (mantidos)
 
@@ -54,7 +80,7 @@ A fase atual cobre Sprints 6–10 e tem como metas:
 
 ---
 
-## 3. Arquitetura Alvo
+## 5. Arquitetura Alvo
 
 ```
 packages/frontend/src/
@@ -126,43 +152,33 @@ Domain (regras puras) ↔ Infrastructure (adaptadores)
 
 ---
 
-## 4. Roadmap
+## 6. Roadmap
 
 ```
-Sprint 6 — Fundação Arquitetural (atual)
-  docs/architecture-evolution-plan.md
-  docs/architecture-evolution-analysis.md
-  docs/architecture-evolution-log.md
-  docs/decisions.md
-  Nenhuma alteração de código
+FASE 1 — Refatoração do Domínio ✅
+  Sprint 0  — Auditoria
+  Sprint 1  — Estratégia de Testes
+  Sprint 2  — Migração para TypeScript
+  Sprint 3  — Fonte Única dos Dons
+  Sprint 4  — Organização Arquitetural
+  Sprint 5  — Limpeza e Remoção de Compatibilidade
 
-Sprint 7 — Application Layer
-  application/quiz/submit-quiz.ts
-  application/quiz/resume-session.ts
-  application/results/calculate-result.ts
-  Testes dos casos de uso
+FASE 2 — Evolução Arquitetural ⏳
+  Sprint 6  — Fundação Arquitetural
+  Sprint 7  — Application Layer
+  Sprint 8  — Infrastructure
+  Sprint 9  — Presentation
+  Sprint 10 — Qualidade e Produto
 
-Sprint 8 — Infrastructure
-  infrastructure/supabase/response-repo.ts
-  infrastructure/supabase/ai-repo.ts
-  Testes de infraestrutura
-  Tratamento de erros padronizado
-
-Sprint 9 — Presentation
-  Composables (useQuizSession, useResults)
-  Modularização de componentes (quiz/, results/)
-  Redução de acoplamento views-stores
-
-Sprint 10 — Qualidade e Produto
-  CI/CD (GitHub Actions)
-  Cobertura de testes (target: 90%+ statements)
-  SEO, PWA, Open Graph
-  Documentação final
+FASE 3 — Experiência Institucional 📋
+  Sprint 11 — Identidade Institucional
+  Sprint 12 — Layout Institucional
+  Sprint 13 — SEO e Publicação
 ```
 
 ---
 
-## 5. Sprints Planejadas (Detalhamento)
+## 7. Sprints Planejadas — Fase 2 (Detalhamento)
 
 ### Sprint 6 — Fundação Arquitetural
 
@@ -258,9 +274,91 @@ Sprint 10 — Qualidade e Produto
 
 ---
 
-## 6. Critérios de Aceite (Fase Completa)
+---
 
-A fase de evolução arquitetural será considerada concluída quando:
+### Sprint 11 — Identidade Institucional
+
+**Objetivo:** Criar a presença institucional do projeto.
+
+**Atividades:**
+- [ ] Criar `views/AboutView.vue` com:
+  - Objetivo do projeto
+  - Metodologia do teste (C. Peter Wagner)
+  - Base utilizada (27 dons, 135 afirmações)
+  - Tecnologias utilizadas
+  - Informações do autor
+  - Licença
+  - Como contribuir (link para GitHub)
+  - Outros projetos relacionados
+- [ ] Criar `components/ui/AppLogo.vue` (componente reutilizável do logotipo)
+- [ ] Configurar rota `/sobre`
+- [ ] Adicionar link para página Sobre no header existente
+- [ ] Testes do componente
+
+**Critérios de aceite:**
+- Página Sobre completa e responsiva
+- Logo componente reutilizável
+- Rota `/sobre` funcional
+- Navegação a partir do header
+
+---
+
+### Sprint 12 — Layout Institucional
+
+**Objetivo:** Consolidar header, footer e navegação institucional.
+
+**Atividades:**
+- [ ] Criar `components/ui/AppFooter.vue` com:
+  - Navegação institucional (Sobre, Teste, Resultados)
+  - Informações de copyright
+  - Versão da aplicação
+  - Link para GitHub
+  - Informações do autor
+- [ ] Revisar `components/ui/AppHeader.vue` para versão definitiva:
+  - Logo institucional
+  - Navegação completa
+  - Toggle de tema (já existe)
+  - Links para Sobre e GitHub
+- [ ] Integrar footer ao layout principal (DefaultLayout ou App.vue)
+- [ ] Garantir consistência visual (cores, tipografia, espaçamentos)
+- [ ] Testes dos componentes
+
+**Critérios de aceite:**
+- Header e footer presentes em todas as páginas
+- Navegação funcional entre todas as rotas
+- Informações de copyright e versão visíveis
+- Responsivo (mobile e desktop)
+
+---
+
+### Sprint 13 — SEO e Publicação
+
+**Objetivo:** Preparar o projeto para descoberta orgânica e compartilhamento em redes sociais.
+
+**Atividades:**
+- [ ] Meta tags HTML (`<title>`, `<meta name="description">`, etc.) em todas as páginas
+- [ ] Open Graph (`og:title`, `og:description`, `og:image`, `og:url`) no layout principal
+- [ ] Imagem/card para compartilhamento social
+- [ ] `sitemap.xml` gerado ou estático
+- [ ] `robots.txt` configurado
+- [ ] `manifest.json` configurado (avaliar PWA — service worker + ícones)
+- [ ] `favicon.ico` e `apple-touch-icon`
+- [ ] Revisão de performance (Lighthouse)
+
+**Critérios de aceite:**
+- Lighthouse ≥ 80 em todas as categorias
+- Open Graph funcional (testar com facebook/twitter debugger)
+- Sitemap e robots acessíveis
+- Manifest configurado
+- Links de compartilhamento com preview enriquecido
+
+---
+
+## 9. Critérios de Aceite
+
+### Fase 2 — Evolução Arquitetural
+
+A Fase 2 será considerada concluída quando:
 
 - [ ] Application Layer criada e testada
 - [ ] Infrastructure isolada e testada
@@ -271,13 +369,26 @@ A fase de evolução arquitetural será considerada concluída quando:
 - [ ] Zero regressão funcional
 - [ ] README.md reflete arquitetura atual
 
+### Fase 3 — Experiência Institucional
+
+A Fase 3 será considerada concluída quando:
+
+- [ ] Página Sobre completa com metodologia, autor, licença e contribuição
+- [ ] Logo componente reutilizável criado
+- [ ] Header definitivo com navegação institucional
+- [ ] Footer institucional em todas as páginas
+- [ ] Open Graph funcional em páginas compartilháveis
+- [ ] Sitemap e robots configurados
+- [ ] Lighthouse ≥ 80 em todas as categorias
+- [ ] Identidade visual consolidada
+
 ---
 
-## 7. Fora do Escopo (Desta Fase)
+## 10. Fora do Escopo (Desta Fase)
 
 - Migração do Supabase para outro backend
 - Substituição do Vuetify
 - Migração completa para TypeScript (será incremental)
 - Refatoração do AdminView
-- Novas funcionalidades (FAQ, páginas institucionais)
+- FAQ
 - Internacionalização (i18n)

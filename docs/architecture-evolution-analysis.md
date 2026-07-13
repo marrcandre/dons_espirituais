@@ -314,7 +314,50 @@
 
 ---
 
-## 5. Decisões Recomendadas
+## 5.1 Evolução Institucional
+
+### Por que essa fase agrega valor ao projeto
+
+O projeto Dons Espirituais está em produção (usuários reais fazendo o teste), mas não possui os elementos institucionais mínimos esperados por uma aplicação pública:
+
+- Não há página Sobre explicando o propósito, a metodologia ou o autor
+- Não há footer com informações institucionais, licença ou links
+- Não há SEO, Open Graph ou metadados de compartilhamento
+- A identidade visual não está consolidada em um componente de logotipo reutilizável
+
+A implementação desses elementos transforma a aplicação de "projeto funcional" para "produto público completo".
+
+### Por que deve acontecer após a consolidação arquitetural
+
+1. **Dependência de infraestrutura:** A página Sobre e o footer não dependem de Application Layer ou Infrastructure — são componentes de apresentação puros
+2. **Momento adequado:** Após a reorganização da Presentation (Sprint 9), os padrões de componente e composable já estarão estabelecidos
+3. **Sem risco de retrabalho:** Se feita antes, a institucionalização poderia precisar de refatoração quando a estrutura de componentes mudar
+4. **Paralelismo potencial:** Sprints institucionais tem escopo bem isolado da arquitetura — baixo risco de conflito
+
+### Benefícios para usuários
+
+- Entendem o propósito e a metodologia do teste
+- Sabem quem desenvolveu e como contribuir
+- Compartilham resultados com preview enriquecido (Open Graph)
+- Navegação institucional consistente (header + footer)
+
+### Benefícios para novos desenvolvedores
+
+- Encontram contexto do projeto (readme + página Sobre)
+- Entendem a licença e as diretrizes de contribuição
+- Identificam outros projetos relacionados
+- Documentação institucional como porta de entrada
+
+### Benefícios para manutenção do projeto
+
+- SEO melhora o ranqueamento e a descoberta orgânica
+- Open Graph enriquece o compartilhamento em redes sociais
+- Identidade visual consolidada reduz decisões de design futuras
+- Header e footer reutilizáveis centralizam navegação
+
+---
+
+## 6. Decisões Recomendadas
 
 ### D01 — Application Layer é prioridade máxima
 Criar `application/` antes de qualquer outra mudança. A inexistência desta camada é o maior débito técnico.
