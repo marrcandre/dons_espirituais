@@ -622,3 +622,30 @@ A Sprint 9.2 avaliou a criação do composable `useInlineEditor` para eliminar d
    - Test mock types preservados com eslint-disable
 
 **Resultado:** 114 testes passando, build verde, 0 lint errors, 0 typecheck errors.
+
+---
+
+### Sprint 10.2 — Continuous Integration
+
+**Objetivo:** Automatizar validações de qualidade via GitHub Actions (sem deploy automático).
+
+**O que foi feito:**
+
+1. **Arquivo criado:** `.github/workflows/ci.yml`
+
+2. **Pipeline — 5 steps:**
+   - `actions/checkout@v4`
+   - `actions/setup-node@v4` com Node 22 e cache npm
+   - `npm ci`
+   - `npm run lint --workspace=packages/frontend`
+   - `npm run typecheck --workspace=packages/frontend`
+   - `npm test --workspace=packages/frontend`
+   - `npm run build --workspace=packages/frontend`
+
+3. **Eventos monitorados:**
+   - `push` para `master`
+   - `pull_request` para `master`
+
+4. **Validação local:** Todos os 5 comandos executados sequencialmente com sucesso.
+
+**Resultado:** 114 testes passando, build verde, CI pipeline validada.

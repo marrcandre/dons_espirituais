@@ -4,7 +4,7 @@
 
 ### Sprint 10 — Qualidade e Produto (10.1 a 10.5) 📋
 - [x] **10.1** Tooling Foundation — ESLint + vue-tsc + tsconfig + scripts de qualidade
-- [ ] **10.2** CI (Continuous Integration) — GitHub Actions (lint → typecheck → test → build)
+- [x] **10.2** CI (Continuous Integration) — GitHub Actions (lint → typecheck → test → build)
 - [ ] **10.3** Test Coverage — vitest --coverage, relatório, meta documentada
 - [ ] **10.4** Presentation Tests — testes de stores + components + refactor auth.js
 - [ ] **10.5** Product Quality — SEO + Open Graph + Sitemap + Robots + PWA + v2.0.0

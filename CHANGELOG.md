@@ -23,11 +23,20 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
   * `submit-quiz.test.ts` — any mantido com eslint-disable
   * `env.d.ts` — tipos corrigidos (`{}` → `object`, `any` → `unknown`)
 
-### Métricas Sprint 10.1
+### Sprint 10.2 — Continuous Integration
+
+* **Pipeline CI criada:** `.github/workflows/ci.yml`
+* **Eventos monitorados:** `push` (master) e `pull_request`
+* **Comandos executados:** `npm ci` → `lint` → `typecheck` → `test` → `build`
+* **Node version:** 22
+* **Fora do escopo:** deploy automático, badges, coverage, cache avançado, matrix
+
+### Métricas Sprint 10.2
 
 * Testes: **114** (inalterado)
 * Lint errors: **0**
 * Typecheck errors: **0**
+* CI pipeline criada e validada localmente
 * Build verde
 
 ---
