@@ -9,7 +9,8 @@
 - [x] **10.4.1** Store Tests — 4 stores cobertas (47 testes)
 - [x] **10.4.2** Component Tests — 7 componentes cobertos (34 testes)
 - [x] **10.4.3** Infrastructure Tests + Helpers — authRepository (10), aiRepository (10), array (6), date (10), validation (13) = 49 novos testes
-- [ ] **10.4.4** (pendente)
+- [x] **10.4.4** Presentation Coverage Review — UserInfoForm (5) + HistoryList (4) = 9 novos testes; decisões documentadas
+- [ ] **10.5** Product Quality (pendente)
 - [ ] **10.5** Product Quality — SEO + Open Graph + Sitemap + Robots + PWA + v2.0.0
 
 > **Nota:** Sprint 10 implementa apenas **CI** (continuous integration). **CD** (continuous deployment / deploy automático) fica para a Sprint 13.

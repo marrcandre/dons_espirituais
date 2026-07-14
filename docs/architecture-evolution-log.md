@@ -862,3 +862,72 @@ Motivos:
 - Typecheck: OK ✅
 - Testes: 250/250 ✅
 - Build: OK ✅
+
+---
+
+### Sprint 10.4.4 — Presentation Coverage Review ✅
+
+**Concluída em:** 2026-07-14
+
+**Etapa 1 — Componentes candidatos com testes criados:**
+
+| Componente | Testes | Comportamento testado |
+|---|---|---|
+| `UserInfoForm.vue` | 5 | renderização de campos, preenchimento de nome via getUserProfile, perfil vazio, erro do perfil, submit com dados válidos |
+| `HistoryList.vue` | 4 | estado de loading, lista de itens, estado vazio, chamada a fetchByUserId no mount |
+
+**Estratégia de mocks:**
+- **UserInfoForm:** `vi.mock('../../application/auth/user-profile', () => ({ getUserProfile: vi.fn() }))` com `vi.hoisted()` — mock da application layer, Vuetify global plugin
+- **HistoryList:** `vi.mock` para `stores/auth` e `stores/responses` com `vi.hoisted()` — retorna objetos mockados de store com `loading`, `list`, `fetchByUserId`
+
+**Etapa 2 — Componentes complexos avaliados e NÃO testados:**
+
+| Componente | Linhas | Decisão | Justificativa |
+|---|---|---|---|
+| `AiAnalysis.vue` | 282 | ❌ Não testar | Ciclo de vida complexo (polling, subscription, generate/regenerate), 5+ estados visuais, mock pesado de stores + timers. Teste seria frágil e de manutenção cara. ADR-013. |
+| `ResultsChart.vue` | 125 | ❌ Não testar | Depende de Chart.js + canvas rendering. Teste unitário em happy-dom não capturaria comportamento real. Mock do Chart.js anularia o propósito. ADR-013. |
+| `AdminView.vue` | 572 | ❌ Não testar | View monolítica com múltiplas responsabilidades. Teste exigiria mock de todo ecossistema (Vuetify data-table, stores, router). Beneficiaria de extração de componentes primeiro. |
+| `ResultsView.vue` | 284 | ❌ Não testar | View que integra múltiplos componentes (AiAnalysis, GiftBadges, ResultsChart, HistoryList). Melhor candidato para teste de integração/e2e, não unitário. Componentes internos já têm cobertura individual. |
+
+**Etapa 3 — Estratégia de testes da Presentation (documentada):**
+
+**Testados (27.89% de cobertura):**
+
+| Componente | Tipo | Testes | Status |
+|---|---|---|---|
+| AppButton, AppAlert, AppCard, LoadingState, EmptyState | UI (DS) | 5–6 cada | ✅ |
+| QuestionStep, GiftBadges | Domínio | 7, 3 | ✅ |
+| UserInfoForm, HistoryList | Feature | 5, 4 | ✅ (nesta sprint) |
+
+**Puramente visuais (sem testes — ADR-013):**
+- QuizProgress (v-progress-linear + texto, sem eventos/lógica)
+- ErrorState (similar a EmptyState, sem eventos/lógica além do emit action)
+- AppPage, PageHeader, SectionTitle, CollapsibleCard, AppStat (layout/decoração)
+
+**Adiados (teste traria mais manutenção que valor):**
+- AiAnalysis — lifecycle complexo, polling, subscription
+- ResultsChart — Chart.js canvas, não testável em happy-dom
+- AdminView — view monolítica 572 linhas, precisa de extração
+- ResultsView — view de integração, melhor para e2e
+
+**Critérios usados para decidir testar ou não:**
+1. O componente tem comportamento (props, eventos, chamadas, validações)? → SIM = candidato
+2. O setup de mock é proporcional ao comportamento testado? → SIM = testar, NÃO = adiar
+3. O teste capturaria regressões reais ou testaria detalhes frágeis? → regressões reais = testar
+4. O componente depende de canvas/DOM API não disponível? → SIM = adiar (Chart.js, etc.)
+
+**Cobertura:**
+
+| Módulo | Antes (10.4.3) | Depois (10.4.4) |
+|---|---|---|
+| All files | 34.45% | **38.66%** |
+| src/components | 10.21% | **27.89%** |
+| src/stores | 95.89% | 95.89% |
+| src/repositories | 93.15% | 93.15% |
+| src/helpers | 100% | 100% |
+
+**Pipeline:**
+- Lint: 0 erros ✅
+- Typecheck: OK ✅
+- Testes: 259/259 ✅
+- Build: OK ✅
