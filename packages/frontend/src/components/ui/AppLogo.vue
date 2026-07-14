@@ -22,22 +22,16 @@
 </template>
 
 <script setup>
-withDefaults(
-  defineProps({
-    icon: { type: String, default: 'mdi-gift-outline' },
-    size: { type: [Number, String], default: 30 },
-    color: { type: String, default: 'white' },
-    variant: { type: String, default: 'full' },
-  }),
-  {
-    icon: 'mdi-gift-outline',
-    size: 30,
-    color: 'white',
-    variant: 'full',
-  },
-)
+import { computed } from 'vue'
 
-defineOptions({ inheritAttrs: false })
+const props = defineProps({
+  icon: { type: String, default: 'mdi-gift-outline' },
+  size: { type: [Number, String], default: 30 },
+  color: { type: String, default: 'white' },
+  variant: { type: String, default: 'full' },
+})
+
+const iconSize = computed(() => Number(props.size))
 </script>
 
 <style scoped>
