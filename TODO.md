@@ -5,8 +5,8 @@
 ### Sprint 8 — Correções, Testes e Consolidação
 - [x] **8.1** Refatorar `UserInfoForm.vue` para usar `getUserProfile()` da Application Layer (remove chamada direta a repositories)
 - [x] **8.2** Padronizar timeout em `responseRepository.insert()` e `countByUserId()` com `runSupabaseQuery`
-- [ ] **8.3** Criar `repositories/__tests__/responseRepository.test.js` (7+ testes)
-- [ ] **8.3** Criar `repositories/__tests__/userRepository.test.js` (2+ testes)
+- [x] **8.3** Criar `repositories/tests/responseRepository.test.js` (10 testes)
+- [x] **8.3** Criar `repositories/tests/userRepository.test.js` (3 testes)
 
 ### Implementação Pendente
 - [ ] Substituir 21 `<v-btn>` raw por `AppButton` em 7 arquivos
@@ -47,6 +47,7 @@
 - [ ] Revisar densidade de informações por tela
 
 ### Arquitetura (Clean Code)
+- [ ] Padronizar nomenclatura de diretórios de testes: `tests` vs `__tests__` (atualmente misturado)
 - [x] ~~Refatorar `UserInfoForm.vue` para usar store (remove chamada direta a repositories)~~ → Sprint 8.1 (props em vez de store)
 - [ ] Análise de viabilidade: substituir Supabase SDK por REST API
   - Mapear endpoints CRUD + auth + IA + notificações

@@ -20,12 +20,27 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 * Todos os 7 métodos do responseRepository usam `runSupabaseQuery` consistentemente
 * Zero acessos `await supabase.from(...)` sem wrapper nos repositories
 
+### Sprint 8.3 — Testes da Infrastructure
+
+* Criação de `repositories/tests/responseRepository.test.js` com 10 testes:
+  - `findById()` — retorno e erro
+  - `findByUserId()` — lista e limit
+  - `insert()` — persistência com retorno de id
+  - `countByUserId()` — contagem e zero
+  - `updateField()` — execução sem erro
+  - `selectField()` — valor e null
+* Criação de `repositories/tests/userRepository.test.js` com 3 testes:
+  - `findById()` — encontrado, não encontrado, erro propagado
+* Mocks no query builder do Supabase via `vi.hoisted() + vi.mock()` — sem mock em `supabaseQuery.js`
+* Zero acesso a Supabase real
+
 ### Testes
 
 * 5 novos testes para `application/auth/user-profile.ts`
+* 13 novos testes para repositories (10 responseRepository + 3 userRepository)
 * `UserInfoForm.vue` validado sem regressão
-* Total: **97 testes passando** (92 existentes + 5 novos)
-* 7 arquivos de teste (6 existentes + 1 novo)
+* Total: **110 testes passando** (92 existentes + 18 novos)
+* 9 arquivos de teste (7 existentes + 2 novos)
 
 ### Build
 

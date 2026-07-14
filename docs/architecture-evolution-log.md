@@ -281,34 +281,34 @@ Sprint 8
 
 - [x] **8.1** UserInfoForm refatorado para usar `getUserProfile()` da Application Layer
 - [x] **8.2** `responseRepository.insert()` e `countByUserId()` usam `runSupabaseQuery`
-- [ ] **8.3** `repositories/__tests__/responseRepository.test.js` com 7+ testes
-- [ ] **8.3** `repositories/__tests__/userRepository.test.js` com 2+ testes
+- [x] **8.3** `repositories/tests/responseRepository.test.js` com 10 testes
+- [x] **8.3** `repositories/tests/userRepository.test.js` com 3 testes
 - [ ] **8.4** `services/aiAnalysis.js` removido (confirmado sem uso)
 - [ ] **8.5** `quizStore.checkSavedState()` delegado a `quizSession.checkSavedSession()`
 - [ ] **8.6** Avaliação documentada — decisão de manter estado atual
 
 ### Resultados esperados
 
-| Métrica | Antes (v1.7.0) | Após 8.1–8.2 | Meta Sprint 8 |
-|---------|----------------|----------------|---------------|
-| Testes totais | 92 | **97** | ~105+ |
-| Arquivos de teste | 6 | **7** | 9 |
-| Cobertura (infrastructure) | 0% | 0% | ~85% |
-| Cobertura (geral) | ~40% | ~40% | ~55% |
-| Violações de camada | 1 (UserInfoForm) | **0** | 0 |
-| Inconsistência de timeout | 2 métodos | **0** | 0 |
-| Código órfão | services/aiAnalysis.js | ainda presente | removido |
-| Duplicação checkSavedState | 2 implementações | ainda presente | 1 (centralizada) |
+| Métrica | Antes (v1.7.0) | Após 8.1–8.2 | Após 8.3 | Meta Sprint 8 |
+|---------|----------------|----------------|----------|---------------|
+| Testes totais | 92 | 97 | **110** | ~105+ |
+| Arquivos de teste | 6 | 7 | **9** | 9 |
+| Cobertura (infrastructure) | 0% | 0% | ~XX% | ~85% |
+| Cobertura (geral) | ~40% | ~40% | ~42% | ~55% |
+| Violações de camada | 1 (UserInfoForm) | 0 | **0** | 0 |
+| Inconsistência de timeout | 2 métodos | 0 | **0** | 0 |
+| Código órfão | services/aiAnalysis.js | ainda presente | ainda presente | removido |
+| Duplicação checkSavedState | 2 implementações | ainda presente | ainda presente | 1 (centralizada) |
 
 ### Critérios de aceite
 
 - [x] UserInfoForm não importa repositories
 - [x] Todos os 7 métodos de responseRepository usam `runSupabaseQuery`
-- [ ] 9+ testes de infrastructure passando
+- [x] 13 testes de infrastructure passando
 - [ ] `services/aiAnalysis.js` removido (se confirmado sem uso)
 - [ ] `quizStore.checkSavedState()` não replica lógica de sessão
 - [ ] Decisão de desacoplamento registrada
-- [ ] 105+ testes passando
+- [x] 110 testes passando
 - [x] Build verde
 - [x] Nenhuma regressão funcional
 
@@ -345,3 +345,34 @@ Sprint 8
 - authRepository e aiRepository mantidos fora do escopo (APIs específicas)
 - 97 testes passando
 - Build verde
+
+---
+
+### Sprint 8.3 — Testes da Infrastructure ✅
+
+**Concluída em:** 2026-07-14
+
+**Implementado:**
+- Criado `repositories/tests/responseRepository.test.js` com 10 testes:
+  - `findById()` — retorna resposta encontrada; propaga erro
+  - `findByUserId()` — retorna lista; aplica limit
+  - `insert()` — persiste payload e retorna id
+  - `countByUserId()` — retorna contagem; retorna zero quando count é null
+  - `updateField()` — executa atualização sem erro
+  - `selectField()` — retorna valor do campo; retorna null quando campo não existe
+- Criado `repositories/tests/userRepository.test.js` com 3 testes:
+  - `findById()` — usuário encontrado retorna objeto; usuário inexistente retorna null; erro do Supabase é propagado
+
+**Estratégia de mocks:**
+- Nenhum mock em `services/supabaseQuery.js` — o fluxo real `repository → runSupabaseQuery() → query.abortSignal()` é testado integralmente
+- Mock no query builder do Supabase via `vi.hoisted()` + `vi.mock()`:
+  - `supabase.from()` retorna um `mockQueryBuilder` com métodos encadeáveis (`select`, `eq`, `single`, `order`, `limit`, `maybeSingle`, `insert`, `update`)
+  - `abortSignal()` configurado por teste para retornar `{ data, error }`, `{ count, error }` ou `{ error }`
+- Zero acesso a Supabase real
+
+**Resultados:**
+- 13 novos testes → total: **110 testes**
+- 9 arquivos de teste (7 existentes + 2 novos)
+- Nenhum código de produção alterado
+- 110/110 testes passando
+- Build verde (787 módulos, sem regressão)
