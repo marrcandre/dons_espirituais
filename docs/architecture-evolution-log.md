@@ -285,7 +285,7 @@ Sprint 8
 - [x] **8.3** `repositories/tests/userRepository.test.js` com 3 testes
 - [x] **8.4** `services/aiAnalysis.js` removido (confirmado sem uso)
 - [x] **8.5** `quizStore.checkSavedState()` delegado a `quizSession.checkSavedSession()`
-- [ ] **8.6** Avaliação documentada — decisão de manter estado atual
+- [x] **8.6** Avaliação documentada — decisão de manter estado atual
 
 ### Resultados esperados
 
@@ -307,7 +307,7 @@ Sprint 8
 - [x] 13 testes de infrastructure passando
 - [x] `services/aiAnalysis.js` removido (confirmado sem uso)
 - [x] `quizStore.checkSavedState()` não replica lógica de sessão
-- [ ] Decisão de desacoplamento registrada
+- [x] Decisão de desacoplamento registrada
 - [x] 110 testes passando
 - [x] Build verde
 - [x] Nenhuma regressão funcional
@@ -448,3 +448,33 @@ Sprint 8
 - 110 testes passando
 - Build verde (787 módulos)
 - `restoreSaved()` mantido fora do escopo (possível duplicação futura não antecipada)
+
+---
+
+### Sprint 8.6 — Auditoria de desacoplamento Presentation ✅
+
+**Concluída em:** 2026-07-14
+
+**Objetivo:** Auditar acoplamento de `AiAnalysis.vue` e `HistoryList.vue` a stores Pinia e registrar decisão arquitetural — sem refatorações.
+
+**Componentes analisados:**
+
+| Componente | Dependências | Decisão |
+|---|---|---|
+| `AiAnalysis.vue` | `useAuthStore()`, `useAiStore()`, `useResponsesStore()` | **Manter** — acoplamento aceitável em Vue + Pinia |
+| `HistoryList.vue` | `useAuthStore()`, `useResponsesStore()` | **Manter** — custo de remoção > benefício |
+
+**Justificativa arquitetural:**
+- Pinia stores são o padrão de estado da Presentation Layer — o acoplamento é esperado e documentado
+- Extrair stores para composables ou props criaria abstração sem benefício mensurável
+- Nenhum componente orquestra regras de negócio ou acessa repositories diretamente
+- Ambos consomem dados via stores que já abstraem repositories
+
+**Oportunidades futuras:**
+- Reavaliar caso `AiAnalysis.vue` cresça em responsabilidades
+- Reavaliar caso surja necessidade de reuso em outro contexto
+- Nenhuma ação planejada — débito técnico de baixa prioridade
+
+**Resultados:**
+- Nenhum arquivo de código fonte alterado
+- Sprint 8 completa — todos os 6 sub-items entregues

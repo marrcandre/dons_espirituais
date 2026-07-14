@@ -4,7 +4,55 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 
 ---
 
-## [1.7.1] - Julho/2026
+## [1.8.0] - Julho/2026
+
+### Sprint 8 — Consolidação Arquitetural
+
+**Sprint 8 concluída.** Correções de camada, padronização, testes de infrastructure, remoção de código morto, consolidação de sessão e auditoria de desacoplamento.
+
+### Sprint 8.6 — Auditoria de desacoplamento Presentation
+
+* `AiAnalysis.vue` analisado — dependências: `useAuthStore()`, `useAiStore()`, `useResponsesStore()`. Decisão: **manter** — acoplamento aceitável dentro da arquitetura Vue + Pinia.
+* `HistoryList.vue` analisado — dependências: `useAuthStore()`, `useResponsesStore()`. Decisão: **manter** — custo de remoção supera benefício atual.
+* Nenhuma violação grave encontrada na Presentation Layer.
+* Débito técnico registrado como baixa prioridade para futura reavaliação.
+* Nenhum arquivo de código fonte alterado nesta sprint.
+
+### Resumo Sprint 8
+
+| Sub-sprint | Entregue |
+|---|---|
+| 8.1 | Violação de camada UserInfoForm corrigida — `application/auth/user-profile.ts` criado |
+| 8.2 | `responseRepository.insert()` e `countByUserId()` padronizados com `runSupabaseQuery` |
+| 8.3 | 13 testes de infrastructure — `responseRepository` (10) + `userRepository` (3) |
+| 8.4 | `services/aiAnalysis.js` removido — código órfão sem consumidores |
+| 8.5 | Duplicação `checkSavedState` eliminada — sessão centralizada em Application Layer |
+| 8.6 | Auditoria de desacoplamento Presentation — decisão de manter estado atual |
+
+### Métricas finais Sprint 8
+
+* Testes: **92 → 110** (+18)
+* Arquivos de teste: **6 → 9**
+* Violações de camada: **1 → 0**
+* Inconsistência de timeout: **2 métodos → 0**
+* Código órfão: **1 arquivo removido**
+* Duplicação de sessão: **eliminada**
+* Nenhum Supabase real utilizado nos novos testes
+* Build verde (787 módulos)
+
+### Testes
+
+* 110 testes passando (92 existentes + 18 novos)
+* 9 arquivos de teste (7 existentes + 2 novos)
+* Cobertura adicionada: repositories (responseRepository, userRepository)
+
+### Build
+
+* 787 módulos transformados
+* Build verde
+* Nenhuma regressão funcional
+
+---
 
 ### Sprint 8.1 — Correção de Violação de Camada
 
@@ -62,7 +110,13 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 
 ### Build
 
-### Application Layer (Sprint 7)
+* 787 módulos transformados
+* Build verde
+* Nenhuma regressão funcional
+
+---
+
+## [1.7.0] - Julho/2026
 
 * Criação da camada `src/application/` com estrutura `application/quiz/`
 * Criação do caso de uso `application/quiz/submit-quiz.ts` — orquestração do envio do teste (calcular scores, montar payload, persistir, limpar sessão, notificar admin, disparar IA, retornar ID)
