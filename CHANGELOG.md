@@ -51,15 +51,16 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 * Nenhuma referência restante ao código removido
 * 110 testes passando, build verde
 
+### Sprint 8.5 — Eliminar duplicação de lógica de sessão
+
+* `stores/quiz.js → checkSavedState()` delegado a `application/quiz/quiz-session.ts → checkSavedSession()`
+* Store deixou de conhecer regra de leitura de sessão (localStorage, JSON.parse, validação)
+* `application/quiz/quiz-session.ts` permanece como fonte única de verdade
+* Nenhuma ocorrência de `localStorage.getItem('quiz_state')` no store
+* `restoreSaved()` mantido fora do escopo
+* 110 testes passando, build verde
+
 ### Build
-
-* 787 módulos transformados
-* Build verde
-* Nenhuma regressão funcional
-
----
-
-## [1.7.0] - Julho/2026
 
 ### Application Layer (Sprint 7)
 

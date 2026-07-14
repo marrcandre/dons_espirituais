@@ -27,7 +27,7 @@
 
 ### Sprint 8 — Continuação
 - [x] **8.4** Remover `services/aiAnalysis.js` (verificar se há consumidores)
-- [ ] **8.5** Eliminar duplicação entre `quizStore.checkSavedState()` e `quizSession.checkSavedSession()`
+- [x] **8.5** Eliminar duplicação entre `quizStore.checkSavedState()` e `quizSession.checkSavedSession()`
 - [ ] **8.6** Avaliar desacoplamento de `AiAnalysis.vue` e `HistoryList.vue` (decisão: manter estado atual)
 
 ### Design System

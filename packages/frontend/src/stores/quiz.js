@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { questions } from '../data/questions.js'
 import { useAuthStore } from './auth.js'
 import { shuffle } from '../helpers/array.js'
+import { checkSavedSession } from '../application/quiz/quiz-session'
 
 function storageKey(userId) {
   return `quiz_state_${userId}`
@@ -35,21 +36,14 @@ export const useQuizStore = defineStore('quiz', () => {
     const userId = authStore.user?.id
     if (!userId) return false
 
-    const saved = localStorage.getItem(storageKey(userId))
-    if (!saved) return false
+    const saved = checkSavedSession(userId)
 
-    try {
-      const parsed = JSON.parse(saved)
-      if (
-        parsed.questionOrder?.length === questions.length &&
-        parsed.userInfo
-      ) {
-        hasSavedState.value = true
-        return true
-      }
-    } catch {
-      // JSON inválido — ignorar
+    if (saved) {
+      hasSavedState.value = true
+      return true
     }
+
+    hasSavedState.value = false
     return false
   }
 

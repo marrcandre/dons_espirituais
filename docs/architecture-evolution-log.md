@@ -284,12 +284,12 @@ Sprint 8
 - [x] **8.3** `repositories/tests/responseRepository.test.js` com 10 testes
 - [x] **8.3** `repositories/tests/userRepository.test.js` com 3 testes
 - [x] **8.4** `services/aiAnalysis.js` removido (confirmado sem uso)
-- [ ] **8.5** `quizStore.checkSavedState()` delegado a `quizSession.checkSavedSession()`
+- [x] **8.5** `quizStore.checkSavedState()` delegado a `quizSession.checkSavedSession()`
 - [ ] **8.6** Avaliação documentada — decisão de manter estado atual
 
 ### Resultados esperados
 
-| Métrica | Antes (v1.7.0) | Após 8.1–8.2 | Após 8.3 | Meta Sprint 8 |
+| Métrica | Antes (v1.7.0) | Após 8.1–8.2 | Após 8.5 | Meta Sprint 8 |
 |---------|----------------|----------------|----------|---------------|
 | Testes totais | 92 | 97 | **110** | ~105+ |
 | Arquivos de teste | 6 | 7 | **9** | 9 |
@@ -298,7 +298,7 @@ Sprint 8
 | Violações de camada | 1 (UserInfoForm) | 0 | **0** | 0 |
 | Inconsistência de timeout | 2 métodos | 0 | **0** | 0 |
 | Código órfão | services/aiAnalysis.js | ainda presente | ainda presente | **removido** |
-| Duplicação checkSavedState | 2 implementações | ainda presente | ainda presente | 1 (centralizada) |
+| Duplicação checkSavedState | 2 implementações | ainda presente | **eliminada** | 1 (centralizada) |
 
 ### Critérios de aceite
 
@@ -306,7 +306,7 @@ Sprint 8
 - [x] Todos os 7 métodos de responseRepository usam `runSupabaseQuery`
 - [x] 13 testes de infrastructure passando
 - [x] `services/aiAnalysis.js` removido (confirmado sem uso)
-- [ ] `quizStore.checkSavedState()` não replica lógica de sessão
+- [x] `quizStore.checkSavedState()` não replica lógica de sessão
 - [ ] Decisão de desacoplamento registrada
 - [x] 110 testes passando
 - [x] Build verde
@@ -410,3 +410,41 @@ Sprint 8
 - 110 testes passando
 - Build verde (787 módulos)
 - Nenhuma regressão funcional
+
+---
+
+### Sprint 8.5 — Eliminar duplicação de lógica de sessão do quiz ✅
+
+**Concluída em:** 2026-07-14
+
+**Problema resolvido:**
+- Duplicação entre `stores/quiz.js → checkSavedState()` e `application/quiz/quiz-session.ts → checkSavedSession()`
+- Store conhecia regra de leitura de sessão (localStorage, JSON.parse, validação)
+
+**Arquivos alterados:**
+- `packages/frontend/src/stores/quiz.js`:
+  - Adicionado `import { checkSavedSession } from '../application/quiz/quiz-session'`
+  - `checkSavedState()` delegado para Application Layer:
+    ```js
+    const saved = checkSavedSession(userId)
+    if (saved) { hasSavedState.value = true; return true }
+    hasSavedState.value = false; return false
+    ```
+
+**Arquitetura antes/depois:**
+
+| Antes | Depois |
+|---|---|
+| `quizStore → localStorage → JSON.parse → validação → hasSavedState` | `quizStore → checkSavedSession() → Application Layer` |
+
+**Impacto na Application Layer:**
+- `quiz-session.ts` permaneceu inalterado — já era a implementação de referência
+- `checkSavedSession()` já possuía cobertura de testes (7 testes em `quiz-session.test.ts`)
+
+**Verificação:**
+- `grep -R "localStorage.getItem.*quiz_state" src/stores` → **0 resultados** ✅
+
+**Resultados:**
+- 110 testes passando
+- Build verde (787 módulos)
+- `restoreSaved()` mantido fora do escopo (possível duplicação futura não antecipada)
