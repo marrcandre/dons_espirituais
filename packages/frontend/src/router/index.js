@@ -66,6 +66,16 @@ const routes = [
     },
   },
   {
+    path: '/sobre',
+    name: 'about',
+    component: () => import('../views/AboutView.vue'),
+    meta: {
+      public: true,
+      title: 'Sobre — Dons Espirituais',
+      description: 'Conheça o projeto Dons Espirituais: metodologia, tecnologia e propósito.',
+    },
+  },
+  {
     path: '/auth/callback',
     name: 'auth-callback',
     component: () => import('../views/AuthCallback.vue'),
