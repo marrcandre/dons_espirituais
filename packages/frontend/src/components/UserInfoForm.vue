@@ -55,9 +55,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import * as authRepository from '../repositories/authRepository.js'
-import * as userRepository from '../repositories/userRepository.js'
 import { required, ageRange } from '../helpers/validation.js'
+import { getUserProfile } from '../application/auth/user-profile'
 import AppCard from './ui/AppCard.vue'
 
 const emit = defineEmits(['submit'])
@@ -74,10 +73,7 @@ onMounted(loadUserData)
 
 async function loadUserData() {
   try {
-    const user = await authRepository.getUser()
-    if (!user) return
-
-    const profile = await userRepository.findById(user.id)
+    const profile = await getUserProfile()
     if (profile?.name) {
       form.value.name = profile.name
     }
