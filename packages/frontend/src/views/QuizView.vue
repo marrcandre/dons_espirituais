@@ -57,9 +57,8 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuizStore } from '../stores/quiz.js'
 import { useAuthStore } from '../stores/auth.js'
-import { useResponsesStore } from '../stores/responses.js'
-import { useAiStore } from '../stores/ai.js'
-import { calculateScores } from '../domain/scoring'
+import { submitQuiz as submitQuizUseCase } from '../application/quiz/submit-quiz'
+import { checkSavedSession } from '../application/quiz/quiz-session'
 import UserInfoForm from '../components/UserInfoForm.vue'
 import QuizProgress from '../components/QuizProgress.vue'
 import QuestionStep from '../components/QuestionStep.vue'
@@ -73,8 +72,6 @@ import LoadingState from '../components/ui/LoadingState.vue'
 const router = useRouter()
 const quizStore = useQuizStore()
 const authStore = useAuthStore()
-const responseStore = useResponsesStore()
-const aiStore = useAiStore()
 
 const step = ref('loading')
 const showResumeDialog = ref(false)
@@ -88,8 +85,8 @@ function preMarkZeroIfBlank() {
 }
 
 onMounted(() => {
-  const hasSaved = quizStore.checkSavedState()
-  if (hasSaved) {
+  const saved = authStore.user ? checkSavedSession(authStore.user.id) : null
+  if (saved) {
     showResumeDialog.value = true
   } else {
     quizStore.startFresh()
@@ -166,38 +163,19 @@ async function submitQuiz() {
   step.value = 'submitting'
 
   try {
-    const answers = quizStore.answers
-    const scores = calculateScores(answers)
-    const { name, gp, age } = quizStore.userInfo
-
-    const payload = {
-      user_id: authStore.user.id,
-      name: name.trim(),
-      email: authStore.user.email,
-      gp: gp.trim(),
-      age: parseInt(age) || null,
-      question_order: quizStore.questionOrder,
-      answers: Object.values(answers), // array indexado por question id (0–134)
-      scores,
-    }
-
-    const data = await responseStore.insert(payload)
+    const result = await submitQuizUseCase({
+      answers: quizStore.answers,
+      userInfo: quizStore.userInfo,
+      userId: authStore.user.id,
+      userEmail: authStore.user.email,
+      questionOrder: quizStore.questionOrder,
+    })
 
     quizStore.clearState()
-
-    aiStore.notifyAdmin(data.id).catch((err) => {
-      console.error('Erro ao enviar notificação:', err)
-    })
-
-    aiStore.generate(data.id).catch((err) => {
-      console.error('Erro ao iniciar geração IA:', err)
-    })
-
-    router.push({ name: 'results', params: { id: data.id } })
+    router.push({ name: 'results', params: { id: result.id } })
   } catch (err) {
     console.error('Erro ao salvar respostas:', err)
     step.value = 'quiz'
-    // Volta para quiz; estado está preservado no localStorage
   }
 }
 </script>

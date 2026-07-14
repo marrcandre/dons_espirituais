@@ -93,7 +93,7 @@ helpers/      → Utilitários puros (já existe)
 ### Próximos passos
 
 1. **Sprint 6 (atual):** Finalizar documentação, criar `docs/decisions.md`, preparar estrutura de diretórios
-2. **Sprint 7:** Criar `application/quiz/submit-quiz.ts` + testes
+2. **Sprint 7:** Criar `application/quiz/` com `submit-quiz.ts`, `quiz-session.ts`, `ports.ts` + testes em `application/__tests__/` + atualizar QuizView.vue
 3. **Sprint 8:** Criar `infrastructure/supabase/` + testes
 4. **Sprint 9:** Composables + organização de componentes
 5. **Sprint 10:** CI/CD, cobertura, SEO, documentação final
@@ -140,3 +140,84 @@ Durante a comparação detalhada com o projeto Cinco Ministérios, identificou-s
 | Componentes | 11 (planos, sem módulos) |
 | Design System | ui/ com 10 componentes |
 | Tokens CSS | Documentados em design_plan.md, sem arquivo de variáveis |
+
+---
+
+## Sprint 7 — Application Layer
+
+> **Início:** 2026-07-14
+>
+> **Término:** 2026-07-14
+>
+> **Status:** ✅ Concluída
+
+### Contexto
+
+Sprint 6 concluída (fundação arquitetural documentada). A Sprint 7 é a primeira sprint com alteração de código na Fase 2.
+
+### Objetivo
+
+Criar a Application Layer com escopo mínimo:
+
+- `application/quiz/ports.ts` — interface de entrada/saída
+- `application/quiz/submit-quiz.ts` — caso de uso principal (orquestração do envio)
+- `application/quiz/quiz-session.ts` — serviço de sessão (localStorage)
+- Testes em `application/__tests__/`
+- QuizView.vue simplificado (orquestração movida para application)
+
+### Decisões de planejamento
+
+1. **Testes em `application/__tests__/`** — mantém o padrão do projeto (co-localizados por camada, não por módulo). A padronização geral dos testes será discutida após a Fase 2.
+2. **`quiz-session.ts` escopo reduzido** — apenas `checkSavedSession()` e `clearSession()`. Sem `saveSession()` por ora (YAGNI).
+3. **`ports.ts` escopo mínimo** — apenas `SubmitQuizInput` e `SubmitQuizResult`. `SavedSession` permanece interno ao `quiz-session.ts`.
+4. **Sem `application/results/`** — será planejada em sprint posterior.
+5. **Sem composables, DI, alterações em stores, repositories ou domain.**
+6. **Nova ADR** registrada em `docs/decisions.md` (ADR-012).
+
+### Estrutura implementada
+
+```
+src/
+  application/
+    __tests__/
+      submit-quiz.test.ts      # 7 testes
+      quiz-session.test.ts     # 7 testes
+    quiz/
+      submit-quiz.ts           # Caso de uso: orquestração do envio
+      quiz-session.ts          # Serviço: checkSavedSession, clearSession
+      ports.ts                 # Tipos: SubmitQuizInput, SubmitQuizResult
+```
+
+### Checklist de execução
+
+- [x] `src/application/` criada com estrutura de diretórios
+- [x] `application/quiz/ports.ts` com `SubmitQuizInput` e `SubmitQuizResult`
+- [x] `application/quiz/quiz-session.ts` com `checkSavedSession()` e `clearSession()`
+- [x] `submitQuiz()` extraído do QuizView.vue para `application/quiz/submit-quiz.ts`
+- [x] Testes unitários em `application/__tests__/` (14 novos testes)
+- [x] QuizView.vue simplificado: orquestração removida, usa casos de uso
+- [x] ADR-012 registrada em `docs/decisions.md`
+
+### Resultados
+
+| Métrica | Antes | Depois |
+|---------|-------|--------|
+| Testes totais | 78 | 92 |
+| Arquivos de teste | 4 | 6 |
+| Cobertura (application) | 0% | ~95% (estimado) |
+| Views com orquestração | QuizView.vue (203 linhas) | QuizView.vue (181 linhas, orquestração removida) |
+| Application Layer | Inexistente | `application/quiz/` com 3 arquivos |
+| Nenhuma alteração | — | stores, repositories, domain, infrastructure intactos |
+
+### Critérios de aceite
+
+- [x] `submitQuiz()` testável sem Vue (com `vi.mock()`) — 7 testes em submit-quiz.test.ts
+- [x] `quiz-session.ts` gerencia sessão (checkSavedSession, clearSession)
+- [x] `ports.ts` contém apenas `SubmitQuizInput` e `SubmitQuizResult`
+- [x] Testes em `application/__tests__/` (padrão do projeto, não co-localizados)
+- [x] QuizView.vue não orquestra scoring/payload/persistência/side effects
+- [x] Nenhuma regra de domínio volta para Views ou Stores
+- [x] 92 testes passando (78 existentes + 14 novos)
+- [x] Build intacto
+- [x] Nenhuma alteração em stores, repositories, domain ou infrastructure
+- [x] `application/results/` não criado

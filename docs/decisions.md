@@ -186,3 +186,30 @@
 - Negativas: Usuários continuam sem página Sobre e footer até o final da Fase 3
 
 **Status:** ✅ Decidido
+
+---
+
+## ADR-012: Padrão da Application Layer
+
+**Data:** 2026-07-14 (Sprint 7)
+
+**Contexto:** A Sprint 7 cria a primeira versão da Application Layer do Dons Espirituais. É necessário estabelecer um padrão consistente para todos os casos de uso futuros.
+
+**Decisão:** Todo caso de uso da Application Layer deve seguir estas regras:
+
+- ser uma **função** (função pura ou async function), não uma classe
+- receber um objeto `Input` como parâmetro
+- retornar um objeto `Result` como saída
+- **não depender de Vue** (nenhum import de `vue`, `@vue/*` ou similares)
+- **não depender de componentes** (nenhum import de `*.vue`)
+- **não depender de Pinia** (nenhum import de `pinia` ou stores)
+- **não depender de Presentation** (nenhum import de `views/`, `components/`, `constants/`)
+- **pode importar repositories** para acessar infraestrutura (`repositories/`)
+- **pode importar domain** para regras de negócio (`domain/`)
+- **pode importar helpers** puros (`helpers/`)
+
+**Consequências:**
+- Positivas: Casos de uso testáveis sem Vue; responsabilidades claras; isolamento de framework
+- Negativas: Restrição intencional de imports; curva de aprendizado inicial
+
+**Status:** ✅ Estabelecido na Sprint 7

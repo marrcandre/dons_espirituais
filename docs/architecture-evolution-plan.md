@@ -204,18 +204,25 @@ FASE 3 — Experiência Institucional 📋
 **Objetivo:** Extrair casos de uso reais da apresentação.
 
 **Atividades:**
-- [ ] Criar `src/application/` com estrutura de diretórios
-- [ ] Extrair `submitQuiz()` do QuizView.vue para `application/quiz/submit-quiz.ts`
-- [ ] Extrair lógica de retomada para `application/quiz/resume-session.ts`
-- [ ] Criar `application/results/calculate-result.ts`
-- [ ] Testes unitários para cada caso de uso
-- [ ] Atualizar QuizView.vue para usar a nova camada
+- [x] Criar `src/application/` com estrutura de diretórios
+- [x] Criar `application/quiz/ports.ts` com `SubmitQuizInput` e `SubmitQuizResult`
+- [x] Criar `application/quiz/quiz-session.ts` com `checkSavedSession()` e `clearSession()`
+- [x] Extrair `submitQuiz()` do QuizView.vue para `application/quiz/submit-quiz.ts`
+- [x] Testes unitários para `submit-quiz` e `quiz-session` em `application/__tests__/`
+- [x] Atualizar QuizView.vue para usar a nova camada
+- [x] Registrar ADR-012 em `docs/decisions.md`
 
 **Critérios de aceite:**
-- `submitQuiz()` testável sem Vue
-- QuizView.vue reduzido em ~50 linhas
+- `submitQuiz()` testável sem Vue (com `vi.mock()`)
+- `quiz-session.ts` gerencia sessão (checkSavedSession, clearSession)
+- `ports.ts` contém apenas `SubmitQuizInput` e `SubmitQuizResult`
+- Testes em `application/__tests__/` (padrão do projeto, não co-localizados)
+- QuizView.vue não orquestra scoring/payload/persistência/side effects
+- Nenhuma regra de domínio volta para Views ou Stores
 - 78+ testes passando (testes existentes + novos)
 - Build intacto
+- Nenhuma alteração em stores, repositories, domain ou infrastructure
+- `application/results/` não criado
 
 ---
 
