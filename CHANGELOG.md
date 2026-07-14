@@ -42,6 +42,15 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 * Total: **110 testes passando** (92 existentes + 18 novos)
 * 9 arquivos de teste (7 existentes + 2 novos)
 
+### Sprint 8.4 — Remoção de código morto
+
+* `services/aiAnalysis.js` removido — código órfão sem consumidores
+* `stores/ai.js → regenerate()` recebeu validações migradas do arquivo removido:
+  - `if (!responseId) throw new Error('responseId obrigatório')`
+  - `if (!name?.trim()) throw new Error('name obrigatório')`
+* Nenhuma referência restante ao código removido
+* 110 testes passando, build verde
+
 ### Build
 
 * 787 módulos transformados

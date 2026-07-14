@@ -283,7 +283,7 @@ Sprint 8
 - [x] **8.2** `responseRepository.insert()` e `countByUserId()` usam `runSupabaseQuery`
 - [x] **8.3** `repositories/tests/responseRepository.test.js` com 10 testes
 - [x] **8.3** `repositories/tests/userRepository.test.js` com 3 testes
-- [ ] **8.4** `services/aiAnalysis.js` removido (confirmado sem uso)
+- [x] **8.4** `services/aiAnalysis.js` removido (confirmado sem uso)
 - [ ] **8.5** `quizStore.checkSavedState()` delegado a `quizSession.checkSavedSession()`
 - [ ] **8.6** Avaliação documentada — decisão de manter estado atual
 
@@ -297,7 +297,7 @@ Sprint 8
 | Cobertura (geral) | ~40% | ~40% | ~42% | ~55% |
 | Violações de camada | 1 (UserInfoForm) | 0 | **0** | 0 |
 | Inconsistência de timeout | 2 métodos | 0 | **0** | 0 |
-| Código órfão | services/aiAnalysis.js | ainda presente | ainda presente | removido |
+| Código órfão | services/aiAnalysis.js | ainda presente | ainda presente | **removido** |
 | Duplicação checkSavedState | 2 implementações | ainda presente | ainda presente | 1 (centralizada) |
 
 ### Critérios de aceite
@@ -305,7 +305,7 @@ Sprint 8
 - [x] UserInfoForm não importa repositories
 - [x] Todos os 7 métodos de responseRepository usam `runSupabaseQuery`
 - [x] 13 testes de infrastructure passando
-- [ ] `services/aiAnalysis.js` removido (se confirmado sem uso)
+- [x] `services/aiAnalysis.js` removido (confirmado sem uso)
 - [ ] `quizStore.checkSavedState()` não replica lógica de sessão
 - [ ] Decisão de desacoplamento registrada
 - [x] 110 testes passando
@@ -376,3 +376,37 @@ Sprint 8
 - Nenhum código de produção alterado
 - 110/110 testes passando
 - Build verde (787 módulos, sem regressão)
+
+---
+
+### Sprint 8.4 — Remoção de código morto ✅
+
+**Concluída em:** 2026-07-14
+
+**Código morto identificado:**
+- `services/aiAnalysis.js` — exportava `regenerateAiAnalysis(responseId, name)`
+- Sem imports, sem chamadas em todo o código-fonte
+- Responsabilidade já absorvida por `stores/ai.js → regenerate()`
+
+**Arquivos modificados:**
+- `packages/frontend/src/stores/ai.js` — adicionadas validações:
+  - `if (!responseId) throw new Error('responseId obrigatório')`
+  - `if (!name?.trim()) throw new Error('name obrigatório')`
+  - Mensagens idênticas ao arquivo removido
+
+**Arquivo removido:**
+- `packages/frontend/src/services/aiAnalysis.js` (16 linhas)
+
+**Comportamento preservado:**
+- `regenerate(responseId, name)` continua válido e com as mesmas validações
+- Fluxo de chamada `aiRepository.invokeGenerateAI()` + `responseRepository.selectField()` inalterado
+- Nenhum consumidor impactado — `regenerateAiAnalysis()` não era importado por ninguém
+
+**Verificação:**
+- `grep -r "services/aiAnalysis" src` → nenhum resultado
+- `grep -r "regenerateAiAnalysis" src` → nenhum resultado
+
+**Resultados:**
+- 110 testes passando
+- Build verde (787 módulos)
+- Nenhuma regressão funcional

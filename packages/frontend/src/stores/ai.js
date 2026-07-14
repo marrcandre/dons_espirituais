@@ -11,6 +11,14 @@ export const useAiStore = defineStore('ai', () => {
   }
 
   async function regenerate(responseId, name) {
+    if (!responseId) {
+      throw new Error('responseId obrigatório')
+    }
+
+    if (!name?.trim()) {
+      throw new Error('name obrigatório')
+    }
+
     await aiRepository.invokeGenerateAI(responseId, name, true)
     return responseRepository.selectField(responseId, 'ai_analysis')
   }
