@@ -6,7 +6,7 @@ Aplicação web para descoberta e análise de dons espirituais baseada no modelo
 
 - **Frontend:** Vue 3 + Vite + Vuetify + TypeScript
 - **Backend:** Supabase (PostgreSQL, Auth, Edge Functions)
-- **Testes:** Vitest (78 testes)
+- **Testes:** Vitest (114 testes)
 - **Análise IA:** OpenAI via Supabase Edge Functions
 
 ## Estrutura
@@ -29,6 +29,8 @@ packages/frontend/src/
 ```bash
 npm install
 npm run dev --workspace=packages/frontend
+npm run lint --workspace=packages/frontend
+npm run typecheck --workspace=packages/frontend
 npm run test --workspace=packages/frontend
 npm run build --workspace=packages/frontend
 ```
@@ -45,3 +47,7 @@ Variáveis de ambiente necessárias (`.env`):
 - `docs/gift-system-plan.md` — plano de refatoração do domínio
 - `docs/gift-system-plan-analysis.md` — análise da auditoria
 - `docs/gift-system-plan-log.md` — log de execução
+- `docs/architecture-evolution-plan.md` — plano de evolução arquitetural
+- `docs/architecture-evolution-analysis.md` — análise arquitetural
+- `docs/architecture-evolution-log.md` — log de execução arquitetural
+- `docs/decisions.md` — decisões técnicas registradas

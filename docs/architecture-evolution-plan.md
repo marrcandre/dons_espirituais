@@ -4,7 +4,7 @@
 >
 > **Data:** 2026-07-09
 >
-> **Última atualização:** 2026-07-14 (Sprint 8 — revisão de planejamento)
+> **Última atualização:** 2026-07-14 (Sprint 10.1 — reorganização do roadmap)
 >
 > **Status:** Planejamento
 
@@ -38,15 +38,16 @@ A Fase 2 cobre Sprints 6–10 e tem como metas:
 
 ## 3. Objetivo da Fase 3
 
-Transformar o Dons Espirituais de "aplicação funcional" para "produto público completo", incorporando elementos institucionais e de publicação que transmitam credibilidade, facilitem o compartilhamento e melhorem a descoberta orgânica.
+Transformar o Dons Espirituais de "aplicação funcional" para "produto público completo", incorporando elementos institucionais que transmitam credibilidade.
 
 A Fase 3 cobre Sprints 11–13 e tem como metas:
 
 - Página institucional (Sobre, metodologia, autor)
 - Header e footer definitivos com navegação institucional
-- SEO, Open Graph, Sitemap, Robots e metadados
 - Identidade visual consolidada (logo, cores, assets)
 - Informações de licença, contribuição e projetos relacionados
+
+> **Nota:** SEO, Open Graph, Sitemap, Robots e PWA foram antecipados para a Sprint 10.5 (Product Quality), pois são pré-requisitos para a release v2.0.0 e independem da identidade institucional.
 
 ---
 
@@ -170,12 +171,12 @@ FASE 2 — Evolução Arquitetural ⏳
   Sprint 7  — Application Layer
   Sprint 8  — Correções, Testes e Consolidação
   Sprint 9  — Presentation
-  Sprint 10 — Qualidade e Produto
+  Sprint 10 — Qualidade e Produto (10.1 a 10.5)
 
 FASE 3 — Experiência Institucional 📋
   Sprint 11 — Identidade Institucional
   Sprint 12 — Layout Institucional
-  Sprint 13 — SEO e Publicação
+  Sprint 13 — Publicação e Deploy
 ```
 
 ---
@@ -471,23 +472,140 @@ A Sprint 8 é dividida em 6 etapas sequenciais, cada uma com escopo pequeno e ve
 
 ---
 
-### Sprint 10 — Qualidade e Produto
+### Sprint 10 — Qualidade e Produto (5 sub-sprints)
 
-**Objetivo:** CI/CD, cobertura, SEO, documentação.
+**Objetivo geral:** Estabelecer ferramentas de qualidade, CI, cobertura de testes e preparar o projeto para a release v2.0.0.
+
+**Princípio arquitetural:** Cada sub-sprint tem escopo fechado e produz valor autônomo. Nenhuma depende de outra para ser útil, embora a ordem sugerida maximize a eficiência (Tooling → CI → Coverage → Tests → Product Quality).
+
+**Nota sobre CI/CD:** A Sprint 10 implementa apenas **CI (Continuous Integration)** — lint, typecheck, testes e build automatizados. Deploy automático (CD) fica para a Sprint 13 (publicação institucional).
+
+---
+
+#### Sprint 10.1 — Tooling Foundation ✅
+
+**Concluída em:** 2026-07-14
+
+**Escopo:**
+- ESLint 9 (flat config) + eslint-plugin-vue + typescript-eslint
+- vue-tsc + tsconfig.json (strict mode)
+- Scripts de qualidade: `lint`, `lint:fix`, `typecheck`
+- env.d.ts para módulos .vue
+- Correções de lint: 65 → 0 (browser globals, unused imports, dead code, etc.)
+
+**Métricas:**
+- Testes: **114** (inalterado)
+- Lint errors: **0**
+- Typecheck errors: **0**
+- Build verde
+
+---
+
+#### Sprint 10.2 — Continuous Integration 🔴
+
+**Objetivo:** Automatizar validações de qualidade sem deploy automático.
+
+**Justificativa:** Após a Tooling Foundation (10.1), as ferramentas de qualidade estão instaladas e configuradas. A próxima etapa é automatizar sua execução para que nenhuma alteração entre no repositório sem validação.
 
 **Atividades:**
-- [ ] CI/CD via GitHub Actions (lint + typecheck + test + build)
-- [ ] Target coverage 90%+ statements
-- [ ] SEO (meta tags, sitemap, Open Graph)
-- [ ] PWA (manifest, service worker)
-- [ ] Documentação final atualizada
-- [ ] CHANGELOG.md preparado para v2.0.0
+- Criar `.github/workflows/ci.yml`
+- Triggers: `push` (main), `pull_request`
+- Steps: `lint` → `typecheck` → `test` → `build`
+- Cache de `node_modules` para velocidade
+
+**Riscos:**
+- Baixo — pipeline executa comandos já testados localmente
+- Médio — dependência do GitHub Actions disponível; sem alternative testada
 
 **Critérios de aceite:**
-- Pipeline CI/CD funcional
-- Cobertura ≥ 90%
-- Lighthouse ≥ 80 em todas as categorias
-- Documentação completa
+- [ ] Pipeline CI funcional no GitHub
+- [ ] Rodando lint + typecheck + test + build
+- [ ] Status check visível em PRs
+- [ ] 0 alterações no código de runtime (apenas .github/ + tooling)
+
+---
+
+#### Sprint 10.3 — Test Coverage 🟡
+
+**Objetivo:** Configurar medição de cobertura de testes e definir meta mínima inicial.
+
+**Justificativa:** Sem métricas, não é possível avaliar a qualidade dos testes nem identificar lacunas. A cobertura inicial servirá como baseline para sprints futuras.
+
+**Atividades:**
+- Configurar `vitest --coverage` (`@vitest/coverage-v8`)
+- Gerar relatório HTML + texto
+- Definir meta mínima inicial (ex: 60% statements — baseline realista para o estado atual)
+- Documentar na architecture-evolution-analysis.md
+- Adicionar script `test:coverage` ao `package.json`
+
+**Riscos:**
+- Baixo — ferramenta de cobertura não altera runtime
+
+**Critérios de aceite:**
+- [ ] `npm run test:coverage` gera relatório sem erros
+- [ ] Meta mínima documentada
+- [ ] Nenhuma alteração no código de runtime
+
+---
+
+#### Sprint 10.4 — Presentation Tests 🟡
+
+**Objetivo:** Primeiros testes de stores e componentes usando `@vue/test-utils` + happy-dom (infraestrutura instalada na Sprint 9.3).
+
+**Justificativa:** A infraestrutura de testes Vue foi instalada mas nunca utilizada. Esta sprint valida o setup com testes reais e cria a base para cobertura progressiva da Presentation Layer.
+
+**Atividades:**
+- Criar `src/stores/tests/responses.test.js` — testar `fetchById`, `fetchByUserId`, `$reset`
+- Criar `src/stores/tests/ai.test.js` — testar `generate`, `regenerate` (com mock)
+- Criar testes de componentes com `mount()` + Vuetify mock
+- Consolidar setup de mocks Vuetify e Pinia em `vitest.setup.js`
+- Refatorar `stores/auth.js` para usar `application/auth/user-profile.ts` (eliminar duplicação)
+
+**Riscos:**
+- Médio — pode exigir ajustes no setup do vitest (vuetify mocking, pinia setup)
+- Médio — fluxo de autenticação sensível; testar com mocks isolados
+
+**Critérios de aceite:**
+- [ ] Pelo menos 2 stores com testes unitários
+- [ ] Testes rodam em ambiente happy-dom sem erros
+- [ ] `stores/auth.js` não replica lógica de `user-profile.ts`
+- [ ] 114+ testes passando
+- [ ] Build verde
+
+---
+
+#### Sprint 10.5 — Product Quality 🟢
+
+**Objetivo:** Preparar o projeto para descoberta orgânica, compartilhamento social e release v2.0.0.
+
+**Justificativa:** SEO, Open Graph, sitemap, robots e PWA são requisitos de "produto pronto", não de experimentação. Agrupá-los nesta sprint permite que os critérios de aceite da Fase 2 sejam completados e uma release v2.0.0 seja preparada.
+
+**Atividades:**
+- Meta tags HTML (`<title>`, `<meta name="description">`) em todas as páginas
+- Open Graph (`og:title`, `og:description`, `og:image`, `og:url`) no layout principal
+- Imagem/card para compartilhamento social
+- `sitemap.xml` estático ou gerado dinamicamente
+- `robots.txt` configurado (permitir indexação)
+- `manifest.json` configurado
+- `favicon.ico` e `apple-touch-icon`
+- Avaliar service worker (escopo limitado — app depende de rede)
+- Revisão de performance (Lighthouse ≥ 80)
+- CHANGELOG.md preparado para v2.0.0
+- Revisão final de documentação
+
+**Riscos:**
+- Baixo — mudanças puramente declarativas (meta tags, manifest, etc.)
+- Médio — service worker pode adicionar complexidade de cache; avaliar com cautela
+
+**Critérios de aceite:**
+- [ ] Open Graph funcional em páginas compartilháveis (testar com facebook/twitter debugger)
+- [ ] Sitemap e robots acessíveis em `/sitemap.xml` e `/robots.txt`
+- [ ] Manifest configurado
+- [ ] Lighthouse ≥ 80 em todas as categorias
+- [ ] v2.0.0 preparada no CHANGELOG
+- [ ] Documentação revisada e consistente
+- [ ] 114+ testes passando
+- [ ] Build verde
 
 ---
 
@@ -548,26 +666,23 @@ A Sprint 8 é dividida em 6 etapas sequenciais, cada uma com escopo pequeno e ve
 
 ---
 
-### Sprint 13 — SEO e Publicação
+### Sprint 13 — Publicação e Deploy
 
-**Objetivo:** Preparar o projeto para descoberta orgânica e compartilhamento em redes sociais.
+**Objetivo:** Deploy contínuo e monitoramento.
 
 **Atividades:**
-- [ ] Meta tags HTML (`<title>`, `<meta name="description">`, etc.) em todas as páginas
-- [ ] Open Graph (`og:title`, `og:description`, `og:image`, `og:url`) no layout principal
-- [ ] Imagem/card para compartilhamento social
-- [ ] `sitemap.xml` gerado ou estático
-- [ ] `robots.txt` configurado
-- [ ] `manifest.json` configurado (avaliar PWA — service worker + ícones)
-- [ ] `favicon.ico` e `apple-touch-icon`
-- [ ] Revisão de performance (Lighthouse)
+- [ ] CD (Continuous Deployment) — deploy automático via GitHub Actions
+- [ ] Healthcheck endpoint
+- [ ] Monitoramento de Edge Functions
+- [ ] Monitoramento de Vercel
+- [ ] Monitoramento de Supabase
+- [ ] Release v2.0.0 oficial
 
 **Critérios de aceite:**
-- Lighthouse ≥ 80 em todas as categorias
-- Open Graph funcional (testar com facebook/twitter debugger)
-- Sitemap e robots acessíveis
-- Manifest configurado
-- Links de compartilhamento com preview enriquecido
+- Deploy automático funcional
+- Healthcheck acessível
+- Monitoramento configurado
+- v2.0.0 publicada
 
 ---
 
@@ -580,8 +695,8 @@ A Fase 2 será considerada concluída quando:
 - [x] Application Layer criada e testada
 - [x] Infrastructure isolada e testada
 - [x] Presentation consolidada (auditada, sem violações, persistência centralizada)
-- [ ] CI/CD estabelecido
-- [ ] Cobertura de testes ≥ 90%
+- [ ] CI estabelecido (GitHub Actions com lint + typecheck + test + build)
+- [ ] Cobertura de testes configurada com meta documentada
 - [x] Decisões documentadas em docs/decisions.md
 - [x] Zero regressão funcional
 - [x] README.md reflete arquitetura atual
@@ -596,10 +711,9 @@ A Fase 3 será considerada concluída quando:
 - [ ] Logo componente reutilizável criado
 - [ ] Header definitivo com navegação institucional
 - [ ] Footer institucional em todas as páginas
-- [ ] Open Graph funcional em páginas compartilháveis
-- [ ] Sitemap e robots configurados
-- [ ] Lighthouse ≥ 80 em todas as categorias
 - [ ] Identidade visual consolidada
+- [ ] CD (Continuous Deployment) automatizado
+- [ ] Monitoramento configurado (Edge Functions, Vercel, Supabase)
 
 ---
 
@@ -611,3 +725,4 @@ A Fase 3 será considerada concluída quando:
 - Refatoração do AdminView
 - FAQ
 - Internacionalização (i18n)
+- Deploy automático (CD) — será na Sprint 13

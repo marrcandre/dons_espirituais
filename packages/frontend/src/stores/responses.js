@@ -14,7 +14,7 @@ export const useResponsesStore = defineStore('responses', () => {
 
     try {
       current.value = await responseRepository.findById(id)
-    } catch (err) {
+    } catch (_err) {
       error.value = 'Resultado não encontrado.'
       current.value = null
     } finally {
@@ -59,14 +59,6 @@ export const useResponsesStore = defineStore('responses', () => {
     } catch (err) {
       console.error(`Erro ao atualizar ${field}:`, err)
       return false
-    }
-  }
-
-  async function selectField(id, field) {
-    try {
-      return await responseRepository.selectField(id, field)
-    } catch {
-      return null
     }
   }
 

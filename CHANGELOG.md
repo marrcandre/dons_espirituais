@@ -4,6 +4,34 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 
 ---
 
+## [1.10.0] - Julho/2026
+
+### Sprint 10 — Qualidade e Produto
+
+### Sprint 10.1 — Tooling Foundation
+
+* **Ferramentas instaladas:** `eslint` 9.39, `vue-tsc` 3.3, `typescript-eslint`, `eslint-plugin-vue`, `vue-eslint-parser`
+* **Configurações criadas:** `eslint.config.js` (flat config), `tsconfig.json`, `src/env.d.ts`
+* **Scripts adicionados:** `lint`, `lint:fix`, `typecheck` em `package.json`
+* **Lint errors corrigidos:** 65 → 0
+  * Browser globais configurados (console, window, localStorage, setTimeout, etc.)
+  * Unused imports removidos (GiftBadges, scoring.test)
+  * Unused variables renomeados com prefixo `_` (catch params)
+  * `props` desnecessário removido (HistoryList)
+  * `selectField()` dead code removido (responses.js)
+  * `vue/valid-v-slot` desabilitado em AdminView.vue (Vuetiet slot naming)
+  * `submit-quiz.test.ts` — any mantido com eslint-disable
+  * `env.d.ts` — tipos corrigidos (`{}` → `object`, `any` → `unknown`)
+
+### Métricas Sprint 10.1
+
+* Testes: **114** (inalterado)
+* Lint errors: **0**
+* Typecheck errors: **0**
+* Build verde
+
+---
+
 ## [1.9.0] - Julho/2026
 
 ### Sprint 9 — Consolidação da Presentation Layer

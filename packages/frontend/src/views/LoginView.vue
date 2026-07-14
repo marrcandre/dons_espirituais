@@ -44,7 +44,7 @@ async function handleLogin() {
   error.value = null
   try {
     await authStore.signInWithGoogle()
-  } catch (err) {
+  } catch (_err) {
     error.value = 'Não foi possível entrar. Tente novamente.'
     loading.value = false
   }

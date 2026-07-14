@@ -102,19 +102,25 @@
 
 ---
 
-## ADR-007: CI/CD apenas após application layer estável
+## ADR-007: CI (Continuous Integration) na Sprint 10, CD na Sprint 13
 
-**Data:** 2026-07-09 (Sprint 6)
+**Data:** 2026-07-09 (Sprint 6) — atualizado em 2026-07-14 (Sprint 10.1)
 
-**Contexto:** Não há pipeline automatizada. Decidiu-se não criar CI/CD antes de ter application layer testável.
+**Contexto:** Não há pipeline automatizada. Decidiu-se não criar CI antes de ter application layer testável. A Sprint 10 original previa CI/CD completo, mas a avaliação mostrou que CD (deploy automático) faz mais sentido junto com a publicação institucional (Sprint 13).
 
-**Decisão:** CI/CD (GitHub Actions) será implementado na Sprint 10, após application layer, infrastructure tests e composables estarem estabelecidos.
+**Decisão:**
+- Sprint 10.2: **CI** (GitHub Actions) — lint + typecheck + test + build, sem deploy
+- Sprint 13: **CD** (Continuous Deployment) — deploy automático + monitoramento
+
+**Motivo da separação:** CI e CD são responsabilidades distintas. A CI valida qualidade do código e pode ser implementada independentemente do ambiente de produção. O CD depende de configuração de Vercel/Supabase e deve ser implementado junto com a publicação final.
 
 **Consequências:**
-- Positivas: Pipeline já nasce com testes de todas as camadas
+- Positivas: CI disponível já na Sprint 10, sem depender de configuração de deploy
+- Positivas: CD alinhado com a release v2.0.0 (Sprint 13)
 - Negativas: Sprints 6–9 sem automação de validação
+- Negativas: Deploy manual entre Sprints 10.2 e 13
 
-**Status:** ✅ Decidido
+**Status:** ✅ Atualizado (Sprint 10.1)
 
 ---
 
@@ -249,3 +255,40 @@
 - remoção de duplicação que efetivamente reduz complexidade
 
 **Status:** ✅ Decidido na Sprint 9
+
+---
+
+## ADR-014: Sprint 10 reorganizada em 5 sub-sprints independentes
+
+**Data:** 2026-07-14 (Sprint 10.1)
+
+**Contexto:** A Sprint 10 original ("Qualidade e Produto") agregava escopos muito diversos — CI/CD, cobertura 90%+, SEO, PWA, documentação. A avaliação mostrou que:
+- 90% de cobertura é irrealista em uma sprint (0 testes de Presentation atualmente)
+- SEO e PWA sobrepõem-se com o escopo institucional da Fase 3
+- Ferramentas de qualidade (lint, tsconfig, vue-tsc) são pré-requisito do CI, mas não estavam listadas
+
+**Decisão:** Reorganizar a Sprint 10 em 5 sub-sprints independentes porém sequenciais:
+
+| Sub-sprint | Escopo | Status |
+|---|---|---|
+| 10.1 | Tooling Foundation (ESLint, vue-tsc, tsconfig, scripts) | ✅ Concluída |
+| 10.2 | CI (GitHub Actions — lint, typecheck, test, build) | 📋 Planejada |
+| 10.3 | Test Coverage (vitest --coverage, baseline, meta) | 📋 Planejada |
+| 10.4 | Presentation Tests (stores, components, composables) | 📋 Planejada |
+| 10.5 | Product Quality (SEO, OG, sitemap, robots, PWA, v2.0.0) | 📋 Planejada |
+
+**Mudanças em relação ao plano original:**
+- CI/CD → CI (CD separado para Sprint 13)
+- Cobertura 90% → "cobertura configurada com meta documentada" (progressivo)
+- SEO/PWA movidos de Fase 3 (Sprint 13) para Sprint 10.5
+- Tooling Foundation adicionada como pré-requisito (não existia no plano original)
+- Design System cleanup (24 `<v-btn>`, 6 `<v-alert>`) adiado para Fase 3
+
+**Consequências:**
+- Positivas: Cada sub-sprint produz valor autônomo
+- Positivas: Roadmap mais realista e factível
+- Positivas: Tooling Foundation já concluída (0 lint errors, 0 typecheck errors)
+- Negativas: Fase 3 perde SEO/PWA, mas ganha foco em identidade institucional
+- Negativas: CD adiado para Sprint 13 (deploy manual entre Sprints 10.2 e 13)
+
+**Status:** ✅ Implementado

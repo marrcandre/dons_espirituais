@@ -2,7 +2,7 @@
 
 > **Data:** 2026-07-09
 >
-> **Última atualização:** 2026-07-14 (Sprint 8 — concluída)
+> **Última atualização:** 2026-07-14 (Sprint 10.1 — reorganização do roadmap)
 >
 > **Contexto:** Avaliação da arquitetura atual do Dons Espirituais à luz da referência Cinco Ministérios (v5.2.0, 134 testes, 13 documentos de arquitetura)
 
@@ -395,8 +395,8 @@ Seguir o mesmo padrão da Sprint 1: criar testes para a camada existente antes d
 ### D05 — TypeScript incremental
 Sprint 7 (application) já em TS. Infrastructure e Presentation migram gradualmente. Sem meta de 100% nesta fase.
 
-### D06 — CI/CD só na Sprint 10
-Não antecipar. Pipeline sem application layer testada teria valor limitado.
+### D06 — CI na Sprint 10, CD na Sprint 13
+Pipeline sem application layer testada teria valor limitado. CI (validação) e CD (deploy) foram separados: CI na Sprint 10.2, CD na Sprint 13. ADR-007 e ADR-014 documentam a decisão.
 
 ### D07 — Decisions.md imediatamente
 Criar na Sprint 6 para registrar decisões desde o início da fase.

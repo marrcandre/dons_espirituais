@@ -2,17 +2,14 @@
 
 ## 🔴 Alta Complexidade
 
-### Sprint 10 — Qualidade e Produto 📋
-- [ ] CI/CD via GitHub Actions (lint + typecheck + test + build)
-- [ ] Target coverage 90%+ statements
-- [ ] SEO (meta tags, sitemap, Open Graph)
-- [ ] PWA (manifest, service worker)
-- [ ] Documentação final atualizada
-- [ ] CHANGELOG.md preparado para v2.0.0
+### Sprint 10 — Qualidade e Produto (10.1 a 10.5) 📋
+- [x] **10.1** Tooling Foundation — ESLint + vue-tsc + tsconfig + scripts de qualidade
+- [ ] **10.2** CI (Continuous Integration) — GitHub Actions (lint → typecheck → test → build)
+- [ ] **10.3** Test Coverage — vitest --coverage, relatório, meta documentada
+- [ ] **10.4** Presentation Tests — testes de stores + components + refactor auth.js
+- [ ] **10.5** Product Quality — SEO + Open Graph + Sitemap + Robots + PWA + v2.0.0
 
-### Débitos Técnicos
-- [ ] Substituir 24 `<v-btn>` raw e 6 `<v-alert>` raw pelo Design System
-- [ ] Refatorar `auth.js` para usar `application/auth/user-profile.ts`
+> **Nota:** Sprint 10 implementa apenas **CI** (continuous integration). **CD** (continuous deployment / deploy automático) fica para a Sprint 13.
 
 ### ResultsView
 - [ ] Melhorar legibilidade da análise IA

@@ -577,3 +577,48 @@ A Sprint 9.2 avaliou a criação do composable `useInlineEditor` para eliminar d
 - Cenários: criação, integração com checkSavedSession, substituição, integração com clearSession
 
 **Resultado:** 114 testes passando, build verde.
+
+---
+
+## Sprint 10 — Qualidade e Produto
+
+> **Início:** 2026-07-14
+>
+> **Término:** (em andamento)
+>
+> **Status:** Em execução
+
+### Sprint 10.1 — Tooling Foundation
+
+**Objetivo:** Instalar e configurar ferramentas de qualidade ausentes (pré-requisito para CI).
+
+**O que foi feito:**
+
+1. **Ferramentas instaladas:**
+   - `eslint` 9.39 — linter com flat config
+   - `vue-tsc` 3.3 — type checker para Vue + TypeScript
+   - `typescript-eslint` — regras TS para eslint
+   - `eslint-plugin-vue` 10.9 — regras Vue para eslint
+   - `vue-eslint-parser` — parser de arquivos .vue
+
+2. **Configurações criadas:**
+   - `eslint.config.js` — flat config com JS recommended + TS recommended + Vue essential
+   - `tsconfig.json` — strict mode, moduleResolution bundler, ES2020 target
+   - `src/env.d.ts` — declaração de tipos para módulos .vue
+
+3. **Scripts adicionados ao `package.json`:**
+   - `lint` — `eslint .`
+   - `lint:fix` — `eslint . --fix`
+   - `typecheck` — `vue-tsc --noEmit`
+
+4. **Fixes aplicados (65 lint errors → 0):**
+   - Config globais: browser globals adicionados
+   - Unused imports removidos
+   - Catch params renomeados com `_` prefix
+   - `props` assignment desnecessário removido
+   - `selectField()` dead code removido de responses.js
+   - `vue/valid-v-slot` desabilitado em AdminView.vue (Vuetify data-table slot naming)
+   - `env.d.ts` corrigido (tipos `{}` → `object`, `any` → `unknown`)
+   - Test mock types preservados com eslint-disable
+
+**Resultado:** 114 testes passando, build verde, 0 lint errors, 0 typecheck errors.

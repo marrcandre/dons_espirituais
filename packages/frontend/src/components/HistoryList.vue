@@ -44,7 +44,7 @@ import { formatDate } from '../helpers/date.js'
 import { topGift } from '../domain/scoring'
 import AppCard from './ui/AppCard.vue'
 
-const props = defineProps({
+defineProps({
   currentId: { type: String, required: true },
 })
 

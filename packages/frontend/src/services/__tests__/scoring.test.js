@@ -1,7 +1,5 @@
 import { describe, it, expect } from 'vitest'
 import { calculateScores, rankGifts, formatScoresForAI, topGift } from '../../domain/scoring'
-import { gifts } from '../../domain/spiritual-gifts'
-
 function makeAnswers(giftIndex, score) {
   const answers = new Array(135).fill(0)
   for (let block = 0; block < 5; block++) {

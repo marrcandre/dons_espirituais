@@ -12,7 +12,9 @@ vi.mock('../../repositories/responseRepository', () => ({
 }))
 
 vi.mock('../../repositories/aiRepository', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   invokeNotifyAdmin: (...args: any[]) => mockNotifyAdmin(...args),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   invokeGenerateAI: (...args: any[]) => mockGenerateAI(...args),
 }))
 
