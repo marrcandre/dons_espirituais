@@ -4,6 +4,103 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 
 ---
 
+## [1.7.0] - Julho/2026
+
+### Application Layer (Sprint 7)
+
+* Criação da camada `src/application/` com estrutura `application/quiz/`
+* Criação do caso de uso `application/quiz/submit-quiz.ts` — orquestração do envio do teste (calcular scores, montar payload, persistir, limpar sessão, notificar admin, disparar IA, retornar ID)
+* Criação do serviço `application/quiz/quiz-session.ts` — gestão de sessão persistida em localStorage (checkSavedSession, clearSession)
+* Criação de `application/quiz/ports.ts` com interfaces `SubmitQuizInput` e `SubmitQuizResult`
+* Extração de toda a orquestração do `QuizView.vue` para a Application Layer
+* `QuizView.vue` reduzido de 203 para 181 linhas (remoção de imports e lógica de scoring, payload, persistência, notificação admin e geração IA)
+* `QuizView.vue` passou a importar apenas de `application/` para fluxos de orquestração — sem imports diretos de domain ou repositories
+* Registro da ADR-012 em `docs/decisions.md` estabelecendo o padrão da Application Layer
+
+### Arquitetura
+
+* Introdução oficial da Application Layer na arquitetura do projeto
+* O projeto passa a ter quatro camadas explícitas:
+  * **Presentation** → `views/`, `components/`, `stores/`, `constants/`
+  * **Application** → `application/` (casos de uso e serviços de aplicação)
+  * **Domain** → `domain/` (regras de negócio puras)
+  * **Infrastructure** → `repositories/`, `services/` (persistência e integração)
+* Nenhuma regra de negócio foi movida para Views ou Stores
+* Nenhuma alteração em stores, repositories, domain ou infrastructure existentes
+* Atualização do roadmap em `docs/architecture-evolution-plan.md`
+* Documentação da Sprint 7 em `docs/architecture-evolution-log.md`
+
+### Testes
+
+* 14 novos testes para a Application Layer (7 submit-quiz + 7 quiz-session)
+* Testes utilizam `vi.mock()` para isolar dependências de repositórios
+* Testes em `application/__tests__/` seguindo padrão do projeto
+* Total: **92 testes passando** (78 existentes + 14 novos)
+* 6 arquivos de teste (4 existentes + 2 novos)
+
+### Build
+
+* 786 módulos transformados
+* Build verde em 861ms
+* Nenhuma regressão funcional
+
+---
+
+## [1.6.0] - Julho/2026
+
+### Domínio — Organização Arquitetural (Sprint 4)
+
+* Movimentação de `services/scoring.ts` → `domain/scoring.ts` (regras de negócio no lugar correto).
+* Eliminação do re-export de `topGift` em `helpers/string.js` — `HistoryList.vue` importa diretamente de `domain/scoring`.
+* Separação de `ANSWER_LABELS` de `data/questions.js` para `constants/likert.js` (escala Likert na camada de apresentação).
+* Adoção de `GIFT_COUNT` derivado em vez de `27` literal no `domain/scoring.ts`.
+* Revisão de `helpers/` — confirmado que todos são utilitários puros, sem funções de domínio.
+
+### Domínio — Limpeza Final (Sprint 5)
+
+* Remoção definitiva do adapter `data/gifts.js` (consumidores já importavam da fonte única).
+* Remoção de ~162 linhas de código comentado (traduções em inglês desatualizadas) de `data/questions.js`.
+* README.md reescrito — descreve a aplicação Vue/Supabase real (não mais o pipeline Python legado).
+* TODO.md limpo — itens de refatoração concluídos removidos.
+* Documentação final da arquitetura atualizada.
+
+### Testes
+
+* 78/78 testes passando (inalterado, sem regressões).
+* Build validado (784 módulos, ~847ms).
+
+---
+
+## [1.5.0] - Julho/2026
+
+### Domínio — Migração para TypeScript (Sprint 2)
+
+* Criação do módulo `domain/spiritual-gifts.ts` como fonte única de verdade.
+* Criação da interface `Gift` tipada (`id`, `name`, `icon`, `color`).
+* Constantes derivadas automáticas: `GIFT_COUNT`, `giftNames`, `giftById()`.
+* Migração de `services/scoring.js` → `services/scoring.ts` com tipagem completa.
+* Movimentação de `topGift()` de `helpers/string.js` para `services/scoring.ts`.
+
+### Domínio — Fonte Única (Sprint 3)
+
+* Migração de todos os consumidores para importar de `domain/spiritual-gifts.ts`.
+* `GiftBadges.vue` alterado para importar da fonte única (único consumidor de produção que ainda usava `data/gifts.js`).
+* `data/gifts.js` transformado em adapter de compatibilidade (re-export da fonte única), eliminando duplicação física de dados.
+* Testes migrados para validar diretamente o domínio (`domain/spiritual-gifts.ts`).
+
+### Testes
+
+* Suíte expandida para 78 testes (Vitest).
+* Todos os testes importam da fonte única de domínio.
+
+### Documentação
+
+* Atualização dos documentos de planejamento (`gift-system-plan.md`).
+* Atualização da análise arquitetural (`gift-system-plan-analysis.md`).
+* Atualização do log de execução (`gift-system-plan-log.md`).
+
+---
+
 ## [1.4.0] - Julho/2026
 
 ### Design System
@@ -70,58 +167,29 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 * Correção de overflow em nomes longos no GiftBadges.
 ---
 
-## [1.5.0] - Julho/2026
+## [1.2.1] - Junho/2026
 
-### Domínio — Migração para TypeScript (Sprint 2)
+### Inteligência Artificial
 
-* Criação do módulo `domain/spiritual-gifts.ts` como fonte única de verdade.
-* Criação da interface `Gift` tipada (`id`, `name`, `icon`, `color`).
-* Constantes derivadas automáticas: `GIFT_COUNT`, `giftNames`, `giftById()`.
-* Migração de `services/scoring.js` → `services/scoring.ts` com tipagem completa.
-* Movimentação de `topGift()` de `helpers/string.js` para `services/scoring.ts`.
+* Criação da Edge Function `retry-ai-analysis`.
+* Recuperação automática de análises pendentes.
+* Processamento em lote de respostas sem análise.
+* Tratamento automático de falhas por indisponibilidade ou limite de quota do Gemini.
+* Simplificação da estratégia de recuperação de falhas.
+* Remoção da função temporária `teste-generate-ai`.
 
-### Domínio — Fonte Única (Sprint 3)
+### Infraestrutura
 
-* Migração de todos os consumidores para importar de `domain/spiritual-gifts.ts`.
-* `GiftBadges.vue` alterado para importar da fonte única (único consumidor de produção que ainda usava `data/gifts.js`).
-* `data/gifts.js` transformado em adapter de compatibilidade (re-export da fonte única), eliminando duplicação física de dados.
-* Testes migrados para validar diretamente o domínio (`domain/spiritual-gifts.ts`).
+* Integração com UptimeRobot para execução periódica da recuperação de análises.
+* Monitoramento contínuo das Edge Functions.
+* Limpeza de artefatos temporários do Supabase.
+* Organização da estrutura de deploy das funções.
 
-### Testes
+### Manutenção
 
-* Suíte expandida para 78 testes (Vitest).
-* Todos os testes importam da fonte única de domínio.
-
-### Documentação
-
-* Atualização dos documentos de planejamento (`gift-system-plan.md`).
-* Atualização da análise arquitetural (`gift-system-plan-analysis.md`).
-* Atualização do log de execução (`gift-system-plan-log.md`).
-
----
-
-## [1.6.0] - Julho/2026
-
-### Domínio — Organização Arquitetural (Sprint 4)
-
-* Movimentação de `services/scoring.ts` → `domain/scoring.ts` (regras de negócio no lugar correto).
-* Eliminação do re-export de `topGift` em `helpers/string.js` — `HistoryList.vue` importa diretamente de `domain/scoring`.
-* Separação de `ANSWER_LABELS` de `data/questions.js` para `constants/likert.js` (escala Likert na camada de apresentação).
-* Adoção de `GIFT_COUNT` derivado em vez de `27` literal no `domain/scoring.ts`.
-* Revisão de `helpers/` — confirmado que todos são utilitários puros, sem funções de domínio.
-
-### Domínio — Limpeza Final (Sprint 5)
-
-* Remoção definitiva do adapter `data/gifts.js` (consumidores já importavam da fonte única).
-* Remoção de ~162 linhas de código comentado (traduções em inglês desatualizadas) de `data/questions.js`.
-* README.md reescrito — descreve a aplicação Vue/Supabase real (não mais o pipeline Python legado).
-* TODO.md limpo — itens de refatoração concluídos removidos.
-* Documentação final da arquitetura atualizada.
-
-### Testes
-
-* 78/78 testes passando (inalterado, sem regressões).
-* Build validado (784 módulos, ~847ms).
+* Revisão da arquitetura de geração da análise.
+* Redução da necessidade de intervenção manual em falhas de processamento.
+* Preparação da base para futura fila assíncrona de processamento.
 
 ---
 
@@ -199,32 +267,6 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 * Configuração do Vercel para SPA.
 * Documentação inicial da arquitetura.
 * Estruturação dos scripts SQL do projeto.
-
----
-
-## [1.2.1] - Junho/2026
-
-### Inteligência Artificial
-
-* Criação da Edge Function `retry-ai-analysis`.
-* Recuperação automática de análises pendentes.
-* Processamento em lote de respostas sem análise.
-* Tratamento automático de falhas por indisponibilidade ou limite de quota do Gemini.
-* Simplificação da estratégia de recuperação de falhas.
-* Remoção da função temporária `teste-generate-ai`.
-
-### Infraestrutura
-
-* Integração com UptimeRobot para execução periódica da recuperação de análises.
-* Monitoramento contínuo das Edge Functions.
-* Limpeza de artefatos temporários do Supabase.
-* Organização da estrutura de deploy das funções.
-
-### Manutenção
-
-* Revisão da arquitetura de geração da análise.
-* Redução da necessidade de intervenção manual em falhas de processamento.
-* Preparação da base para futura fila assíncrona de processamento.
 
 ---
 
