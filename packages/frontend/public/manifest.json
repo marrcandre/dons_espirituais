@@ -1,0 +1,22 @@
+{
+  "name": "Dons Espirituais",
+  "short_name": "Dons",
+  "description": "Descubra seus dons espirituais com nosso teste bíblico. Identifique seus talentos dados por Deus e encontre seu propósito na igreja.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2b5440",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

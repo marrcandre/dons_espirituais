@@ -4,9 +4,43 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 
 ---
 
-## [1.10.0] - Julho/2026
+## [2.0.0] - Julho/2026
 
 ### Sprint 10 — Qualidade e Produto
+
+Versão 2.0.0 marca a conclusão da **Fase 2 — Evolução Arquitetural** do projeto.
+
+**Evolução arquitetural (Sprints 7–10):**
+
+- **Application Layer** criada (Sprint 7): `submit-quiz`, `quiz-session`, `user-profile` — casos de uso testáveis sem Vue
+- **Infrastructure** consolidada (Sprint 8): timeout padronizado, 4 repositories com 32 testes, violação de camada corrigida
+- **Presentation** auditada e consolidada (Sprint 9): zero violações, persistência centralizada, dead code removido
+- **Qualidade** estabelecida (Sprint 10): ESLint + vue-tsc + CI + cobertura + testes de stores (47), componentes (34), helpers (29), repositories (19)
+- **SEO/PWA** implementados (Sprint 10.5): robots.txt, sitemap.xml, Open Graph, Twitter Card, manifest.json, ícones
+
+**Arquitetura atual (4 camadas):**
+
+```
+src/
+  domain/          → Regras de negócio puras (TypeScript)
+  application/     → Casos de uso orquestradores
+  infrastructure/  → Repositories (Supabase adapters)
+  presentation/    → Views, Components, Stores, Composables
+```
+
+**Métricas finais v2.0.0:**
+
+| Métrica | Sprint 6 (baseline) | v2.0.0 |
+|---------|--------------------|--------|
+| Testes | 78 | **259** |
+| Arquivos de teste | 4 | **27** |
+| Cobertura (statements) | ~12% | **38.66%** |
+| Lint errors | 65+ | **0** |
+| Typecheck errors | N/A | **0** |
+| CI/CD | Nenhum | **CI implementado** |
+| Application Layer | Inexistente | Criada e testada |
+| Violações de camada | 1 (UserInfoForm) | **0** |
+| SEO/PWA | Nenhum | robots, sitemap, OG, Twitter, manifest, icons |
 
 ### Sprint 10.1 — Tooling Foundation
 
@@ -54,6 +88,26 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 * Typecheck errors: **0**
 * CI pipeline criada e validada localmente
 * Build verde
+
+---
+
+### Sprint 10.5.1 — SEO & Discovery
+
+* **Arquivos estáticos:** `public/robots.txt`, `public/sitemap.xml`, `public/og-image.png`, `public/favicon.ico`, `public/apple-touch-icon.png`
+* **Meta tags HTML:** description, keywords, author, robots, language adicionados ao `index.html`
+* **Open Graph:** og:title, og:description, og:image (1200×630), og:url, og:locale, og:site_name
+* **Twitter Card:** summary_large_image + title/description/image
+* **Título dinâmico por página:** Router `meta.title` + `meta.description` + `afterEach` hook para document.title e OG tags
+
+---
+
+### Sprint 10.5.2 — PWA & Performance
+
+* **PWA Manifest:** `public/manifest.json` com name, short_name, description, start_url, display: standalone, theme_color, background_color, lang, icons
+* **Ícones PWA:** `public/icon-192x192.png` e `public/icon-512x512.png` gerados do favicon SVG
+* **index.html:** `<link rel="manifest">`, `<meta name="theme-color">`, preconnect para Supabase e Google OAuth
+* **Service worker:** Não implementado — app 100% dependente de rede; ADR-013
+* **Nenhuma dependência nova instalada · Nenhuma alteração em código runtime**
 
 ---
 

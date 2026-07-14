@@ -931,3 +931,97 @@ Motivos:
 - Typecheck: OK ✅
 - Testes: 259/259 ✅
 - Build: OK ✅
+
+---
+
+### Sprint 10.5.2 — PWA & Performance ✅
+
+**Concluída em:** 2026-07-14
+
+**Objetivo:** Adicionar suporte PWA básico e pequenos ajustes de performance sem introduzir complexidade desnecessária.
+
+**Arquivos criados:**
+
+| Arquivo | Descrição |
+|---------|-----------|
+| `public/manifest.json` | PWA manifest com name, short_name, description, start_url, display standalone, theme_color #2b5440, background #ffffff, icons 192x192 e 512x512 |
+| `public/icon-192x192.png` | Ícone PWA 192x192 gerado do favicon.svg |
+| `public/icon-512x512.png` | Ícone PWA 512x512 gerado do favicon.svg |
+
+**Arquivos modificados:**
+
+| Arquivo | Alteração |
+|---------|-----------|
+| `index.html` | `<link rel="manifest">`, `<meta name="theme-color">`, preconnect Supabase + Google OAuth |
+
+**Decisões arquiteturais (ADR-013 aplicado):**
+
+| Decisão | Status | Justificativa |
+|---------|--------|---------------|
+| manifest.json | ✅ Implementado | Baixo esforço, habilita "Add to Home Screen" |
+| Ícones PWA | ✅ Implementado | Gerados do SVG existente, consistência visual |
+| theme-color | ✅ Implementado | 1 linha no `<head>` |
+| Preconnect hints | ✅ Implementado | Supabase + Google OAuth — redução de latência |
+| Service worker | ❌ Não implementado | App 100% dependente de rede (auth, dados, IA). Vercel CDN já entrega assets rapidamente. Precaching adicionaria ~30KB Workbox sem ganho real. ADR-013. |
+| vite-plugin-pwa | ❌ Não instalado | Sem service worker, sem necessidade do plugin |
+| Otimizações de bundle | ❌ Não aplicadas | Sem evidência de gargalo real. ADR-013. |
+
+**Pipeline:**
+- Lint: 0 erros ✅
+- Typecheck: OK ✅
+- Testes: 259/259 ✅
+- Build: OK ✅
+
+**Métricas do build:**
+- `index.html`: 2.54 kB (gzip 0.83 kB) — aumento esperado pelos novos links/meta
+- Assets runtime: inalterados em relação ao Sprint 10.5.1
+
+---
+
+### Sprint 10.5.3 — Release v2.0.0 ✅
+
+**Concluída em:** 2026-07-14
+
+**Objetivo:** Preparar o fechamento oficial da versão 2.0.0, garantindo consistência entre código, documentação, versão e histórico de evolução. Sem novas funcionalidades.
+
+**Arquivos modificados:**
+
+| Arquivo | Alteração |
+|---------|-----------|
+| `packages/frontend/package.json` | version `0.0.0` → `2.0.0` |
+| `CHANGELOG.md` | Resumo executivo da v2.0.0 com métricas e evolução |
+| `README.md` | Stack, arquitetura 4 camadas, 259 testes, scripts de qualidade |
+| `TODO.md` | Sprint 10 movida para concluídas |
+| `docs/architecture-evolution-plan.md` | Sprint 10 marcada como completa; Fase 2 critérios atualizados |
+| `docs/architecture-evolution-log.md` | Sprint 10.5.3 registrada |
+| `docs/architecture-evolution-analysis.md` | Header atualizado, métricas e CI/CD nota atualizadas |
+
+**Pipeline final:**
+- Lint: 0 erros ✅
+- Typecheck: OK ✅
+- Testes: 259/259 passando, 27 arquivos ✅
+- Coverage: Statements 38.66% configurado e reportando ✅
+- Build: verde (787 módulos, 3.18s) ✅
+
+**Versão final:** **v2.0.0**
+
+**Fase 2 — Evolução Arquitetural: ✅ COMPLETA**
+
+| Critério | Status |
+|----------|--------|
+| Application Layer criada e testada | ✅ |
+| Infrastructure isolada e testada | ✅ |
+| Presentation consolidada (auditada, sem violações) | ✅ |
+| CI estabelecido (GitHub Actions) | ✅ |
+| Cobertura de testes configurada | ✅ |
+| Decisões documentadas (docs/decisions.md) | ✅ |
+| Zero regressão funcional | ✅ |
+| README reflete arquitetura atual | ✅ |
+
+**Próximos passos (Fase 3 — Sprints 11–13):**
+- Página Sobre (metodologia, autor, licença)
+- Footer institucional
+- Header definitivo com navegação completa
+- Logo componente reutilizável
+- CD (Continuous Deployment)
+- Release v2.0.0 oficial (tag + publicação)

@@ -2,19 +2,6 @@
 
 ## 🔴 Alta Complexidade
 
-### Sprint 10 — Qualidade e Produto (10.1 a 10.5) 📋
-- [x] **10.1** Tooling Foundation — ESLint + vue-tsc + tsconfig + scripts de qualidade
-- [x] **10.2** CI (Continuous Integration) — GitHub Actions (lint → typecheck → test → build)
-- [x] **10.3** Test Coverage — vitest --coverage, relatório, meta documentada
-- [x] **10.4.1** Store Tests — 4 stores cobertas (47 testes)
-- [x] **10.4.2** Component Tests — 7 componentes cobertos (34 testes)
-- [x] **10.4.3** Infrastructure Tests + Helpers — authRepository (10), aiRepository (10), array (6), date (10), validation (13) = 49 novos testes
-- [x] **10.4.4** Presentation Coverage Review — UserInfoForm (5) + HistoryList (4) = 9 novos testes; decisões documentadas
-- [ ] **10.5** Product Quality (pendente)
-- [ ] **10.5** Product Quality — SEO + Open Graph + Sitemap + Robots + PWA + v2.0.0
-
-> **Nota:** Sprint 10 implementa apenas **CI** (continuous integration). **CD** (continuous deployment / deploy automático) fica para a Sprint 13.
-
 ### ResultsView
 - [ ] Melhorar legibilidade da análise IA
 
@@ -103,6 +90,20 @@
 - [ ] Registrar versões do prompt
 
 ## ✅ Concluídas
+
+### Sprint 10 — Qualidade e Produto ✓
+- [x] **10.1** Tooling Foundation — ESLint + vue-tsc + tsconfig + scripts de qualidade
+- [x] **10.2** CI (Continuous Integration) — GitHub Actions (lint → typecheck → test → build)
+- [x] **10.3** Test Coverage — vitest --coverage, relatório, meta documentada
+- [x] **10.4.1** Store Tests — 4 stores cobertas (47 testes)
+- [x] **10.4.2** Component Tests — 7 componentes cobertos (34 testes)
+- [x] **10.4.3** Infrastructure Tests + Helpers — authRepository (10), aiRepository (10), array (6), date (10), validation (13)
+- [x] **10.4.4** Presentation Coverage Review — UserInfoForm (5) + HistoryList (4)
+- [x] **10.5.1** SEO & Discovery — robots.txt, sitemap.xml, OG, Twitter, OG image, favicon
+- [x] **10.5.2** PWA & Performance — manifest.json, icons, theme-color, preconnect
+- [x] **10.5.3** Release v2.0.0 — version bump, CHANGELOG, docs review
+
+> **Nota:** Sprint 10 implementa apenas **CI** (continuous integration). **CD** (continuous deployment / deploy automático) fica para a Sprint 13.
 
 ### Sprint 9 — Consolidação da Presentation Layer ✓
 - [x] **9.1** Auditoria — 7 views, 21 componentes, 4 stores analisados. Zero violações.

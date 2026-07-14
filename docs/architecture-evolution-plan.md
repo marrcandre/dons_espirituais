@@ -501,7 +501,9 @@ A Sprint 8 é dividida em 6 etapas sequenciais, cada uma com escopo pequeno e ve
 
 ---
 
-#### Sprint 10.2 — Continuous Integration 🔴
+#### Sprint 10.2 — Continuous Integration ✅
+
+**Concluída em:** 2026-07-14
 
 **Objetivo:** Automatizar validações de qualidade sem deploy automático.
 
@@ -518,10 +520,10 @@ A Sprint 8 é dividida em 6 etapas sequenciais, cada uma com escopo pequeno e ve
 - Médio — dependência do GitHub Actions disponível; sem alternative testada
 
 **Critérios de aceite:**
-- [ ] Pipeline CI funcional no GitHub
-- [ ] Rodando lint + typecheck + test + build
-- [ ] Status check visível em PRs
-- [ ] 0 alterações no código de runtime (apenas .github/ + tooling)
+- [x] Pipeline CI funcional no GitHub
+- [x] Rodando lint + typecheck + test + build
+- [x] Status check visível em PRs
+- [x] 0 alterações no código de runtime (apenas .github/ + tooling)
 
 ---
 
@@ -555,7 +557,7 @@ A Sprint 8 é dividida em 6 etapas sequenciais, cada uma com escopo pequeno e ve
 
 ---
 
-#### Sprint 10.4 — Presentation Tests 🟡
+#### Sprint 10.4 — Presentation Tests ✅
 
 **Objetivo:** Primeiros testes de stores e componentes usando `@vue/test-utils` + happy-dom (infraestrutura instalada na Sprint 9.3).
 
@@ -581,7 +583,7 @@ A Sprint 8 é dividida em 6 etapas sequenciais, cada uma com escopo pequeno e ve
 
 ---
 
-#### Sprint 10.5 — Product Quality 🟢
+#### Sprint 10.5 — Product Quality ✅
 
 **Objetivo:** Preparar o projeto para descoberta orgânica, compartilhamento social e release v2.0.0.
 
@@ -702,11 +704,12 @@ A Fase 2 será considerada concluída quando:
 - [x] Application Layer criada e testada
 - [x] Infrastructure isolada e testada
 - [x] Presentation consolidada (auditada, sem violações, persistência centralizada)
-- [ ] CI estabelecido (GitHub Actions com lint + typecheck + test + build)
-- [ ] Cobertura de testes configurada com meta documentada
+- [x] CI estabelecido (GitHub Actions com lint + typecheck + test + build)
+- [x] Cobertura de testes configurada com meta documentada
 - [x] Decisões documentadas em docs/decisions.md
 - [x] Zero regressão funcional
 - [x] README.md reflete arquitetura atual
+- [x] Sprint 10 concluída — todos os 5 sub-sprints entregues (10.1 Tooling, 10.2 CI, 10.3 Coverage, 10.4 Tests, 10.5 Product Quality)
 
 **Observação:** O critério "Presentation organizada com composables" foi substituído por ADR-013 — composables são criados apenas por necessidade real comprovada, não como padrão obrigatório.
 

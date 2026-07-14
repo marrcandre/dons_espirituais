@@ -2,7 +2,7 @@
 
 > **Data:** 2026-07-09
 >
-> **Última atualização:** 2026-07-14 (Sprint 10.3 — baseline de cobertura)
+> **Última atualização:** 2026-07-14 (Sprint 10 concluída — v2.0.0)
 >
 > **Contexto:** Avaliação da arquitetura atual do Dons Espirituais à luz da referência Cinco Ministérios (v5.2.0, 134 testes, 13 documentos de arquitetura)
 
@@ -117,7 +117,7 @@
 - Ambiente configurado em `vite.config.js`
 - Pronto para Sprint 10 criar testes de stores e components
 
-**Cobertura de testes:** 114 testes (110 existentes + 4 saveSession)
+**Cobertura de testes:** 259 testes (Sprint 10.4 — 145 novos testes de stores, componentes, infrastructure e helpers)
 
 **Riscos:**
 - Baixo. Presentation Layer sem violações graves. Nenhum componente acessa Infrastructure diretamente.
@@ -215,9 +215,9 @@
 
 ---
 
-### 1.8 CI/CD — Nota: 0/10
+### 1.8 CI/CD — Nota: 6/10
 
-**Situação:** Inexistente. Não há pipeline automatizada.
+**Situação:** CI implementado na Sprint 10.2 (GitHub Actions — lint, typecheck, test, build). CD planejado para Sprint 13.
 
 **Riscos:**
 - Alto. Sem validação automática em commits/PRs.
