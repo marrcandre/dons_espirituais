@@ -23,6 +23,22 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
   * `submit-quiz.test.ts` — any mantido com eslint-disable
   * `env.d.ts` — tipos corrigidos (`{}` → `object`, `any` → `unknown`)
 
+### Sprint 10.3 — Test Coverage
+
+* **Provider:** `@vitest/coverage-v8` (nativo V8, rápido, sem dependências Babel)
+* **Configuração:** adicionada seção `coverage` em `vite.config.js`
+* **Scripts:** `test:coverage` adicionado ao `package.json`
+* **Relatórios:** texto, HTML e lcov em `coverage/`
+
+### Métricas Sprint 10.3
+
+* Testes: **114** (inalterado)
+* Cobertura global: **Statements 12.54% | Branches 79.43% | Functions 75.75% | Lines 12.54%**
+* **Nota:** Branches/Functions inflados por arquivos .vue com 0 branches (vacuamente 100%)
+* Meta inicial proposta: **30% statements** (atingível com testes de stores + helpers + authRepository)
+
+---
+
 ### Sprint 10.2 — Continuous Integration
 
 * **Pipeline CI criada:** `.github/workflows/ci.yml`

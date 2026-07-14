@@ -13,5 +13,22 @@ export default defineConfig({
   test: {
     environment: 'happy-dom',
     setupFiles: ['./vitest.setup.js'],
+    css: true,
+    deps: {
+      inline: ['vuetify'],
+    },
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'lcov'],
+      include: ['src/**'],
+      exclude: [
+        'src/main.js',
+        'src/env.d.ts',
+        'src/**/*.test.*',
+        'src/**/tests/**',
+        'src/**/__tests__/**',
+      ],
+      reportsDirectory: './coverage',
+    },
   },
 })

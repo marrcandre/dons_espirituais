@@ -649,3 +649,216 @@ A Sprint 9.2 avaliou a criação do composable `useInlineEditor` para eliminar d
 4. **Validação local:** Todos os 5 comandos executados sequencialmente com sucesso.
 
 **Resultado:** 114 testes passando, build verde, CI pipeline validada.
+
+---
+
+### Sprint 10.3 — Test Coverage
+
+**Objetivo:** Configurar medição de cobertura e estabelecer baseline — sem escrever novos testes.
+
+**Provider escolhido:** `@vitest/coverage-v8` (nativo do V8, sem dependências Babel/Istanbul, mais rápido e recomendado pelo Vitest para projetos Node.js modernos).
+
+**O que foi feito:**
+
+1. **Instalação:** `@vitest/coverage-v8@3.2.7` (compatível com vitest 3.2.7)
+
+2. **Configuração em `vite.config.js`:**
+   - `provider: 'v8'`
+   - Reporters: `text`, `html`, `lcov`
+   - Include: `src/**`
+   - Exclude: `main.js`, `env.d.ts`, arquivos de teste (`*.test.*`, `tests/`, `__tests__/`)
+
+3. **Script adicionado:** `test:coverage` → `vitest run --coverage`
+
+4. **Relatório gerado:** `coverage/index.html` + `coverage/lcov.info`
+
+**Cobertura real — baseline:**
+
+| Métrica | Valor | Observação |
+|---|---|---|
+| Statements | **12.54%** | Puxado para baixo por 0% em stores/views/components |
+| Branches | **79.43%** | Inflado — .vue sem branches reportam 100% |
+| Functions | **75.75%** | Inflado — .vue sem funções reportam 100% |
+| Lines | **12.54%** | Mesmo que Statements para v8 |
+
+**Cobertura por módulo (Statements):**
+
+| Módulo | Cobertura | Status |
+|---|---|---|
+| `domain/` | 96.77% | ✅ Bem testado |
+| `application/` | 100% | ✅ Totalmente coberto |
+| `data/` | 87.5% | ⚠️ resources.js 0% |
+| `repositories/` | 49.31% | ⚠️ authRepository e aiRepository 0% |
+| `services/` | 58.82% | ⚠️ supabase.js 0% (só exports) |
+| `helpers/` | 12.5% | ⚠️ só string.js testado |
+| `stores/` | 0% | ❌ Nenhum teste |
+| `components/` | 0% | ❌ Nenhum teste |
+| `views/` | 0% | ❌ Nenhum teste |
+| `plugins/` | 0% | 🔸 Setup code, baixo valor |
+| `router/` | 0% | 🔸 Config, baixo valor |
+| `constants/` | 0% | 🔸 Dados estáticos, baixo valor |
+
+**Principais lacunas:**
+
+1. **Stores (4 arquivos, ~405 linhas):** auth.js, quiz.js, responses.js, ai.js — sem testes. **Maior impacto potencial.**
+2. **Componentes (21 arquivos, ~900 linhas):** Nenhum teste. Exigem @vue/test-utils.
+3. **authRepository.js + aiRepository.js:** Sem testes — os únicos repositories sem cobertura.
+4. **Helpers (array.js, date.js, validation.js):** Funções puras, fáceis de testar.
+5. **resources.js:** Dados estáticos, baixa prioridade.
+
+**Meta inicial proposta:**
+
+**30% de statements** — atingível implementando testes para:
+- Stores (4 stores → ~+8% global)
+- authRepository + aiRepository (~+3% global)
+- Helpers restantes (~+3% global)
+- Primeiros componentes (~+4% global)
+
+**Prioridades para Sprint 10.4:**
+
+1. 🔴 **Stores** (auth.js, quiz.js, responses.js, ai.js) — Pinia + mocks simples
+2. 🟡 **authRepository.js + aiRepository.js** — reusar padrão responseRepository.test.js
+3. 🟡 **Helpers** (array.js, date.js, validation.js) — funções puras, testes triviais
+4. 🟢 **Primeiros componentes** (AppButton, AppAlert) — @vue/test-utils simples
+
+---
+
+### Sprint 10.4.1 — Store Tests ✅
+
+**Concluída em:** 2026-07-14
+
+**Resultados:**
+- 47 novos testes de store (4 arquivos)
+- Total: 163 testes (13 arquivos)
+- Stores com 95.89% de statements
+- Cobertura geral: 24.41% (up from 12.54%)
+
+**Lições aprendidas (documentadas para evitar retrabalho):**
+
+1. **Caminhos relativos em `vi.mock`:** O caminho em `vi.mock()` é relativo ao arquivo de teste, não ao arquivo sob teste. Exemplo: para mockar `stores/ai.js` → `repositories/aiRepository.js`, o teste em `stores/tests/ai.test.js` deve usar `vi.mock('../../repositories/aiRepository')`, não `../repositories/aiRepository`.
+
+2. **`Object.defineProperty` não funciona em stores Pinia:** Pinia envolve a store em um proxy reativo. `Object.defineProperty(store, 'computedName', { get: () => X })` não sobrescreve `computed` internos. Para testar computados com valores alternativos, configure o estado real (ex.: `store.answers = [...Array(34).keys()].reduce(...)` para simular 25% de progresso).
+
+3. **Propriedades internas não expostas:** Stores Pinia com sintaxe setup() só expõem o que está no `return { ... }`. Se uma ref é usada internamente (ex.: `activeSubscriptions` em `ai.js`), não está disponível via `store.activeSubscriptions`. Teste o comportamento indiretamente através de spies nos repositórios mockados, não pelo estado interno.
+
+4. **`vi.hoisted()` + `vi.mock()` pattern:** `vi.hoisted()` deve ser usado para declarar variáveis antes de `vi.mock()` porque `vi.mock()` é hoisted por Vitest. O padrão é:
+   ```js
+   const { mockFn } = vi.hoisted(() => ({ mockFn: vi.fn() }))
+   vi.mock('../../path/to/module', () => ({ method: mockFn }))
+   ```
+   Isto garante que `mockFn` está disponível quando o factory de `vi.mock()` é avaliado.
+
+5. **`vi.clearAllMocks()` no `beforeEach`:** Essencial para evitar vazamento de estado entre testes. Sempre chamar no `beforeEach` quando usar mocks globais.
+
+---
+
+### Sprint 10.4.2 — Component Tests ✅
+
+**Concluída em:** 2026-07-14
+
+**Objetivo:** Primeira camada de testes de componentes Vue, priorizando componentes reutilizáveis e isolados.
+
+**Infraestrutura configurada:**
+- `vitest.setup.js` — criado `createVuetify()` com todos os componentes e diretivas
+- `vite.config.js` — adicionado `deps: { inline: ['vuetify'] }` para processar CSS do Vuetify
+- `css: true` habilitado no ambiente de teste
+
+**Componentes cobertos (7):**
+
+| Componente | Testes | O que testa |
+|---|---|---|
+| `ui/AppButton.vue` | 6 | slot, loading, size/rounded, $attrs, click, defaults |
+| `ui/AppAlert.vue` | 5 | slot, todos os 4 tipos, variant, icon, defaults |
+| `ui/LoadingState.vue` | 5 | spinner, mensagem, sem mensagem, size/thickness, aria-label |
+| `ui/AppCard.vue` | 6 | slot, outlined, flat, compact, interactive, flush |
+| `ui/EmptyState.vue` | 5 | title, custom props, action button + emit, sem action, action slot |
+| `QuestionStep.vue` | 7 | question text, answer options, update:modelValue emit, prev/next emit, isLast label, isFirst disabled, no-answer disabled |
+| `GiftBadges.vue` | 3 | top 3 rendering, score ordering, zero scores |
+
+**Componentes avaliados e descartados (1):**
+
+| Componente | Decisão | Motivo |
+|---|---|---|
+| `QuizProgress.vue` | ❌ Não testado | Puramente apresentacional (v-progress-linear + texto). Sem lógica, sem eventos, sem variantes. ADR-013. |
+
+**Resultados:**
+
+| Métrica | Antes (10.4.1) | Depois (10.4.2) |
+|---|---|---|
+| Testes | 163 | **201** |
+| Arquivos de teste | 13 | **20** |
+| Cobertura (statements) | 24.41% | **29.85%** |
+| Cobertura (components) | 0% | **10.21%** |
+| Cobertura (stores) | 95.89% | 95.89% |
+| Branches | 83.52% | **86.34%** |
+| Lint | 0 erros | 0 erros |
+| Typecheck | OK | OK |
+| Build | OK | OK |
+
+**Dificuldades encontradas:**
+
+1. **Vuetify CSS em ambiente de teste:** `import * as components from 'vuetify/components'` aciona import de arquivos `.css` que o Node.js não reconhece. Solução: `deps: { inline: ['vuetify'] }` + `css: true` no `vite.config.js`.
+
+2. **Object spread override em mount helper:** O padrão `{ ...baseProps, ...options }` com spread de `options` no mesmo nível de `props` causa sobrescrita do objeto `props` inteiro. Solução: desestruturar `options` em `{ props, ...rest }`.
+
+3. **GiftBadges com dados reais de domínio:** O componente importa `rankGifts` do domínio. Funciona bem por ser função pura, mas requer conhecimento das IDs dos gifts para preparar scores de teste.
+
+**Nova lição aprendida — Vuetify em testes:**
+Ao usar `createVuetify()` em testes, não importar `'vuetify/styles'` ou `'@mdi/font'` (são CSS que poluem o ambiente). O `createVuetify({ components, directives })` mínimo é suficiente para renderizar componentes Vuetify sem estilo visual.
+
+---
+
+### Sprint 10.4.3 — Infrastructure Tests + Helpers ✅
+
+**Concluída em:** 2026-07-14
+
+**Testes de repositories criados:**
+
+| Arquivo | Testes | Descrição |
+|---|---|---|
+| `repositories/tests/authRepository.test.js` | 10 | getSession (success/error), getUser (success/error), onAuthStateChange, signInWithGoogle (call/throw), signOut (success/error) |
+| `repositories/tests/aiRepository.test.js` | 10 | invokeGenerateAI (params/force/error), invokeNotifyAdmin (call/error), subscribeToUpdates (channel/onChange), unsubscribeChannel (remove/null/undefined) |
+
+**Testes de helpers criados:**
+
+| Arquivo | Testes | Descrição |
+|---|---|---|
+| `helpers/__tests__/array.test.js` | 6 | shuffle (length/elements/immutability/empty/single/different ordering) |
+| `helpers/__tests__/date.test.js` | 10 | formatDate (default/short), formatRelativeDate (today/yesterday/Xdias/1mês/Xmeses/1ano/Xanos/XanosYmeses), formatDateTime |
+| `helpers/__tests__/validation.test.js` | 13 | required (filled/empty/whitespace/null/undefined/custom msg), ageRange (valid/empty/min/max/below/above/custom range) |
+
+**Total:** 49 novos testes, 25 arquivos de teste, 250 testes passando.
+
+**Análise de refatoração — stores/auth.js × application/auth/user-profile.ts:**
+
+| Aspecto | `loadProfile()` (store) | `getUserProfile()` (application) |
+|---|---|---|
+| Argumento | userId (recebido) | Nenhum (chama getUser() internamente) |
+| Retry | 3 tentativas, 300ms delay | Nenhum |
+| Retorno | Profile completo (inclui role) | Apenas `{ name, email }` |
+| Side effect | Atualiza `profile.value` | Função pura de consulta |
+| Uso | Init + onAuthStateChange | Preenchimento de formulário |
+
+**Decisão: Refatoração NÃO recomendada.**
+
+Motivos:
+1. `getUserProfile()` não é substituto direto para `loadProfile()` — API, retorno e propósito são diferentes
+2. Adicionar retry e full-profile a `getUserProfile()` seria scope creep (ADR-013)
+3. `loadProfile()` tem 14 linhas claras e específicas ao ciclo de vida da store
+4. Risco de regressão no fluxo de autenticação sem ganho mensurável
+
+**Cobertura:**
+
+| Módulo | Antes (10.4.2) | Depois (10.4.3) |
+|---|---|---|
+| All files | 29.85% | **34.45%** |
+| src/repositories | 49.31% | **93.15%** |
+| src/helpers | 12.5% | **100%** |
+| src/stores | 95.89% | 95.89% |
+| src/components | 10.21% | 10.21% |
+
+**Pipeline:**
+- Lint: 0 erros ✅
+- Typecheck: OK ✅
+- Testes: 250/250 ✅
+- Build: OK ✅

@@ -1,2 +1,5 @@
-// Setup básico para testes Vue.
-// Sprint 10 será responsável por configurar mocks do Vuetify e Pinia.
+import { createVuetify } from 'vuetify'
+import * as components from 'vuetify/components'
+import * as directives from 'vuetify/directives'
+
+export const vuetify = createVuetify({ components, directives })

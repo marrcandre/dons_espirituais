@@ -5,8 +5,11 @@
 ### Sprint 10 — Qualidade e Produto (10.1 a 10.5) 📋
 - [x] **10.1** Tooling Foundation — ESLint + vue-tsc + tsconfig + scripts de qualidade
 - [x] **10.2** CI (Continuous Integration) — GitHub Actions (lint → typecheck → test → build)
-- [ ] **10.3** Test Coverage — vitest --coverage, relatório, meta documentada
-- [ ] **10.4** Presentation Tests — testes de stores + components + refactor auth.js
+- [x] **10.3** Test Coverage — vitest --coverage, relatório, meta documentada
+- [x] **10.4.1** Store Tests — 4 stores cobertas (47 testes)
+- [x] **10.4.2** Component Tests — 7 componentes cobertos (34 testes)
+- [x] **10.4.3** Infrastructure Tests + Helpers — authRepository (10), aiRepository (10), array (6), date (10), validation (13) = 49 novos testes
+- [ ] **10.4.4** (pendente)
 - [ ] **10.5** Product Quality — SEO + Open Graph + Sitemap + Robots + PWA + v2.0.0
 
 > **Nota:** Sprint 10 implementa apenas **CI** (continuous integration). **CD** (continuous deployment / deploy automático) fica para a Sprint 13.

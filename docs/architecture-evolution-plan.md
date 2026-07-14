@@ -525,26 +525,33 @@ A Sprint 8 é dividida em 6 etapas sequenciais, cada uma com escopo pequeno e ve
 
 ---
 
-#### Sprint 10.3 — Test Coverage 🟡
+#### Sprint 10.3 — Test Coverage 🟡 ✅
 
-**Objetivo:** Configurar medição de cobertura de testes e definir meta mínima inicial.
+**Concluída em:** 2026-07-14
 
-**Justificativa:** Sem métricas, não é possível avaliar a qualidade dos testes nem identificar lacunas. A cobertura inicial servirá como baseline para sprints futuras.
+**Provider:** `@vitest/coverage-v8` — nativo V8, mais rápido que Istanbul, sem dependências Babel. Recomendado pelo Vitest para projetos Node.js modernos.
 
-**Atividades:**
-- Configurar `vitest --coverage` (`@vitest/coverage-v8`)
-- Gerar relatório HTML + texto
-- Definir meta mínima inicial (ex: 60% statements — baseline realista para o estado atual)
-- Documentar na architecture-evolution-analysis.md
-- Adicionar script `test:coverage` ao `package.json`
+**Configuração:**
+- Reporters: `text` (console), `html` (visual), `lcov` (ferramentas externas)
+- Include: `src/**`
+- Exclude: `main.js` (entry point), `env.d.ts` (tipos), arquivos de teste
 
-**Riscos:**
-- Baixo — ferramenta de cobertura não altera runtime
+**Script adicionado:** `test:coverage` → `vitest run --coverage`
 
-**Critérios de aceite:**
-- [ ] `npm run test:coverage` gera relatório sem erros
-- [ ] Meta mínima documentada
-- [ ] Nenhuma alteração no código de runtime
+**Baseline real:**
+
+| Métrica | Valor | Nota |
+|---|---|---|
+| Statements | **12.54%** | Puxado por 0% em stores/views/components |
+| Branches | **79.43%** | Inflado — .vue sem branches reportam 100% |
+| Functions | **75.75%** | Inflado — .vue sem funções reportam 100% |
+| Lines | **12.54%** | Idem Statements para v8 |
+
+**Módulos com cobertura ≥80%:** domain (96.77%), application (100%), data/questions (100%), helpers/string (100%), responseRepository (85.91%), userRepository (100%), supabaseQuery (100%)
+
+**Módulos sem cobertura:** stores (4), components (21), views (7), authRepository, aiRepository, plugins, router, constants, resources.js, 3 helpers
+
+**Meta inicial:** **30% statements** — alcançável com testes de stores (4), authRepository, aiRepository e helpers restantes na Sprint 10.4.
 
 ---
 

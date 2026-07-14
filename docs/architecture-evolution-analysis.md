@@ -2,7 +2,7 @@
 
 > **Data:** 2026-07-09
 >
-> **Última atualização:** 2026-07-14 (Sprint 10.1 — reorganização do roadmap)
+> **Última atualização:** 2026-07-14 (Sprint 10.3 — baseline de cobertura)
 >
 > **Contexto:** Avaliação da arquitetura atual do Dons Espirituais à luz da referência Cinco Ministérios (v5.2.0, 134 testes, 13 documentos de arquitetura)
 
@@ -146,14 +146,31 @@
 **Problemas remanescentes:**
 - 0 testes de stores/composables
 - Testes de domínio (`scoring`) localizados em `services/__tests__/` em vez de `domain/__tests__/`
-- Cobertura não medida oficialmente
+- Cobertura global: 12.54% statements (Sprint 10.3 baseline)
 
 **Riscos:**
 - Baixo. Infrastructure tests fornecem rede de segurança para refatoração de repositories.
 
 **Oportunidades:**
-- Testes de stores (Sprint 9)
-- Medir cobertura oficialmente
+- Testes de stores (Sprint 10.4)
+- Cobertura configurada (Sprint 10.3): `vitest --coverage` com relatório HTML
+- Meta inicial: 30% statements (atingível com stores + authRepository + helpers)
+
+**Cobertura por módulo (baseline Sprint 10.3):**
+
+| Módulo | Stmts | Status |
+|---|---|---|
+| `domain/` | 96.77% | ✅ Bem testado |
+| `application/` | 100% | ✅ Totalmente coberto |
+| `data/` | 87.5% | ⚠️ resources.js 0% |
+| `repositories/` | 49.31% | ⚠️ 2 de 4 repositories sem testes |
+| `services/` | 58.82% | ⚠️ supabase.js 0% (só exports) |
+| `helpers/` | 12.5% | ⚠️ só string.js testado |
+| `stores/` | 0% | ❌ Nenhum teste |
+| `components/` | 0% | ❌ Nenhum teste |
+| `views/` | 0% | ❌ Nenhum teste |
+
+**Meta:** 30% statements — baseline realista para Sprint 10.4 focando stores + repositories + helpers.
 
 ---
 
