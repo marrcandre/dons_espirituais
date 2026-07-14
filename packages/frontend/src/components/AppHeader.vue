@@ -1,20 +1,6 @@
 <template>
   <v-app-bar color="primary" elevation="2">
-    <!-- Logo + título -->
-<router-link
-  to="/"
-  class="d-flex align-center text-decoration-none text-white ml-2"
->
-<v-icon
-  icon="mdi-home-outline"
-  size="30"
-  class="mr-3"
-/>
-
-  <span class="text-h6 font-weight-bold">
-    Dons Espirituais
-  </span>
-</router-link>
+    <AppLogo variant="compact" class="ml-2" />
     <v-spacer />
 
     <template #append>
@@ -34,6 +20,16 @@
         to="/meus-resultados"
         title="Meus resultados"
       />
+
+      <v-btn
+        color="white"
+        variant="text"
+        to="/sobre"
+        title="Sobre o projeto"
+        class="text-none"
+      >
+        Sobre
+      </v-btn>
 
       <v-btn
         :icon="theme.global.name.value === 'dark' ? 'mdi-weather-sunny' : 'mdi-weather-night'"
@@ -99,6 +95,7 @@ import { computed, ref, watch } from 'vue'
 import { useTheme } from 'vuetify'
 import { useAuthStore } from '../stores/auth.js'
 import { initials as getInitials } from '../helpers/string.js'
+import AppLogo from '../components/ui/AppLogo.vue'
 
 const theme = useTheme()
 const authStore = useAuthStore()
