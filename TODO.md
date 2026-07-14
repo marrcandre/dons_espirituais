@@ -3,8 +3,8 @@
 ## 🔴 Alta Complexidade
 
 ### Sprint 8 — Correções, Testes e Consolidação
-- [ ] **8.1** Refatorar `UserInfoForm.vue` para receber `initialData` por prop (remove chamada direta a repositories)
-- [ ] **8.2** Padronizar timeout em `responseRepository.insert()` e `countByUserId()` com `runSupabaseQuery`
+- [x] **8.1** Refatorar `UserInfoForm.vue` para usar `getUserProfile()` da Application Layer (remove chamada direta a repositories)
+- [x] **8.2** Padronizar timeout em `responseRepository.insert()` e `countByUserId()` com `runSupabaseQuery`
 - [ ] **8.3** Criar `repositories/__tests__/responseRepository.test.js` (7+ testes)
 - [ ] **8.3** Criar `repositories/__tests__/userRepository.test.js` (2+ testes)
 

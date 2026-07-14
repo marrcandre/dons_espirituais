@@ -279,8 +279,8 @@ Sprint 8
 
 ### Checklist de execução
 
-- [ ] **8.1** UserInfoForm refatorado para usar props em vez de repositories
-- [ ] **8.2** `responseRepository.insert()` e `countByUserId()` usam `runSupabaseQuery`
+- [x] **8.1** UserInfoForm refatorado para usar `getUserProfile()` da Application Layer
+- [x] **8.2** `responseRepository.insert()` e `countByUserId()` usam `runSupabaseQuery`
 - [ ] **8.3** `repositories/__tests__/responseRepository.test.js` com 7+ testes
 - [ ] **8.3** `repositories/__tests__/userRepository.test.js` com 2+ testes
 - [ ] **8.4** `services/aiAnalysis.js` removido (confirmado sem uso)
@@ -289,25 +289,59 @@ Sprint 8
 
 ### Resultados esperados
 
-| Métrica | Antes (v1.7.0) | Depois (Sprint 8) |
-|---------|----------------|-------------------|
-| Testes totais | 92 | ~105+ |
-| Arquivos de teste | 6 | 9 |
-| Cobertura (infrastructure) | 0% | ~85% (estimado) |
-| Cobertura (geral) | ~40% | ~55% (estimado) |
-| Violações de camada | 1 (UserInfoForm) | 0 |
-| Inconsistência de timeout | 2 métodos | 0 |
-| Código órfão | services/aiAnalysis.js | removido |
-| Duplicação checkSavedState | 2 implementações | 1 (centralizada) |
+| Métrica | Antes (v1.7.0) | Após 8.1–8.2 | Meta Sprint 8 |
+|---------|----------------|----------------|---------------|
+| Testes totais | 92 | **97** | ~105+ |
+| Arquivos de teste | 6 | **7** | 9 |
+| Cobertura (infrastructure) | 0% | 0% | ~85% |
+| Cobertura (geral) | ~40% | ~40% | ~55% |
+| Violações de camada | 1 (UserInfoForm) | **0** | 0 |
+| Inconsistência de timeout | 2 métodos | **0** | 0 |
+| Código órfão | services/aiAnalysis.js | ainda presente | removido |
+| Duplicação checkSavedState | 2 implementações | ainda presente | 1 (centralizada) |
 
 ### Critérios de aceite
 
-- [ ] UserInfoForm não importa repositories
-- [ ] Todos os 7 métodos de responseRepository usam `runSupabaseQuery`
+- [x] UserInfoForm não importa repositories
+- [x] Todos os 7 métodos de responseRepository usam `runSupabaseQuery`
 - [ ] 9+ testes de infrastructure passando
 - [ ] `services/aiAnalysis.js` removido (se confirmado sem uso)
 - [ ] `quizStore.checkSavedState()` não replica lógica de sessão
 - [ ] Decisão de desacoplamento registrada
 - [ ] 105+ testes passando
-- [ ] Build verde
-- [ ] Nenhuma regressão funcional
+- [x] Build verde
+- [x] Nenhuma regressão funcional
+
+---
+
+### Sprint 8.1 — Corrigir violação de camada ✅
+
+**Concluída em:** 2026-07-14
+
+**Implementado:**
+- Criado `application/auth/user-profile.ts` com `getUserProfile()` — caso de uso que obtém nome e email do usuário autenticado
+- Criado `application/auth/ports.ts` com interface `UserProfile`
+- Criados 5 testes em `application/auth/tests/user-profile.test.ts`
+- Modificado `UserInfoForm.vue` — substituídos imports de `repositories/` por `getUserProfile()` da Application Layer
+
+**Resultados:**
+- 5 novos testes → total: 97
+- Build verde
+- Violação de camada eliminada
+
+---
+
+### Sprint 8.2 — Padronizar acesso ao Supabase ✅
+
+**Concluída em:** 2026-07-14
+
+**Implementado:**
+- `responseRepository.insert()` migrado para `runSupabaseQuery()` com `DEFAULT_TIMEOUT` (10s)
+- `responseRepository.countByUserId()` migrado para `runSupabaseQuery()` com `DEFAULT_TIMEOUT` (10s)
+
+**Resultados:**
+- 7/7 métodos do responseRepository usam `runSupabaseQuery`
+- Zero acessos `await supabase.from(...)` sem wrapper nos repositories
+- authRepository e aiRepository mantidos fora do escopo (APIs específicas)
+- 97 testes passando
+- Build verde

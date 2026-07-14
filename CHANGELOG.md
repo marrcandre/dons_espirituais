@@ -4,6 +4,37 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 
 ---
 
+## [1.7.1] - Julho/2026
+
+### Sprint 8.1 — Correção de Violação de Camada
+
+* Criação do caso de uso `application/auth/user-profile.ts` — obtenção de dados do usuário autenticado via Application Layer
+* Criação de `application/auth/ports.ts` com interface `UserProfile`
+* `UserInfoForm.vue` deixou de importar repositories diretamente — passou a consumir `getUserProfile()` da Application Layer
+* Eliminação da dependência direta Presentation → Infrastructure
+
+### Sprint 8.2 — Padronização de Acesso ao Supabase
+
+* `responseRepository.insert()` migrado para `runSupabaseQuery()` com timeout de 10s
+* `responseRepository.countByUserId()` migrado para `runSupabaseQuery()` com timeout de 10s
+* Todos os 7 métodos do responseRepository usam `runSupabaseQuery` consistentemente
+* Zero acessos `await supabase.from(...)` sem wrapper nos repositories
+
+### Testes
+
+* 5 novos testes para `application/auth/user-profile.ts`
+* `UserInfoForm.vue` validado sem regressão
+* Total: **97 testes passando** (92 existentes + 5 novos)
+* 7 arquivos de teste (6 existentes + 1 novo)
+
+### Build
+
+* 787 módulos transformados
+* Build verde
+* Nenhuma regressão funcional
+
+---
+
 ## [1.7.0] - Julho/2026
 
 ### Application Layer (Sprint 7)
