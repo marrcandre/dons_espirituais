@@ -2,16 +2,17 @@
 
 ## 🔴 Alta Complexidade
 
-### Sprint 8 — Correções, Testes e Consolidação
-- [x] **8.1** Refatorar `UserInfoForm.vue` para usar `getUserProfile()` da Application Layer (remove chamada direta a repositories)
-- [x] **8.2** Padronizar timeout em `responseRepository.insert()` e `countByUserId()` com `runSupabaseQuery`
-- [x] **8.3** Criar `repositories/tests/responseRepository.test.js` (10 testes)
-- [x] **8.3** Criar `repositories/tests/userRepository.test.js` (3 testes)
+### Sprint 10 — Qualidade e Produto 📋
+- [ ] CI/CD via GitHub Actions (lint + typecheck + test + build)
+- [ ] Target coverage 90%+ statements
+- [ ] SEO (meta tags, sitemap, Open Graph)
+- [ ] PWA (manifest, service worker)
+- [ ] Documentação final atualizada
+- [ ] CHANGELOG.md preparado para v2.0.0
 
-### Implementação Pendente
-- [ ] Substituir 21 `<v-btn>` raw por `AppButton` em 7 arquivos
-- [ ] Padronizar botões (Sprint 7)
-- [ ] Padronizar alertas (Sprint 7)
+### Débitos Técnicos
+- [ ] Substituir 24 `<v-btn>` raw e 6 `<v-alert>` raw pelo Design System
+- [ ] Refatorar `auth.js` para usar `application/auth/user-profile.ts`
 
 ### ResultsView
 - [ ] Melhorar legibilidade da análise IA
@@ -24,11 +25,6 @@
 ---
 
 ## 🟡 Média Complexidade
-
-### Sprint 8 — Continuação
-- [x] **8.4** Remover `services/aiAnalysis.js` (verificar se há consumidores)
-- [x] **8.5** Eliminar duplicação entre `quizStore.checkSavedState()` e `quizSession.checkSavedSession()`
-- [x] **8.6** Avaliar desacoplamento de `AiAnalysis.vue` e `HistoryList.vue` (decisão: manter estado atual)
 
 ### Design System
 - [ ] GiftBadges: substituir gold/silver/bronze hardcoded por tokens
@@ -48,7 +44,6 @@
 
 ### Arquitetura (Clean Code)
 - [ ] Padronizar nomenclatura de diretórios de testes: `tests` vs `__tests__` (atualmente misturado)
-- [x] ~~Refatorar `UserInfoForm.vue` para usar store (remove chamada direta a repositories)~~ → Sprint 8.1 (props em vez de store)
 - [ ] Análise de viabilidade: substituir Supabase SDK por REST API
   - Mapear endpoints CRUD + auth + IA + notificações
   - Avaliar modelo híbrido (manter auth Supabase, DB via REST)
@@ -82,11 +77,7 @@
 
 ## 🟢 Baixa Complexidade
 
-### Refatoração de Componentes
-- [ ] ~~AiAnalysis: receber dados por props em vez de importar store~~ → Sprint 8.6: avaliado — manter estado atual (sem benefício claro)
-- [ ] ~~HistoryList: receber dados por props em vez de importar store~~ → Sprint 8.6: avaliado — manter estado atual (ganho marginal)
-
-### Conteúdo Institucional (Sprint 5)
+### Conteúdo Institucional (Fase 3)
 - [ ] Página Sobre (história, metodologia, limitações)
 - [ ] FAQ
 - [ ] Página de Contato + Política de Privacidade
@@ -109,3 +100,26 @@
 - [ ] Documentar banco de dados
 - [ ] Documentar prompt da IA e estratégia de retry
 - [ ] Registrar versões do prompt
+
+## ✅ Concluídas
+
+### Sprint 9 — Consolidação da Presentation Layer ✓
+- [x] **9.1** Auditoria — 7 views, 21 componentes, 4 stores analisados. Zero violações.
+- [x] **9.2** Avaliação useInlineEditor — implementado e revertido. ADR-013.
+- [x] **9.3** Consolidação — dead code removido, quiz session centralizada, Vue Test Utils instalado.
+- [x] **9.3.1** 4 testes saveSession. Total: 114 testes.
+
+### Sprint 8 — Correções, Testes e Consolidação ✓
+- [x] **8.1** Refatorar `UserInfoForm.vue` para usar `getUserProfile()` da Application Layer
+- [x] **8.2** Padronizar timeout em `responseRepository.insert()` e `countByUserId()` com `runSupabaseQuery`
+- [x] **8.3** Criar `repositories/tests/responseRepository.test.js` (10 testes)
+- [x] **8.3** Criar `repositories/tests/userRepository.test.js` (3 testes)
+- [x] **8.4** Remover `services/aiAnalysis.js` (verificar se há consumidores)
+- [x] **8.5** Eliminar duplicação entre `quizStore.checkSavedState()` e `quizSession.checkSavedSession()`
+- [x] **8.6** Avaliar desacoplamento de `AiAnalysis.vue` e `HistoryList.vue` (decisão: manter estado atual)
+
+### Sprint 7 — Application Layer ✓
+- [x] Todos os itens concluídos (ver CHANGELOG.md)
+
+### Sprints 0–6 — Fundação e Domínio ✓
+- [x] Todas concluídas (ver CHANGELOG.md)

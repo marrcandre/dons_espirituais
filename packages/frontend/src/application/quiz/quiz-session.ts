@@ -30,3 +30,7 @@ export function checkSavedSession(userId: string): SavedSession | null {
 export function clearSession(userId: string): void {
   localStorage.removeItem(storageKey(userId))
 }
+
+export function saveSession(userId: string, session: SavedSession): void {
+  localStorage.setItem(storageKey(userId), JSON.stringify(session))
+}

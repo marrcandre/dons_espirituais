@@ -4,6 +4,48 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 
 ---
 
+## [1.9.0] - Julho/2026
+
+### Sprint 9 — Consolidação da Presentation Layer
+
+### Sprint 9.1 — Auditoria
+
+* 7 views, 21 componentes, 4 stores analisados
+* Zero violações de camada — nenhum import direto de repositories ou services
+* 21 `<v-btn>` raw identificados (DS subutilizado)
+* Editor inline duplicado (~150 linhas) entre ResultsView e AdminView
+* Dead code identificado: `responseStore.insert()`, `countByUserId()`
+* Duplicação identificada: `quiz.js` contorna `quiz-session.ts` com localStorage direto
+* Nenhuma alteração de código na auditoria
+
+### Sprint 9.2 — Avaliação de abstração de edição inline
+
+* `useInlineEditor` implementado e testado (9 testes), mas revertido
+* Decisão: manter ResultsView e AdminView como componentes independentes
+* ADR-013 atualizado: código semelhante não significa responsabilidade compartilhada
+* Código revertido ao estado anterior
+
+### Sprint 9.3 — Consolidação
+
+* **Dead code removido:** `stores/responses.js` — `insert()` e `countByUserId()` (sem consumidores)
+* **Quiz session consolidada:** `application/quiz/quiz-session.ts` ganhou `saveSession()`. `stores/quiz.js` delegou toda persistência (clearState, persistState, restoreSaved, savedAnswerCount) para a application layer. Zero acesso direto a localStorage no store.
+* **Infraestrutura de testes Vue:** `@vue/test-utils` + `happy-dom` instalados. Ambiente configurado em `vite.config.js`. Pronto para Sprint 10.
+
+### Sprint 9.3.1 — Testes de saveSession()
+
+* 4 testes unitários para `saveSession()` em `quiz-session.test.ts`
+* Cenários: criação, integração com checkSavedSession, substituição, integração com clearSession
+
+### Métricas Sprint 9
+
+* Testes: **110 → 114** (+4 — saveSession)
+* Violações de camada: **0**
+* Acesso direto a localStorage em stores: **eliminado** (quiz.js)
+* Dead code em stores: **0** (responses.js limpo)
+* Build verde
+
+---
+
 ## [1.8.0] - Julho/2026
 
 ### Sprint 8 — Consolidação Arquitetural

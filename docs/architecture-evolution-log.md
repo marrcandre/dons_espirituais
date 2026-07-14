@@ -478,3 +478,102 @@ Sprint 8
 **Resultados:**
 - Nenhum arquivo de código fonte alterado
 - Sprint 8 completa — todos os 6 sub-items entregues
+
+---
+
+### Sprint 9.1 — Auditoria da Presentation Layer ✅
+
+**Concluída em:** 2026-07-14
+
+**Resumo:**
+- Nenhuma alteração de código — auditoria exclusivamente documental
+- **7 views analisadas:** HomeView (85), LoginView (71), AuthCallback (18), QuizView (181), ResultsView (284), MyResultsView (114), AdminView (572)
+- **21 componentes analisados:** 10 feature + 11 UI
+- **4 stores analisadas:** auth (107), quiz (170), responses (105), ai (59)
+- **Violações arquiteturais encontradas: 0** — nenhum import direto de repositories ou services em views/components
+
+**Principais achados:**
+- Editor inline duplicado entre ResultsView e AdminView (~150 linhas)
+- 21 `<v-btn>` raw — DS subutilizado
+- `LoadingState.vue`, `EmptyState.vue`, `ErrorState.vue` existentes mas não reutilizados
+- `responseStore.insert()` e `countByUserId()` — dead code
+- `auth.js` ignora `application/auth/user-profile.ts` existente
+- `quiz.js` contorna `quiz-session.ts` com localStorage direto
+
+**Decisão:** Avaliar `useInlineEditor` como primeiro candidato a composable (ADR-013).
+
+---
+
+### Sprint 9.2 — Avaliação de abstração de edição inline ❌
+
+**Status:** Cancelada após implementação experimental.
+
+**Concluída em:** 2026-07-14
+
+**Resumo:**
+A Sprint 9.2 avaliou a criação do composable `useInlineEditor` para eliminar duplicação entre `ResultsView.vue` e `AdminView.vue`. O composable foi implementado e testado inicialmente (9 testes), porém durante a validação funcional foi identificado que os fluxos possuem responsabilidades diferentes:
+
+- **ResultsView:** edição de um resultado individual, atualização de `responseStore.current`, contexto do usuário
+- **AdminView:** edição de múltiplos registros em tabela administrativa, controle de linhas independentes
+
+**Conclusão:** A similaridade existente era principalmente visual e parcial. A abstração criada aumentava acoplamento e complexidade sem representar um conceito real compartilhado.
+
+**Decisão:** Manter `ResultsView.vue` e `AdminView.vue` como componentes independentes. Código revertido ao estado anterior.
+
+**Motivação:** Aplicação do ADR-013: "Composables devem surgir por necessidade real, não por antecipação." Código semelhante não significa necessariamente responsabilidade compartilhada.
+
+**Arquivos removidos:**
+- `packages/frontend/src/composables/useInlineEditor.js`
+- `packages/frontend/src/composables/tests/useInlineEditor.test.js`
+
+**Arquivos restaurados:**
+- `packages/frontend/src/views/ResultsView.vue`
+- `packages/frontend/src/views/AdminView.vue`
+
+**Resultado:** 110 testes passando, build verde. Nenhuma referência a `useInlineEditor` no código.
+
+---
+
+### Sprint 9.3 — Consolidação da Presentation Layer ✅
+
+**Concluída em:** 2026-07-14
+
+**Objetivo:** Consolidar responsabilidades da Presentation eliminando duplicações reais e preparando Sprint 10 (Qualidade).
+
+**1. Dead code removido**
+- `stores/responses.js`: `insert()` e `countByUserId()` removidos (sem consumidores)
+- `repositories/responseRepository.js`: mantido (testes existentes validam API de infraestrutura)
+
+**2. Quiz session consolidada**
+- `application/quiz/quiz-session.ts`: adicionado `saveSession(userId, session)`
+- `stores/quiz.js`:
+  - `clearState()` → usa `clearSession(userId)` da application layer
+  - `persistState()` → usa `saveSession()` da application layer
+  - `restoreSaved()` → usa `checkSavedSession()` da application layer (removido JSON.parse/validação manual)
+  - `savedAnswerCount` → usa `checkSavedSession()` da application layer
+  - `storageKey()` removido
+  - Zero acesso direto a `localStorage` (confirmado por grep)
+
+**3. Infraestrutura de testes Vue**
+- `@vue/test-utils` instalado
+- `happy-dom` instalado como ambiente de testes
+- `vitest.setup.js` criado (setup básico)
+- `vite.config.js`: configurado `test.environment: 'happy-dom'` e `setupFiles`
+- Pronto para Sprint 10 criar testes de stores e components
+
+**Arquivos alterados:**
+- `packages/frontend/src/stores/responses.js` — dead code removido
+- `packages/frontend/src/application/quiz/quiz-session.ts` — `saveSession()` adicionado
+- `packages/frontend/src/stores/quiz.js` — toda persistência delegada para application layer
+- `packages/frontend/vite.config.js` — ambiente de teste configurado
+- `packages/frontend/vitest.setup.js` — criado
+
+**Arquivos instalados:**
+- `@vue/test-utils`
+- `happy-dom`
+
+**4. Testes de saveSession()**
+- 4 testes unitários adicionados a `quiz-session.test.ts`
+- Cenários: criação, integração com checkSavedSession, substituição, integração com clearSession
+
+**Resultado:** 114 testes passando, build verde.

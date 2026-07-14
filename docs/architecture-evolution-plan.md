@@ -409,21 +409,65 @@ A Sprint 8 é dividida em 6 etapas sequenciais, cada uma com escopo pequeno e ve
 
 ---
 
-### Sprint 9 — Presentation
+### Sprint 9 — Consolidação da Presentation Layer
 
-**Objetivo:** Organização de componentes, composables e stores.
+**Objetivo:** Consolidar a camada Presentation antes de criar novas abstrações. Auditoria de views, redução de componentes grandes, extração de componentes visuais e avaliação realista de composables.
+
+**Motivação:** A Presentation Layer não possui violações graves de camada (resolvidas na Sprint 8), mas contém views grandes com responsabilidades misturadas (AdminView 572 linhas, ResultsView 284 linhas) e zero testes de componentes/stores. Antes de introduzir composables, é necessário entender o estado real da camada e reduzir seu acoplamento interno.
+
+**Princípio arquitetural:** Composables não serão criados por antecipação. Eles devem surgir de necessidades reais identificadas durante a refatoração — principalmente repetição de lógica ou compartilhamento de comportamento entre componentes. Não criar composables apenas para substituir stores.
+
+---
+
+#### 9.1 — Auditoria da Presentation Layer ✅
+
+**Concluída em:** 2026-07-14
 
 **Atividades:**
-- [ ] Criar `src/presentation/composables/`
-- [ ] Criar `useQuizSession` (encapsula quiz store + application)
-- [ ] Criar `useResults` (encapsula responses store + application)
-- [ ] Modularizar componentes (quiz/, results/)
-- [ ] Reduzir imports diretos de domain nas views
+- 7 views analisadas (HomeView, LoginView, AuthCallback, QuizView, ResultsView, MyResultsView, AdminView)
+- 21 componentes analisados (10 feature + 11 UI)
+- 4 stores analisadas (auth, quiz, responses, ai)
+- Violações arquiteturais encontradas: **0** (nenhum import direto de repositories ou services em views/components)
+- 21 ocorrências de `<v-btn>` raw identificadas
+- 150+ linhas de lógica de edição inline duplicada entre ResultsView e AdminView
 
-**Critérios de aceite:**
-- Composables testáveis
-- Views importam preferencialmente de composables ou application
-- Componentes organizados por domínio
+**Resultados da auditoria:** Nenhuma alteração de código. Diagnóstico completo documentado no relatório da Sprint 9.1.
+
+---
+
+#### 9.2 — Avaliação de abstrações da Presentation Layer ❌
+
+**Status:** Concluída como análise técnica / decisão arquitetural.
+
+**Objetivo:** Avaliar a criação de `useInlineEditor` para eliminar duplicação entre `ResultsView.vue` e `AdminView.vue`.
+
+**Resultado:** Abstração descartada após implementação experimental.
+
+**Motivo:** A similaridade entre as views era visual e parcial. ResultsView edita um resultado individual (`responseStore.current`). AdminView edita múltiplas linhas de uma tabela administrativa com controle de linhas independente. A abstração aumentou complexidade sem representar um conceito real compartilhado.
+
+**Decisão:** Manter ResultsView.vue e AdminView.vue como componentes independentes. Código revertido ao estado anterior.
+
+**Aplicação do ADR-013:** Código semelhante não significa responsabilidade compartilhada. Uma abstração só deve existir quando há conceito de domínio compartilhado, comportamento compartilhado, e a remoção de duplicação reduz complexidade.
+
+**Próxima etapa:** Sprint 9.3 — Revisão final da Presentation Layer.
+
+---
+
+#### 9.3 — Consolidação da Presentation Layer ✅
+
+**Status:** Concluída.
+
+**Entregues:**
+- Dead code removido de `stores/responses.js` (`insert()`, `countByUserId()`)
+- Persistência do quiz centralizada em `application/quiz/quiz-session.ts` (saveSession adicionado; quiz.js sem acesso direto a localStorage)
+- Infraestrutura de testes Vue: `@vue/test-utils` + `happy-dom` instalados, vitest configurado
+- 4 testes para `saveSession()` adicionados
+
+**Débitos técnicos remanescentes:**
+- `stores/auth.js`: `loadProfile()` com retry manual, ignora `application/auth/user-profile.ts`
+- 24 `<v-btn>` raw e 6 `<v-alert>` raw fora do Design System
+
+**Resultado:** 114 testes passando, build verde.
 
 ---
 
@@ -533,14 +577,16 @@ A Sprint 8 é dividida em 6 etapas sequenciais, cada uma com escopo pequeno e ve
 
 A Fase 2 será considerada concluída quando:
 
-- [ ] Application Layer criada e testada
-- [ ] Infrastructure isolada e testada
-- [ ] Presentation organizada com composables
+- [x] Application Layer criada e testada
+- [x] Infrastructure isolada e testada
+- [x] Presentation consolidada (auditada, sem violações, persistência centralizada)
 - [ ] CI/CD estabelecido
 - [ ] Cobertura de testes ≥ 90%
-- [ ] Decisões documentadas em docs/decisions.md
-- [ ] Zero regressão funcional
-- [ ] README.md reflete arquitetura atual
+- [x] Decisões documentadas em docs/decisions.md
+- [x] Zero regressão funcional
+- [x] README.md reflete arquitetura atual
+
+**Observação:** O critério "Presentation organizada com composables" foi substituído por ADR-013 — composables são criados apenas por necessidade real comprovada, não como padrão obrigatório.
 
 ### Fase 3 — Experiência Institucional
 

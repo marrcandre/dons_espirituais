@@ -10,4 +10,8 @@ export default defineConfig({
   optimizeDeps: {
     include: ['vuetify'],
   },
+  test: {
+    environment: 'happy-dom',
+    setupFiles: ['./vitest.setup.js'],
+  },
 })

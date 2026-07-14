@@ -52,10 +52,6 @@ export const useResponsesStore = defineStore('responses', () => {
     }
   }
 
-  async function insert(payload) {
-    return responseRepository.insert(payload)
-  }
-
   async function updateField(id, field, value) {
     try {
       await responseRepository.updateField(id, field, value)
@@ -63,14 +59,6 @@ export const useResponsesStore = defineStore('responses', () => {
     } catch (err) {
       console.error(`Erro ao atualizar ${field}:`, err)
       return false
-    }
-  }
-
-  async function countByUserId(userId) {
-    try {
-      return await responseRepository.countByUserId(userId)
-    } catch {
-      return 0
     }
   }
 
@@ -97,9 +85,7 @@ export const useResponsesStore = defineStore('responses', () => {
     fetchById,
     fetchByUserId,
     fetchAll,
-    insert,
     updateField,
-    countByUserId,
     $reset,
   }
 })

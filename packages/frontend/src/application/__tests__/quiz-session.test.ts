@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { checkSavedSession, clearSession } from '../quiz/quiz-session'
+import { checkSavedSession, clearSession, saveSession } from '../quiz/quiz-session'
 
 function mockLocalStorage() {
   const store: Record<string, string> = {}
@@ -82,5 +82,64 @@ describe('clearSession', () => {
 
   it('não lança erro quando não há sessão salva', () => {
     expect(() => clearSession(USER_ID)).not.toThrow()
+  })
+})
+
+describe('saveSession', () => {
+  beforeEach(() => {
+    mockLocalStorage()
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('cria sessão no localStorage com chave e estrutura corretas', () => {
+    saveSession(USER_ID, VALID_SESSION)
+
+    const raw = localStorage.getItem(`quiz_state_${USER_ID}`)
+    expect(raw).not.toBeNull()
+
+    const parsed = JSON.parse(raw!)
+    expect(parsed.questionOrder).toEqual([0, 1, 2, 3])
+    expect(parsed.answers).toEqual({ 0: 1, 1: 2 })
+    expect(parsed.currentIndex).toBe(2)
+    expect(parsed.userInfo).toEqual({ name: 'João', gp: 'Igreja', age: '30' })
+    expect(parsed.savedAt).toBeGreaterThan(0)
+  })
+
+  it('checkSavedSession retorna exatamente os dados salvos', () => {
+    saveSession(USER_ID, VALID_SESSION)
+
+    const result = checkSavedSession(USER_ID)
+    expect(result).not.toBeNull()
+    expect(result?.questionOrder).toEqual(VALID_SESSION.questionOrder)
+    expect(result?.answers).toEqual(VALID_SESSION.answers)
+    expect(result?.currentIndex).toBe(VALID_SESSION.currentIndex)
+    expect(result?.userInfo).toEqual(VALID_SESSION.userInfo)
+  })
+
+  it('salvar novamente para o mesmo usuário substitui a sessão anterior', () => {
+    saveSession(USER_ID, VALID_SESSION)
+
+    const updated = {
+      ...VALID_SESSION,
+      currentIndex: 3,
+      answers: { 0: 1, 1: 2, 2: 3 },
+      userInfo: { name: 'Maria', gp: 'Missão', age: '25' },
+    }
+
+    saveSession(USER_ID, updated)
+
+    const result = checkSavedSession(USER_ID)
+    expect(result?.currentIndex).toBe(3)
+    expect(result?.answers).toEqual({ 0: 1, 1: 2, 2: 3 })
+    expect(result?.userInfo).toEqual({ name: 'Maria', gp: 'Missão', age: '25' })
+  })
+
+  it('saveSession + clearSession + checkSavedSession retorna null', () => {
+    saveSession(USER_ID, VALID_SESSION)
+    clearSession(USER_ID)
+    expect(checkSavedSession(USER_ID)).toBeNull()
   })
 })

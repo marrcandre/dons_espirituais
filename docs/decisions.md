@@ -213,3 +213,39 @@
 - Negativas: Restrição intencional de imports; curva de aprendizado inicial
 
 **Status:** ✅ Estabelecido na Sprint 7
+
+---
+
+## ADR-013: Composables por necessidade, não por antecipação
+
+**Data:** 2026-07-14 (Sprint 9 — planejamento)
+
+**Contexto:** Durante o planejamento da Sprint 9, avaliou-se a criação de composables como padrão para a Presentation Layer. O plano inicial previa criar `useQuizSession` e `useResults` antecipadamente. A revisão do roadmap pós-Sprint 8 questionou se essa abstração traria benefício real no momento.
+
+**Decisão:** Composables da Presentation Layer serão criados **por necessidade real identificada durante a refatoração**, não por antecipação. Os critérios para criação são:
+
+- Haver lógica reutilizada entre dois ou mais componentes
+- Haver estado/comportamento compartilhado que justifique isolamento
+- Haver necessidade de teste isolado de lógica de apresentação
+
+**Não** criar composables apenas para:
+- Substituir stores Pinia existentes (ADR-004)
+- "Completar" a arquitetura com camadas que o projeto ainda não necessita
+- Seguir padrão de referência sem comprovação de benefício
+
+**Consequências:**
+- Positivas: Evita abstração prematura (YAGNI); mantém arquitetura simples; evita camada View → Composable → Store sem responsabilidade clara
+- Negativas: Pode postergar a criação de padrão reutilizável; views podem permanecer maiores por mais tempo
+
+**Caso avaliado — Sprint 9.2:** `useInlineEditor`
+
+**Resultado:** ❌ Não aprovado — implementação experimental descartada.
+
+**Motivo:** A similaridade entre `ResultsView.vue` e `AdminView.vue` era visual e parcial. ResultsView edita um resultado individual (`responseStore.current`). AdminView edita múltiplas linhas de uma tabela administrativa com controle independente. A abstração aumentou acoplamento sem representar um conceito real compartilhado.
+
+**Critério reforçado:** Código semelhante não significa responsabilidade compartilhada. Uma abstração só deve existir quando há:
+- conceito de domínio compartilhado
+- comportamento compartilhado
+- remoção de duplicação que efetivamente reduz complexidade
+
+**Status:** ✅ Decidido na Sprint 9

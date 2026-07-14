@@ -3,11 +3,7 @@ import { ref, computed } from 'vue'
 import { questions } from '../data/questions.js'
 import { useAuthStore } from './auth.js'
 import { shuffle } from '../helpers/array.js'
-import { checkSavedSession } from '../application/quiz/quiz-session'
-
-function storageKey(userId) {
-  return `quiz_state_${userId}`
-}
+import { checkSavedSession, clearSession, saveSession } from '../application/quiz/quiz-session'
 
 export const useQuizStore = defineStore('quiz', () => {
   const authStore = useAuthStore()
@@ -63,19 +59,14 @@ export const useQuizStore = defineStore('quiz', () => {
     const userId = authStore.user?.id
     if (!userId) return
 
-    const saved = localStorage.getItem(storageKey(userId))
+    const saved = checkSavedSession(userId)
     if (!saved) return
 
-    try {
-      const parsed = JSON.parse(saved)
-      questionOrder.value = parsed.questionOrder
-      answers.value = parsed.answers ?? {}
-      currentIndex.value = parsed.currentIndex ?? 0
-      userInfo.value = parsed.userInfo ?? { name: '', gp: '', age: '' }
-      hasSavedState.value = false
-    } catch {
-      startFresh()
-    }
+    questionOrder.value = saved.questionOrder
+    answers.value = saved.answers ?? {}
+    currentIndex.value = saved.currentIndex ?? 0
+    userInfo.value = saved.userInfo ?? { name: '', gp: '', age: '' }
+    hasSavedState.value = false
   }
 
   /** Salva o estado atual no localStorage */
@@ -83,14 +74,13 @@ export const useQuizStore = defineStore('quiz', () => {
     const userId = authStore.user?.id
     if (!userId) return
 
-    const state = {
+    saveSession(userId, {
       questionOrder: questionOrder.value,
       answers: answers.value,
       currentIndex: currentIndex.value,
       userInfo: userInfo.value,
       savedAt: Date.now(),
-    }
-    localStorage.setItem(storageKey(userId), JSON.stringify(state))
+    })
   }
 
   /** Registra a resposta de uma questão */
@@ -124,7 +114,7 @@ export const useQuizStore = defineStore('quiz', () => {
   /** Limpa o estado após envio bem-sucedido */
   function clearState() {
     const userId = authStore.user?.id
-    if (userId) localStorage.removeItem(storageKey(userId))
+    if (userId) clearSession(userId)
 
     questionOrder.value = []
     answers.value = {}
@@ -137,13 +127,9 @@ export const useQuizStore = defineStore('quiz', () => {
   const savedAnswerCount = computed(() => {
     const userId = authStore.user?.id
     if (!userId) return 0
-    const saved = localStorage.getItem(storageKey(userId))
-    if (!saved) return 0
-    try {
-      return Object.keys(JSON.parse(saved).answers ?? {}).length
-    } catch {
-      return 0
-    }
+
+    const saved = checkSavedSession(userId)
+    return saved ? Object.keys(saved.answers ?? {}).length : 0
   })
 
   return {

@@ -81,40 +81,63 @@
 
 ---
 
-### 1.4 Presentation — Nota: 7/10
+### 1.4 Presentation — Nota: 6.5/10
 
-**Situação:** Views + Components + Stores (Pinia). Design System em evolução. Application Layer já reduziu orquestração no QuizView.
+**Situação:** Views + Components + Stores (Pinia). Design System em evolução. Application Layer já reduziu orquestração no QuizView. Auditoria completa da camada concluída na Sprint 9.1.
 
 **Pontos fortes:**
 - Design System com componentes reutilizáveis (AppPage, AppCard, AppButton, CollapsibleCard, etc.)
 - `design_plan.md` bem documentado (965 linhas)
 - Separação clara entre `components/ui/` (DS) e componentes de domínio
 - QuizView.vue simplificado (orquestração movida para application layer)
+- **Zero violações de camada:** nenhum componente ou view importa repositories ou services diretamente (confirmado por auditoria)
 
 **Problemas (resolvidos na Sprint 8):**
 - `UserInfoForm.vue` importava `repositories/` diretamente — violação corrigida (8.1)
 - `stores/quiz.js` duplicava `quizSession.checkSavedSession()` — consolidado (8.5)
 - `AiAnalysis.vue` e `HistoryList.vue` — acoplamento avaliado: **manter** (8.6)
 
-**Problemas remanescentes:**
-- `ResultsView.vue` (285 linhas) — gerencia estado, edição de nome, share, print, tudo diretamente
+**Problemas remanescentes (identificados na auditoria 9.1):**
 - `AdminView.vue` (572 linhas) — maior view do projeto, múltiplas responsabilidades
+- `ResultsView.vue` (284 linhas) — gerencia estado, edição de nome, share, print
+- `AiAnalysis.vue` (282 linhas) — polling, subscription, 4 estados, permissões
+- 24 `<v-btn>` raw em vez de `<AppButton>` — DS subutilizado
+- 6 `<v-alert>` raw em vez de `<AppAlert>` — DS subutilizado
+- `LoadingState.vue`, `EmptyState.vue`, `ErrorState.vue` existem mas não são usados por componentes feature
+- 0 testes de components ou stores
+
+**Débitos técnicos (Sprint 9.3):**
+- `stores/responses.js`: `insert()` e `countByUserId()` — **removidos**
+- `stores/quiz.js`: `restoreSaved()` e `persistState()` acessavam localStorage direto — **consolidados em `application/quiz/quiz-session.ts`**
+- `stores/auth.js`: `loadProfile()` com retry manual, ignora `application/auth/user-profile.ts` existente — **pendente**
+
+**Infraestrutura de testes Vue (Sprint 9.3):**
+- `@vue/test-utils` + `happy-dom` instalados
+- `vitest.setup.js` criado
+- Ambiente configurado em `vite.config.js`
+- Pronto para Sprint 10 criar testes de stores e components
+
+**Cobertura de testes:** 114 testes (110 existentes + 4 saveSession)
 
 **Riscos:**
 - Baixo. Presentation Layer sem violações graves. Nenhum componente acessa Infrastructure diretamente.
 
+**Próximo gargalo arquitetural:** Editor inline com lógica similar entre ResultsView e AdminView, mas com fluxos de negócio distintos (individual vs tabela). Avaliado na Sprint 9.2 — decisão de manter componentes independentes.
+
 **Oportunidades:**
-- Reduzir responsabilidades de ResultsView e AdminView (futuro)
+- Substituir `<v-btn>` raw por `<AppButton>` (Sprint 10+)
+- Reutilizar `LoadingState`, `EmptyState`, `ErrorState` em HistoryList e AiAnalysis (Sprint 9+)
+- Extrair componentes de AdminView (dashboard, tabela, filtros) em sprints futuras
 
 ---
 
 ### 1.5 Testes — Nota: 7/10
 
-**Situação:** 110 testes, Vitest, 9 arquivos de teste. Infrastructure tests criados (Sprint 8.3).
+**Situação:** 114 testes, Vitest, 9 arquivos de teste. Infrastructure tests criados (Sprint 8.3).
 
 **Pontos fortes:**
 - Domínio bem testado (75 testes)
-- Application layer com 19 testes (14 quiz + 5 auth)
+- Application layer com 23 testes (14 quiz + 5 auth + 4 saveSession)
 - Infrastructure com 13 testes (10 responseRepository + 3 userRepository)
 - Testes rápidos (~500ms)
 - Application tests isolados com `vi.mock()` (sem Vue)
