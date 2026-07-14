@@ -39,11 +39,14 @@ export async function listAll(fields = '*') {
 }
 
 export async function insert(payload) {
-  const { data, error } = await supabase
-    .from('responses')
-    .insert(payload)
-    .select('id')
-    .single()
+  const { data, error } = await runSupabaseQuery(
+    supabase
+      .from('responses')
+      .insert(payload)
+      .select('id')
+      .single(),
+    DEFAULT_TIMEOUT,
+  )
 
   if (error) throw error
   return data
@@ -58,10 +61,13 @@ export async function updateField(id, field, value) {
 }
 
 export async function countByUserId(userId) {
-  const { count, error } = await supabase
-    .from('responses')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', userId)
+  const { count, error } = await runSupabaseQuery(
+    supabase
+      .from('responses')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId),
+    DEFAULT_TIMEOUT,
+  )
 
   if (error) throw error
   return count ?? 0
