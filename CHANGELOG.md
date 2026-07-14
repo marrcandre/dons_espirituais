@@ -4,6 +4,35 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 
 ---
 
+## [2.1.0] - Julho/2026
+
+### Sprint 11 — Identidade Institucional
+
+Início da **Fase 3 — Experiência Institucional e Produção**.
+
+**Novos componentes:**
+- `AppLogo.vue` — componente reutilizável com variantes full (ícone + texto) e compact (apenas ícone), props de size, color e icon
+- `AboutView.vue` — página institucional completa com seções: objetivo, metodologia (C. Peter Wagner, 27 dons, 135 afirmações), tecnologias, autoria, licença, contribuição e projetos relacionados
+
+**Navegação:**
+- Rota `/sobre` adicionada ao router (pública, sem autenticação)
+- Título e meta description para SEO: "Sobre — Dons Espirituais"
+- Link "Sobre" adicionado ao AppHeader
+
+**Testes:**
+- 5 testes para AppLogo (full/compact variant, size, color, defaults)
+- 9 testes para AboutView (todas as seções institucionais)
+
+**Métricas:**
+- Testes: **259 → 273** (+14)
+- Arquivos de teste: **27 → 29** (+2)
+- Lint: **0 erros**
+- Typecheck: **0 erros**
+- Build: verde (790 módulos)
+- Nenhuma alteração em domain, application, repositories ou stores
+
+---
+
 ## [2.0.0] - Julho/2026
 
 ### Sprint 10 — Qualidade e Produto

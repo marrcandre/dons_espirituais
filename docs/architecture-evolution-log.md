@@ -1018,10 +1018,55 @@ Motivos:
 | Zero regressão funcional | ✅ |
 | README reflete arquitetura atual | ✅ |
 
-**Próximos passos (Fase 3 — Sprints 11–13):**
-- Página Sobre (metodologia, autor, licença)
-- Footer institucional
-- Header definitivo com navegação completa
-- Logo componente reutilizável
-- CD (Continuous Deployment)
-- Release v2.0.0 oficial (tag + publicação)
+---
+
+## Sprint 11 — Identidade Institucional
+
+> **Início:** 2026-07-14
+>
+> **Término:** 2026-07-14
+>
+> **Status:** ✅ Concluída
+
+### Contexto
+
+Primeira sprint da **Fase 3 — Experiência Institucional e Produção**. A v2.0.0 foi concluída com Fase 2 encerrada. O objetivo da Sprint 11 é criar a presença institucional do projeto com página Sobre e identidade visual inicial.
+
+### Entregues
+
+| Item | Arquivo | Descrição |
+|------|---------|-----------|
+| AppLogo | `components/ui/AppLogo.vue` | Componente reutilizável com variantes full (ícone + texto) e compact (apenas ícone). Props: icon, size, color, variant. |
+| AboutView | `views/AboutView.vue` | Página institucional com seções: objetivo, metodologia (C. Peter Wagner, 27 dons, 135 afirmações), tecnologias (Vue, Vuetify, Supabase, Gemini, Vercel), autoria, licença MIT, contribuição (GitHub), projetos relacionados (Cinco Ministérios). |
+| Rota /sobre | `router/index.js` | Rota pública (`public: true`), lazy-loaded, com meta tags SEO. |
+| Navegação | `AppHeader.vue` | Link "Sobre" adicionado no header entre o toggle de tema e o menu do usuário. |
+
+### Testes
+
+| Arquivo | Testes |
+|---------|--------|
+| `components/ui/__tests__/AppLogo.test.js` | 5 (full, compact, size, color, defaults) |
+| `views/AboutView.test.js` | 9 (todas as seções institucionais) |
+
+### Princípios aplicados
+
+- **Escopo fechado:** Nenhuma alteração em domain, application, repositories ou stores
+- **Componentes existentes:** AboutView reusa AppPage, AppCard, AppButton, PageHeader, SectionTitle, AppLogo
+- **ADR-011 seguido:** Experiência institucional como fase independente
+- **ADR-013 seguido:** AppLogo criado por necessidade real (identidade visual reutilizável)
+
+### Métricas
+
+| Métrica | Antes (v2.0.0) | Depois |
+|---------|-----------------|--------|
+| Testes | 259 | **273** |
+| Arquivos de teste | 27 | **29** |
+| Lint errors | 0 | **0** |
+| Typecheck errors | 0 | **0** |
+| Build | OK | **OK** (790 módulos) |
+
+**Próximos passos (Sprint 12 — Layout Institucional):**
+- AppFooter definitivo (copyright, versão, navegação institucional)
+- AppHeader definitivo (logo, navegação completa)
+- Integração footer ao layout
+- Consistência visual

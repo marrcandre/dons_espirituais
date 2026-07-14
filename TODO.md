@@ -91,6 +91,14 @@
 
 ## ✅ Concluídas
 
+### Sprint 11 — Identidade Institucional ✓
+- [x] **Criar AppLogo.vue** — componente reutilizável (full/compact, size, color)
+- [x] **Criar AboutView.vue** — página institucional (objetivo, metodologia, tecnologias, autoria, licença, contribuição, projetos)
+- [x] **Adicionar rota /sobre** no router (pública)
+- [x] **Adicionar link Sobre** no AppHeader
+- [x] **Testes** — AppLogo (5) + AboutView (9) = +14 testes
+- [x] **273 testes passando, build verde, 0 lint, 0 typecheck**
+
 ### Sprint 10 — Qualidade e Produto ✓
 - [x] **10.1** Tooling Foundation — ESLint + vue-tsc + tsconfig + scripts de qualidade
 - [x] **10.2** CI (Continuous Integration) — GitHub Actions (lint → typecheck → test → build)
