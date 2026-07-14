@@ -2,6 +2,12 @@
 
 ## 🔴 Alta Complexidade
 
+### Sprint 8 — Correções, Testes e Consolidação
+- [ ] **8.1** Refatorar `UserInfoForm.vue` para receber `initialData` por prop (remove chamada direta a repositories)
+- [ ] **8.2** Padronizar timeout em `responseRepository.insert()` e `countByUserId()` com `runSupabaseQuery`
+- [ ] **8.3** Criar `repositories/__tests__/responseRepository.test.js` (7+ testes)
+- [ ] **8.3** Criar `repositories/__tests__/userRepository.test.js` (2+ testes)
+
 ### Implementação Pendente
 - [ ] Substituir 21 `<v-btn>` raw por `AppButton` em 7 arquivos
 - [ ] Padronizar botões (Sprint 7)
@@ -18,6 +24,11 @@
 ---
 
 ## 🟡 Média Complexidade
+
+### Sprint 8 — Continuação
+- [ ] **8.4** Remover `services/aiAnalysis.js` (verificar se há consumidores)
+- [ ] **8.5** Eliminar duplicação entre `quizStore.checkSavedState()` e `quizSession.checkSavedSession()`
+- [ ] **8.6** Avaliar desacoplamento de `AiAnalysis.vue` e `HistoryList.vue` (decisão: manter estado atual)
 
 ### Design System
 - [ ] GiftBadges: substituir gold/silver/bronze hardcoded por tokens
@@ -36,7 +47,7 @@
 - [ ] Revisar densidade de informações por tela
 
 ### Arquitetura (Clean Code)
-- [ ] Refatorar `UserInfoForm.vue` para usar store (remove chamada direta a repositories)
+- [x] ~~Refatorar `UserInfoForm.vue` para usar store (remove chamada direta a repositories)~~ → Sprint 8.1 (props em vez de store)
 - [ ] Análise de viabilidade: substituir Supabase SDK por REST API
   - Mapear endpoints CRUD + auth + IA + notificações
   - Avaliar modelo híbrido (manter auth Supabase, DB via REST)
@@ -71,8 +82,8 @@
 ## 🟢 Baixa Complexidade
 
 ### Refatoração de Componentes
-- [ ] AiAnalysis: receber dados por props em vez de importar store
-- [ ] HistoryList: receber dados por props em vez de importar store
+- [ ] ~~AiAnalysis: receber dados por props em vez de importar store~~ → Sprint 8.6: avaliado — manter estado atual (sem benefício claro)
+- [ ] ~~HistoryList: receber dados por props em vez de importar store~~ → Sprint 8.6: avaliado — manter estado atual (ganho marginal)
 
 ### Conteúdo Institucional (Sprint 5)
 - [ ] Página Sobre (história, metodologia, limitações)

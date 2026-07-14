@@ -123,7 +123,7 @@ Durante a comparação detalhada com o projeto Cinco Ministérios, identificou-s
 
 ---
 
-### Métricas atuais (baseline para comparação)
+### Métricas (baseline pós-Sprint 6)
 
 | Métrica | Valor |
 |---------|-------|
@@ -221,3 +221,93 @@ src/
 - [x] Build intacto
 - [x] Nenhuma alteração em stores, repositories, domain ou infrastructure
 - [x] `application/results/` não criado
+
+---
+
+## Sprint 8 — Correções, Testes e Consolidação
+
+> **Início:** 2026-07-14
+>
+> **Término:** —
+>
+> **Status:** ⏳ Planejamento
+
+### Contexto
+
+Sprint 7 concluída com Application Layer criada e testada. O projeto está em v1.7.0 com 92 testes passando.
+
+A auditoria técnica realizada no início da Sprint 8 identificou:
+
+1. **Violação de camada:** `UserInfoForm.vue` importa `repositories/` diretamente
+2. **Inconsistência de timeout:** 2 métodos de `responseRepository` não usam `runSupabaseQuery`
+3. **Zero testes de infrastructure:** repositories sem cobertura
+4. **Código órfão:** `services/aiAnalysis.js` sem consumidores após Sprint 7
+5. **Duplicação:** `quizStore.checkSavedState()` replica `quizSession.checkSavedSession()`
+6. **Acoplamento:** `AiAnalysis.vue` e `HistoryList.vue` importam stores globais
+
+### Decisão de planejamento
+
+Diferentemente do planejamento original (que previa "criar `infrastructure/supabase/` com adaptadores"), a Sprint 8 foi reestruturada em 6 etapas menores e sequenciais, priorizando:
+
+1. Correção de violações de arquitetura antes de criar novas abstrações
+2. Testes antes de limpeza (padrão ADR-010)
+3. Remoção de código morto antes de refatoração
+4. Eliminação de duplicações antes de novas funcionalidades
+
+**Esta abordagem substitui a criação de `infrastructure/supabase/`** (prevista no plano original) por correções pontuais nos repositories existentes, evitando antecipar a reorganização física da arquitetura (Fase 4).
+
+### Estrutura da Sprint 8
+
+```
+Sprint 8
+├── 8.1 — Corrigir violação de camada (UserInfoForm)
+├── 8.2 — Padronizar acesso ao Supabase (timeout)
+├── 8.3 — Criar testes unitários da Infrastructure
+├── 8.4 — Remover código morto (services/aiAnalysis.js)
+├── 8.5 — Eliminar duplicação (quizStore / quizSession)
+└── 8.6 — Avaliar desacoplamento de componentes
+```
+
+### Decisões de planejamento
+
+1. **Sprint 8.1 primeiro** — corrigir violação de camada antes de qualquer outra alteração
+2. **Sprint 8.2 antes de 8.3** — padronizar timeout antes de criar testes
+3. **Sprint 8.3 antes de 8.4** — testes de infrastructure como rede de segurança para remoção de código
+4. **Sprint 8.6 é apenas avaliação** — não implementar alteração sem ganho claro (decisão: manter estado atual)
+5. **Sem `application/analysis/`** — postergado para Sprint 9
+6. **Sem `infrastructure/supabase/`** — postergado para Fase 4 (reorganização física)
+
+### Checklist de execução
+
+- [ ] **8.1** UserInfoForm refatorado para usar props em vez de repositories
+- [ ] **8.2** `responseRepository.insert()` e `countByUserId()` usam `runSupabaseQuery`
+- [ ] **8.3** `repositories/__tests__/responseRepository.test.js` com 7+ testes
+- [ ] **8.3** `repositories/__tests__/userRepository.test.js` com 2+ testes
+- [ ] **8.4** `services/aiAnalysis.js` removido (confirmado sem uso)
+- [ ] **8.5** `quizStore.checkSavedState()` delegado a `quizSession.checkSavedSession()`
+- [ ] **8.6** Avaliação documentada — decisão de manter estado atual
+
+### Resultados esperados
+
+| Métrica | Antes (v1.7.0) | Depois (Sprint 8) |
+|---------|----------------|-------------------|
+| Testes totais | 92 | ~105+ |
+| Arquivos de teste | 6 | 9 |
+| Cobertura (infrastructure) | 0% | ~85% (estimado) |
+| Cobertura (geral) | ~40% | ~55% (estimado) |
+| Violações de camada | 1 (UserInfoForm) | 0 |
+| Inconsistência de timeout | 2 métodos | 0 |
+| Código órfão | services/aiAnalysis.js | removido |
+| Duplicação checkSavedState | 2 implementações | 1 (centralizada) |
+
+### Critérios de aceite
+
+- [ ] UserInfoForm não importa repositories
+- [ ] Todos os 7 métodos de responseRepository usam `runSupabaseQuery`
+- [ ] 9+ testes de infrastructure passando
+- [ ] `services/aiAnalysis.js` removido (se confirmado sem uso)
+- [ ] `quizStore.checkSavedState()` não replica lógica de sessão
+- [ ] Decisão de desacoplamento registrada
+- [ ] 105+ testes passando
+- [ ] Build verde
+- [ ] Nenhuma regressão funcional

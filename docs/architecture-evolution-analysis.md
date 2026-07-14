@@ -2,6 +2,8 @@
 
 > **Data:** 2026-07-09
 >
+> **Última atualização:** 2026-07-14 (Sprint 8 — análise após v1.7.0)
+>
 > **Contexto:** Avaliação da arquitetura atual do Dons Espirituais à luz da referência Cinco Ministérios (v5.2.0, 134 testes, 13 documentos de arquitetura)
 
 ---
@@ -34,111 +36,107 @@
 
 ---
 
-### 1.2 Application Layer — Nota: 0/10
+### 1.2 Application Layer — Nota: 7/10
 
-**Situação:** Inexistente. A orquestração está concentrada no `QuizView.vue`.
+**Situação:** Criada na Sprint 7. `application/quiz/` com `submit-quiz.ts`, `quiz-session.ts`, `ports.ts`. 14 testes. `QuizView.vue` simplificado.
 
 **Pontos fortes:**
-- Nenhum. A inexistência da camada é o problema.
+- `submitQuiz()` testável sem Vue (com `vi.mock()`) — 7 testes
+- `quiz-session.ts` gerencia sessão localStorage (checkSavedSession, clearSession)
+- `ports.ts` com `SubmitQuizInput` e `SubmitQuizResult` — contratos claros
+- ADR-012 estabelece padrão para todos os casos de uso futuros
+- QuizView.vue não orquestra mais scoring/payload/persistência/side effects
 
 **Problemas:**
-- `submitQuiz()` em `QuizView.vue` (167-201) centraliza: validação, scoring, montagem de payload, persistência, notificação admin, geração IA, navegação
-- Sem possibilidade de testar o fluxo completo sem montar o componente Vue
-- Lógica de retomada de sessão (`checkSavedState`, `restoreSaved`) está na store, misturada com estado
-- `handleAnswer` com auto-advance + submit — regra de negócio (timer, navegação) na view
+- `services/aiAnalysis.js` (17 linhas) duplica lógica que deveria estar na application layer — `regenerateAiAnalysis()` faz validação + invoke + selectField
+- Application layer cobre apenas submit-quiz; não há casos de uso para regenerate-analysis, calculate-result
+- `quiz-session.ts` lê localStorage diretamente — infraestrutura de persistência na application layer
 
 **Riscos:**
-- Alto. Qualquer mudança no fluxo de submit exige alteração no componente Vue.
-- Médio. A lógica de auto-advance (350ms) é frágil e acoplada ao ciclo de vida do Vue.
+- Baixo. Camada estabelecida e testada.
 
-**Oportunidades:**
-- Extrair `submitQuiz()` para `application/quiz/submit-quiz.ts`
-- Extrair gerenciamento de sessão para `application/quiz/resume-session.ts`
-- Extrair `calculateResult()` para `application/results/calculate-result.ts`
+**Oportunidades (Sprint 8):**
+- Remover `services/aiAnalysis.js` (código órfão — 8.4)
+- Eliminar duplicação entre `quizStore.checkSavedState()` e `quizSession.checkSavedSession()` (8.5)
 
 ---
 
 ### 1.3 Infrastructure — Nota: 5/10
 
-**Situação:** `repositories/` com acesso direto ao Supabase. Misturado com stores.
+**Situação:** `repositories/` com acesso direto ao Supabase. 4 arquivos (response, ai, auth, user). Zero testes.
 
 **Pontos fortes:**
 - Separado em arquivos por entidade (response, ai, auth, user)
-- `supabaseQuery.js` fornece `runSupabaseQuery` com timeout
+- `services/supabaseQuery.js` fornece `runSupabaseQuery` com timeout (10s)
+- 5 dos 7 métodos de `responseRepository` usam `runSupabaseQuery`
 
 **Problemas:**
 - Zero testes de infraestrutura
-- Tratamento de erros inconsistente:
-  - `responseRepository.insert()` não usa `runSupabaseQuery` (sem timeout)
-  - `responseRepository.countByUserId()` também sem timeout
-  - `findById` e `findByUserId` usam `DEFAULT_TIMEOUT` (10s), mas `insert` e `countByUserId` não
-- Stores (Pinia) importam repositories diretamente e adicionam camada de estado
-- Sem isolamento — testes precisariam de Supabase real ou mock manual
+- Inconsistência de timeout: `insert()` e `countByUserId()` não usam `runSupabaseQuery`
+- `UserInfoForm.vue` (Presentation) importa `authRepository` e `userRepository` diretamente — violação de camada
 
 **Riscos:**
-- Médio. Inconsistência de timeout pode causar hangs.
-- Baixo. Falta de testes não causa regressão imediata, mas dificulta refatoração.
+- Médio. Inconsistência de timeout pode causar hangs em insert.
+- Baixo. Falta de testes dificulta refatoração.
 
-**Oportunidades:**
-- Mover repositories para `infrastructure/supabase/`
-- Padronizar `runSupabaseQuery` em todos os métodos
-- Adicionar testes com Supabase mock
-- Separar stores (estado) de repositories (persistência)
+**Oportunidades (Sprint 8):**
+- Padronizar timeout em todos os métodos (8.2)
+- Criar testes de infrastructure com mock Supabase (8.3)
+- Corrigir violação de camada no UserInfoForm (8.1)
 
 ---
 
 ### 1.4 Presentation — Nota: 7/10
 
-**Situação:** Views + Components + Stores (Pinia). Design System em evolução.
+**Situação:** Views + Components + Stores (Pinia). Design System em evolução. Application Layer já reduziu orquestração no QuizView.
 
 **Pontos fortes:**
 - Design System com componentes reutilizáveis (AppPage, AppCard, AppButton, CollapsibleCard, etc.)
 - `design_plan.md` bem documentado (965 linhas)
 - Separação clara entre `components/ui/` (DS) e componentes de domínio
-- Pinia stores bem estruturadas
+- QuizView.vue simplificado (orquestração movida para application layer)
 
 **Problemas:**
-- `ResultsView.vue` (285 linhas) — gerencia estado, edição de nome, share, print, todo diretamente
-- `HomeView.vue` (não lido, mas mencionado como dependente de `ANSWER_LABELS` via `constants/likert.js`)
-- Componentes não organizados por domínio (todos planos em `components/`)
-- Sem composables — toda lógica de integração está nas stores ou views
-- `stores/quiz.js` (176 linhas) — acumula estado, persistência localStorage, computações, navegação
+- `UserInfoForm.vue` importa `repositories/` diretamente — violação de camada (Sprint 8.1)
+- `AiAnalysis.vue` e `HistoryList.vue` importam stores globais — acoplamento a ser avaliado (Sprint 8.6)
+- `stores/quiz.js` duplica lógica de `quizSession.checkSavedSession()` (Sprint 8.5)
+- `ResultsView.vue` (285 linhas) — gerencia estado, edição de nome, share, print, tudo diretamente
+- `AdminView.vue` (572 linhas) — maior view do projeto, múltiplas responsabilidades
 
 **Riscos:**
-- Médio. Views grandes e com múltiplas responsabilidades dificultam manutenção.
-- Baixo. Design System já estabelecido reduz risco de inconsistência visual.
+- Baixo. Violações identificadas têm plano de correção na Sprint 8.
 
-**Oportunidades:**
-- Criar `composables/useQuizSession` (encapsula estado + persistência + navegação)
-- Modularizar componentes em `quiz/` e `results/`
-- Extrair lógica de `ResultsView.vue` para composable
+**Oportunidades (Sprint 8):**
+- Corrigir violação UserInfoForm (8.1)
+- Eliminar duplicação quizStore/quizSession (8.5)
+- Avaliar desacoplamento de AiAnalysis e HistoryList (8.6)
 
 ---
 
-### 1.5 Testes — Nota: 6/10
+### 1.5 Testes — Nota: 6.5/10
 
-**Situação:** 78 testes, Vitest, 4 arquivos de teste.
+**Situação:** 92 testes, Vitest, 6 arquivos de teste.
 
 **Pontos fortes:**
 - Domínio bem testado (75 testes)
+- Application layer com 14 testes
 - Testes rápidos (~210ms)
-- Sem dependência de Vue ou Supabase
+- Application tests isolados com `vi.mock()` (sem Vue)
 
 **Problemas:**
-- 0 testes de application (camada não existe)
 - 0 testes de infrastructure (repositories sem teste)
-- 0 testes de composable/stores
-- Cobertura não medida
+- 0 testes de stores/composables
+- Testes de domínio (`scoring`) localizados em `services/__tests__/` em vez de `domain/__tests__/`
+- Cobertura não medida oficialmente
 
 **Riscos:**
-- Alto. Refatorar a orquestração sem testes de application é arriscado.
-- Médio. Qualquer mudança em repositories pode quebrar sem alerta.
+- Médio. Refatorar repositories sem testes é arriscado.
+- Baixo. Application layer já tem rede de segurança.
 
-**Oportunidades:**
-- Application tests (Sprint 7)
-- Infrastructure tests (Sprint 8)
-- Composable tests (Sprint 9)
-- Configurar cobertura (Sprint 10)
+**Oportunidades (Sprint 8):**
+- Infrastructure tests com mock Supabase (8.3) — 7+ testes para responseRepository, 2+ para userRepository
+- Cobertura estimada de infrastructure: 0% → ~85%
+- Estimativa total após Sprint 8: ~105+ testes
 
 ---
 
@@ -267,37 +265,39 @@
 
 ### Críticos
 
-| Item | Local | Impacto | Sprint |
-|------|-------|---------|--------|
-| Application Layer inexistente | N/A | Impossibilidade de testar fluxos | 7 |
-| Sem CI/CD | N/A | Risco de regressão não detectada | 10 |
-| Zero testes de infrastructure | repositories/ | Refatoração arriscada | 8 |
+| Item | Local | Impacto | Sprint | Status |
+|------|-------|---------|--------|--------|
+| Application Layer inexistente | N/A | Impossibilidade de testar fluxos | 7 | ✅ Resolvido |
+| Violação de camada: Presentation → Infrastructure | UserInfoForm.vue | Componente acessa repositories diretamente | 8.1 | 🔴 Pendente |
+| Zero testes de infrastructure | repositories/ | Refatoração arriscada | 8.3 | 🔴 Pendente |
+| Sem CI/CD | N/A | Risco de regressão não detectada | 10 | ⏳ Futuro |
 
 ### Altos
 
-| Item | Local | Impacto | Sprint |
-|------|-------|---------|--------|
-| `submitQuiz()` na view | QuizView.vue | Orquestrador monolítico | 7 |
-| Stores sem testes | stores/ | Refatoração de stores sem rede de segurança | 9 |
-| Tratamento de erros inconsistente | repositories/ | Possíveis hangs (insert sem timeout) | 8 |
-| Sem type-check | Projeto inteiro | Erros de tipo só aparecem em runtime | 10 |
+| Item | Local | Impacto | Sprint | Status |
+|------|-------|---------|--------|--------|
+| `submitQuiz()` na view | QuizView.vue | Orquestrador monolítico | 7 | ✅ Resolvido |
+| Tratamento de erros inconsistente | repositories/ | Possíveis hangs (insert sem timeout) | 8.2 | 🔴 Pendente |
+| Duplicação checkSavedSession | stores/quiz.js + application/quiz/quiz-session.ts | Duas validações de sessão | 8.5 | 🟡 Pendente |
+| Código órfão services/aiAnalysis.js | services/ | Camada services sem propósito | 8.4 | 🟡 Pendente |
+| Stores sem testes | stores/ | Refatoração de stores sem rede de segurança | 9 | ⏳ Futuro |
+| Sem type-check | Projeto inteiro | Erros de tipo só aparecem em runtime | 10 | ⏳ Futuro |
 
 ### Médios
 
-| Item | Local | Impacto | Sprint |
-|------|-------|---------|--------|
-| Acoplamento posicional i%27 | questions.js ↔ spiritual-gifts.ts | Mudança na ordem quebra scores | 7 |
-| `color` repetido 27x | spiritual-gifts.ts | Ruim, mas sem risco funcional | 6 |
-| Tokens sem variáveis CSS | N/A | Inconsistência visual potencial | 6 |
-| 21 v-btn raw no código | Vários | Inconsistência de Design System | 9 |
+| Item | Local | Impacto | Sprint | Status |
+|------|-------|---------|--------|--------|
+| Acoplamento posicional i%27 | questions.js ↔ spiritual-gifts.ts | Mudança na ordem quebra scores | 7 | ⚠️ Identificado |
+| `color` repetido 27x | spiritual-gifts.ts | Ruim, mas sem risco funcional | — | 📋 Backlog |
+| 21 v-btn raw no código | Vários | Inconsistência de Design System | 9 | ⏳ Futuro |
 
 ### Baixos
 
-| Item | Local | Impacto | Sprint |
-|------|-------|---------|--------|
-| Components planos (sem módulos) | components/ | Dificuldade de navegação | 9 |
-| Views grandes | ResultsView (285 linhas) | Manutenibilidade | 9 |
-| Sem decisions.md | N/A | Perda de histórico de decisões | 6 |
+| Item | Local | Impacto | Sprint | Status |
+|------|-------|---------|--------|--------|
+| Components planos (sem módulos) | components/ | Dificuldade de navegação | 9 | ⏳ Futuro |
+| Views grandes | ResultsView (285 linhas) | Manutenibilidade | 9 | ⏳ Futuro |
+| AiAnalysis/HistoryList acoplados a stores | components/ | Reutilização limitada | 8.6 | 📋 Avaliado — manter |
 
 ---
 
@@ -306,11 +306,15 @@
 | Risco | Prob | Impacto | Mitigação |
 |-------|:----:|:-------:|-----------|
 | Quebrar submit ao extrair application layer | Média | Alto | Manter código original funcionando durante extração; testes antes da migração |
-| Regressão em repositories ao refatorar | Média | Alto | Testes de infrastructure com mock Supabase |
+| Regressão em repositories ao refatorar | Média | Alto | Testes de infrastructure com mock Supabase (Sprint 8.3) |
 | Perder estado de quiz ao refatorar stores | Baixa | Alto | Migração incremental com compatibilidade |
 | Application layer virar "garbage can" | Média | Médio | Definir responsabilidades claras; casos de uso pequenos |
 | Aumento de complexidade sem benefício | Baixa | Médio | Seguir YAGNI — só criar o que for usado imediatamente |
 | TypeScript migration lenta | Alta | Baixo | Incremental, sem bloqueio |
+| **UserInfoForm perder preenchimento automático** (8.1) | Baixa | Alto | QuizView.vue usa `authStore.user` para initialData |
+| **Mock do Supabase complexo** (8.3) | Média | Médio | Começar com mock simples (`vi.fn()`); evoluir gradualmente |
+| **Duplicação checkSavedState quebrar retomada** (8.5) | Baixa | Alto | Testes existentes validam fluxo de retomada |
+| **Remover aiAnalysis.js e algo importá-lo** (8.4) | Baixa | Médio | Verificar com grep antes de remover |
 
 ---
 

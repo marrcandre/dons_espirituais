@@ -4,6 +4,8 @@
 >
 > **Data:** 2026-07-09
 >
+> **Última atualização:** 2026-07-14 (Sprint 8 — revisão de planejamento)
+>
 > **Status:** Planejamento
 
 ---
@@ -166,7 +168,7 @@ FASE 1 — Refatoração do Domínio ✅
 FASE 2 — Evolução Arquitetural ⏳
   Sprint 6  — Fundação Arquitetural
   Sprint 7  — Application Layer
-  Sprint 8  — Infrastructure
+  Sprint 8  — Correções, Testes e Consolidação
   Sprint 9  — Presentation
   Sprint 10 — Qualidade e Produto
 
@@ -226,20 +228,184 @@ FASE 3 — Experiência Institucional 📋
 
 ---
 
-### Sprint 8 — Infrastructure
+### Sprint 8 — Correções, Testes e Consolidação
 
-**Objetivo:** Melhorar isolamento e testes dos repositories.
+**Objetivo:** Eliminar violações de camada, padronizar acesso ao Supabase, criar testes de infrastructure, remover código morto, eliminar duplicações e avaliar desacoplamento de componentes.
 
-**Atividades:**
-- [ ] Criar `src/infrastructure/supabase/` com adaptadores
-- [ ] Padronizar tratamento de erros (timeout, fallback, logging)
-- [ ] Testes de unidade para cada adaptador (com mock Supabase)
-- [ ] Manter compatibilidade com consumidores existentes
+A Sprint 8 é dividida em 6 etapas sequenciais, cada uma com escopo pequeno e verificação obrigatória (testes + build) antes de avançar.
+
+---
+
+#### Sprint 8.1 — Corrigir violação de camada (Alta)
+
+**Objetivo:** Eliminar a dependência direta de `repositories/` dentro de `UserInfoForm.vue`, fazendo a comunicação ocorrer exclusivamente através da camada Application.
+
+**Justificativa arquitetural:** `UserInfoForm.vue` (Presentation) importa `repositories/authRepository` e `repositories/userRepository` diretamente (linhas 58-59), violando o fluxo de dependências da Clean Architecture. Um componente de UI não deve conhecer detalhes de infraestrutura.
+
+**Arquivos envolvidos:**
+- `components/UserInfoForm.vue` — remover imports de repositories; receber `initialData` por prop
+- `views/QuizView.vue` — passar `authStore.user` como `initialData` para UserInfoForm
+
+**Estratégia de testes:**
+- Testar UserInfoForm com props mockadas (mount + assert rendering)
+- Verificar que o formulário emite `submit` com dados corretos
+- Executar todos os 92+ testes existentes para garantir zero regressão
+
+**Riscos:**
+- Perda de preenchimento automático do nome se QuizView não passar os dados corretamente → mitigado por validação no UserInfoForm
+
+**Complexidade:** Média (~3h)
 
 **Critérios de aceite:**
-- Cada repository tem testes
-- Tratamento de erros consistente
-- Zero regressão nos consumidores
+- [ ] UserInfoForm não importa `repositories/authRepository.js` nem `repositories/userRepository.js`
+- [ ] UserInfoForm recebe `initialData` por prop
+- [ ] QuizView.vue usa `authStore.user` para preencher `initialData`
+- [ ] Todos os 92+ testes passam
+- [ ] Build verde
+- [ ] Nenhuma regressão funcional no fluxo de quiz
+
+---
+
+#### Sprint 8.2 — Padronizar acesso ao Supabase (Alta)
+
+**Objetivo:** Garantir que todos os métodos dos repositories utilizem o mesmo mecanismo (`runSupabaseQuery`), eliminando inconsistências de timeout e comportamento.
+
+**Justificativa arquitetural:** Atualmente `responseRepository.insert()` e `responseRepository.countByUserId()` não usam `runSupabaseQuery`, ao contrário dos outros 5 métodos do mesmo repository. Essa inconsistência pode causar hangs em produção se a conexão com o Supabase ficar lenta.
+
+**Arquivos envolvidos:**
+- `repositories/responseRepository.js` — envolver `insert()` e `countByUserId()` com `runSupabaseQuery` + `DEFAULT_TIMEOUT`
+
+**Estratégia de testes:**
+- Testes unitários (Item 8.3) validarão que todos os métodos usam timeout
+- Executar build para confirmar comportamento idêntico
+
+**Riscos:**
+- Baixo — mudança encapsulada no método, sem alteração de interface
+
+**Complexidade:** Baixa (~30min)
+
+**Critérios de aceite:**
+- [ ] `responseRepository.insert()` usa `runSupabaseQuery` com `DEFAULT_TIMEOUT`
+- [ ] `responseRepository.countByUserId()` usa `runSupabaseQuery` com `DEFAULT_TIMEOUT`
+- [ ] Todos os 7 métodos do repository têm tratamento de timeout consistente
+- [ ] Build verde
+- [ ] Comportamento funcional idêntico (insert e count continuam funcionando)
+
+---
+
+#### Sprint 8.3 — Criar testes unitários da Infrastructure (Alta)
+
+**Objetivo:** Adicionar cobertura de testes para os repositories antes de realizar novas limpezas de código. Priorizar `responseRepository` e `userRepository`.
+
+**Justificativa arquitetural:** Zero testes de infrastructure atualmente (ADR-005). Sem rede de segurança, qualquer refatoração nos repositories é arriscada. Seguir o padrão ADR-010 (testes antes da refatoração).
+
+**Arquivos envolvidos:**
+- `repositories/__tests__/responseRepository.test.js` (criar) — 7+ testes
+- `repositories/__tests__/userRepository.test.js` (criar) — 2+ testes
+
+**Estratégia de testes:**
+- Mock global do cliente Supabase via `vi.mock('../../services/supabase')`
+- Cada teste mocka a chamada específica (`supabase.from().select().eq().single()`, etc.)
+- Testar: findById, findByUserId, listAll, insert, updateField, countByUserId, selectField, userRepository.findById
+
+**Riscos:**
+- Médio — mock do Supabase pode ser complexo; começar com mock simples (`vi.fn()`) e evoluir
+
+**Complexidade:** Média (~4h)
+
+**Critérios de aceite:**
+- [ ] `repositories/__tests__/responseRepository.test.js` com 7+ testes passando
+- [ ] `repositories/__tests__/userRepository.test.js` com 2+ testes passando
+- [ ] Cobertura estimada de infrastructure: de 0% para ~85%
+- [ ] Todos os testes existentes continuam passando
+
+---
+
+#### Sprint 8.4 — Remover código morto (Média)
+
+**Objetivo:** Verificar se `services/aiAnalysis.js` está completamente sem uso. Caso confirmado, remover o arquivo, imports e referências.
+
+**Justificativa arquitetural:** Após a criação da Application Layer (Sprint 7), a camada `services/` perdeu sua razão de existir. O arquivo `services/aiAnalysis.js` contém `regenerateAiAnalysis()` que não é importado por nenhum consumidor — `AiAnalysis.vue` chama stores diretamente.
+
+**Arquivos envolvidos:**
+- `services/aiAnalysis.js` — remover (se confirmado sem uso)
+
+**Estratégia de testes:**
+- Antes: verificar com `grep -r "aiAnalysis"` se há imports
+- Após remoção: executar todos os testes
+- Verificar build
+
+**Riscos:**
+- Baixo — confirmar com busca textual antes de remover
+
+**Complexidade:** Baixa (~15min)
+
+**Critérios de aceite:**
+- [ ] Confirmado que `services/aiAnalysis.js` não é importado por nenhum arquivo
+- [ ] `services/aiAnalysis.js` removido
+- [ ] Nenhum import quebrado
+- [ ] Todos os 95+ testes passam
+- [ ] Build verde
+
+---
+
+#### Sprint 8.5 — Eliminar duplicação (Média)
+
+**Objetivo:** Remover duplicações entre `quizStore.checkSavedState()` e `quizSession.checkSavedSession()`. Centralizar a responsabilidade em apenas um local.
+
+**Justificativa arquitetural:** Tanto a store quanto a application layer validam sessão salva em localStorage. Se o formato da sessão mudar, é necessário alterar em 2 lugares. A responsabilidade de validar sessão deve pertencer à Application Layer (ADR-012).
+
+**Decisão arquitetural:** Manter `quizSession.checkSavedSession()` como fonte única. Refatorar `quizStore.checkSavedState()` para delegar a `checkSavedSession()` em vez de replicar a lógica.
+
+**Arquivos envolvidos:**
+- `stores/quiz.js` — refatorar `checkSavedState()` para chamar `checkSavedSession()` da application layer em vez de replicar lógica
+- `application/quiz/quiz-session.ts` — inalterado (fonte única mantida)
+
+**Estratégia de testes:**
+- Testes existentes de `quiz-session.test.ts` (7 testes) validam `checkSavedSession`
+- Testes de QuizView.vue (indiretamente) validam que `checkSavedState` continua funcionando
+- Executar todos os testes
+
+**Riscos:**
+- Médio — `quizStore.checkSavedState()` é chamado por `QuizView.vue`; refatorar requer cuidado com o fluxo de inicialização
+
+**Complexidade:** Baixa (~1h)
+
+**Critérios de aceite:**
+- [ ] `quizStore.checkSavedState()` não replica lógica de `quizSession.checkSavedSession()`
+- [ ] `quizStore.checkSavedState()` usa `checkSavedSession()` da application layer
+- [ ] Fluxo de retomada de sessão continua funcionando
+- [ ] Todos os testes passam
+- [ ] Build verde
+
+---
+
+#### Sprint 8.6 — Avaliar desacoplamento de componentes (Baixa)
+
+**Objetivo:** Avaliar se `AiAnalysis.vue` e `HistoryList.vue` realmente se beneficiam de receber dados via props em vez de importar stores globais.
+
+**Justificativa arquitetural:** O TODO.md atual lista esses componentes como candidatos a refatoração ("receber dados por props"). No entanto, a decisão não deve ser automática — é necessário avaliar se há ganho claro em reutilização, testabilidade e redução de acoplamento.
+
+**Decisão arquitetural:** Não alterar sem comprovação de benefício. Realizar análise e registrar a decisão.
+
+**Análise de cada componente:**
+
+| Componente | Stores importadas | Beneficiaria de props? | Justificativa |
+|---|---|---|---|
+| `AiAnalysis.vue` | `authStore`, `aiStore`, `responsesStore` | Parcialmente | O componente gerencia ciclo de vida de geração de IA, polling e subscrição real-time — lógica que exige acesso a stores. Props reduziriam acoplamento, mas aumentariam a complexidade de `ResultsView.vue` que precisaria passar todos os dados e callbacks. |
+| `HistoryList.vue` | `authStore`, `responsesStore` | Sim, mas ganho marginal | O componente é usado apenas em `ResultsView.vue`. A refatoração para props traria testabilidade, mas o componente tem apenas 63 linhas e escopo limitado. |
+
+**Resultado da avaliação:** Manter o estado atual para ambos os componentes. Os ganhos potenciais não justificam o risco de regressão no fluxo de análise IA e histórico de resultados neste momento. Reavaliar na Sprint 9 (Presentation) quando composables forem introduzidos.
+
+**Arquivos envolvidos:** Nenhum (decisão de manter)
+
+**Complexidade:** Muito Baixa (~15min, apenas documentação)
+
+**Critérios de aceite:**
+- [ ] Análise documentada neste plano
+- [ ] Decisão registrada
+- [ ] Nenhuma alteração de código
+- [ ] Todos os testes existentes passam
 
 ---
 
