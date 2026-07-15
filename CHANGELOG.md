@@ -4,6 +4,33 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 
 ---
 
+## [2.5.0] - Julho/2026
+
+### Sprint 12.1 — Design System Alignment + AppHeader Refinement
+
+Alinhamento visual da identidade do Dons Espirituais com o padrão do Cinco Ministérios.
+
+#### Added
+
+- Design System alignment with Cinco Ministérios visual identity
+- Centralized visual tokens
+- Updated Vuetify theme configuration
+- Refined AppHeader visual experience
+
+#### Changed
+
+- Updated colors, typography scale, spacing and shadows
+- Header changed from primary green bar to neutral surface style
+- Improved navigation colors, hover and active states
+- Improved visual consistency between Header and Footer
+
+#### Technical
+
+- Maintained 317 tests passing
+- Lint, typecheck and build successful
+
+---
+
 ## [2.4.0] - Julho/2026
 
 ### Sprint 12 — Layout Institucional

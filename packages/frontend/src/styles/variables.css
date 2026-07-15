@@ -1,16 +1,13 @@
 :root {
-  /* Core color tokens for future DS migration (no current component override). */
-  --color-accent: #0f766e;
-  --color-success: #16a34a;
-  --color-warning: #ea580c;
-  --color-error: #dc2626;
-  --color-background: #f4f8f4;
-  --color-surface: #fafaf8;
-  --color-text: #1f2937;
-  --color-text-secondary: #475569;
-
-  /* Border radius scale extension. */
-  --radius-xl: 20px;
+  /* Core color tokens — kept for backward compatibility; prefer tokens.css values. */
+  --color-success: #388e3c;
+  --color-warning: #fb8c00;
+  --color-error: #d32f2f;
+  --color-background: #f8f8f5;
+  --color-surface: #ffffff;
+  --color-text: #1a1a1a;
+  --color-text-secondary: #5a5a5a;
+  --color-border: #e0e0e0;
 
   /* Container tokens aligned with design plan naming. */
   --container-default: 900px;
