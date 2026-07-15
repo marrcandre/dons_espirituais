@@ -40,6 +40,10 @@ vi.mock('../stores/responses', () => ({
   useResponsesStore: vi.fn(() => mockResponsesStore),
 }))
 
+vi.mock('../components/AiAnalysis.vue', () => ({
+  default: { template: '<div />' },
+}))
+
 import ResultsView from './ResultsView.vue'
 
 function mountResultsView() {
