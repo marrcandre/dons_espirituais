@@ -1065,8 +1065,52 @@ Primeira sprint da **Fase 3 — Experiência Institucional e Produção**. A v2.
 | Typecheck errors | 0 | **0** |
 | Build | OK | **OK** (790 módulos) |
 
-**Próximos passos (Sprint 12 — Layout Institucional):**
-- AppFooter definitivo (copyright, versão, navegação institucional)
-- AppHeader definitivo (logo, navegação completa)
-- Integração footer ao layout
-- Consistência visual
+---
+
+## Sprint 11.1 — Contribuição via PIX
+
+> **Período:** Julho/2026
+>
+> **Versão:** v2.2.0
+>
+> **Status:** ✅ Concluída
+
+### Objetivo
+
+Consolidar o AboutView como página institucional oficial do projeto e adicionar funcionalidade de apoio financeiro via PIX.
+
+### Arquivos modificados
+
+| Arquivo | Ação |
+|---|---|
+| `src/views/AboutView.vue` | Reescrito — seções reorganizadas, conteúdo revisado, PIX adicionado |
+| `src/views/AboutView.test.js` | Atualizado — 10 testes (nova seção PIX + Autor + Como contribuir) |
+| `package.json` | Versão 2.2.0, +1 dependência |
+| `CHANGELOG.md` | Release v2.2.0 adicionada |
+
+### Dependência adicionada
+
+- `qrcode` ^1.5.4 — geração local de QR Code (sem API externa)
+
+### Decisões arquiteturais
+
+- **Toda lógica permanece no AboutView** — sem novos componentes, composables, use cases, stores ou repositories (YAGNI, KISS)
+- **QR Code gerado localmente** — canvas via `qrcode`, payload EMV BR Code com CRC16-CCITT
+- **Cópia com fallback** — `navigator.clipboard.writeText()` com snackbar de fallback se indisponível
+- **Dados institucionais agrupados** — constantes nomeadas `pix`, `author`, `technologies`, `relatedProjects`, `spheres`, `contributionWays`
+
+### Validação
+
+| Item | Resultado |
+|---|---|
+| Testes | **274 passando** (273 → 274) |
+| Lint | 0 erros |
+| Typecheck | 0 erros |
+| Build | OK |
+
+**Próximos passos (Sprint 11.2 — Exclusão Administrativa):**
+- Botão de excluir teste na ResultsView (admin-only)
+- Modal de confirmação
+- Use case + repository + store
+- Migration SQL (RLS DELETE policy)
+- Release v2.3.0

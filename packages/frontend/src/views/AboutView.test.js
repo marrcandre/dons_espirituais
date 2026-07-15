@@ -1,7 +1,13 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { vuetify } from '../../vitest.setup'
 import AboutView from './AboutView.vue'
+
+vi.mock('qrcode', () => ({
+  default: {
+    toCanvas: vi.fn().mockResolvedValue(undefined),
+  },
+}))
 
 function mountAboutView() {
   return mount(AboutView, {
@@ -22,7 +28,7 @@ describe('AboutView', () => {
     const wrapper = mountAboutView()
     expect(wrapper.text()).toContain('Objetivo')
     expect(wrapper.text()).toContain('Dons Espirituais')
-    expect(wrapper.text()).toContain('autoconhecimento ministerial')
+    expect(wrapper.text()).toContain('descoberta dos dons espirituais')
   })
 
   it('renders the test explanation section', () => {
@@ -42,13 +48,13 @@ describe('AboutView', () => {
     const wrapper = mountAboutView()
     expect(wrapper.text()).toContain('Tecnologias utilizadas')
     expect(wrapper.text()).toContain('Vue 3')
-    expect(wrapper.text()).toContain('Supabase')
+    expect(wrapper.text()).toContain('Vitest')
   })
 
-  it('renders the authorship section', () => {
+  it('renders the author section', () => {
     const wrapper = mountAboutView()
-    expect(wrapper.text()).toContain('Autoria')
-    expect(wrapper.text()).toContain('Marco André')
+    expect(wrapper.text()).toContain('Autor')
+    expect(wrapper.text()).toContain('Marco André Mendes')
   })
 
   it('renders the license section', () => {
@@ -59,14 +65,21 @@ describe('AboutView', () => {
 
   it('renders the contribution section with GitHub link', () => {
     const wrapper = mountAboutView()
-    expect(wrapper.text()).toContain('Contribuição')
+    expect(wrapper.text()).toContain('Como contribuir')
     expect(wrapper.text()).toContain('GitHub')
     expect(wrapper.text()).toContain('código aberto')
   })
 
-  it('renders related projects section', () => {
+  it('renders the PIX donation section', () => {
     const wrapper = mountAboutView()
-    expect(wrapper.text()).toContain('Projetos relacionados')
+    expect(wrapper.text()).toContain('Apoie este projeto')
+    expect(wrapper.text()).toContain('Chave PIX')
+    expect(wrapper.text()).toContain('Copiar chave PIX')
+  })
+
+  it('renders other projects section', () => {
+    const wrapper = mountAboutView()
+    expect(wrapper.text()).toContain('Outros projetos')
     expect(wrapper.text()).toContain('Cinco Ministérios')
   })
 })

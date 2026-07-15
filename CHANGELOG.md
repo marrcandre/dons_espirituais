@@ -4,6 +4,38 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 
 ---
 
+## [2.2.0] - Julho/2026
+
+### Sprint 11.1 — Contribuição via PIX
+
+Consolidação do AboutView como página institucional oficial e adição de apoio financeiro via PIX.
+
+**SobreView reestruturado:**
+- Seções reorganizadas: Objetivo, Como funciona, Metodologia, Tecnologias, Autor, Licença, Como contribuir, Apoie este projeto, Outros projetos
+- Texto institucional revisado em todas as seções
+- Autor: nome completo, descrição e 3 contatos com ícones (GitHub, LinkedIn, Email)
+- Seção "Como contribuir" com 6 formas de contribuição + botões GitHub/Reportar
+
+**Apoio PIX:**
+- Geração local de QR Code via `qrcode` (sem API externa)
+- Payload EMV BR Code com CRC16-CCITT (padrão oficial PIX)
+- Chave PIX com botão "Copiar" e snackbar de feedback
+- Fallback para navegadores sem `navigator.clipboard`
+
+**Dependências:**
+- `qrcode` ^1.5.4 (geração client-side de QR Code)
+- `@types/qrcode` (dev)
+
+**Métricas:**
+- Testes: **273 → 274** (+1)
+- AboutView tests: 9 → 10 (cobertura da seção PIX)
+- Lint: **0 erros**
+- Typecheck: **0 erros**
+- Build: verde
+- Nenhuma alteração em domain, application, repositories ou stores
+
+---
+
 ## [2.1.0] - Julho/2026
 
 ### Sprint 11 — Identidade Institucional
