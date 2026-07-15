@@ -4,6 +4,35 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 
 ---
 
+## [2.6.0] - Julho/2026
+
+### Sprint 13 — Publicação, Operação e Maturidade
+
+Preparação do projeto para publicação profissional com CI/CD, documentação de deploy e monitoramento.
+
+#### Added
+
+- `docs/deploy.md` — fluxo completo de deploy (Vercel + Supabase Edge Functions)
+- `docs/monitoring.md` — documentação do monitoramento atual e recomendações (UptimeRobot, Vercel Analytics, Sentry)
+- `CONTRIBUTING.md` — guia de contribuição
+- `LICENSE` — licença MIT
+- Headers de segurança no Vercel (X-Content-Type-Options, X-Frame-Options, Referrer-Policy)
+- Cache infinito para assets com hash no nome (Cache-Control: immutable)
+
+#### Changed
+
+- `vercel.json` expandido com security headers e cache规则 para assets
+- `README.md` atualizado — test count (259 → 317), seções de CI/CD, deploy, monitoramento, variáveis de ambiente
+- Versão bump: 2.5.0 → 2.6.0
+
+#### Technical
+
+- 317 testes mantidos
+- Lint, typecheck e build sem erros
+- Deploy via integração nativa Vercel + GitHub (sem GitHub Actions CD)
+
+---
+
 ## [2.5.0] - Julho/2026
 
 ### Sprint 12.1 — Design System Alignment + AppHeader Refinement
