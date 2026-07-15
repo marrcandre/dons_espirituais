@@ -11,6 +11,7 @@ const { mockQueryBuilder } = vi.hoisted(() => {
     maybeSingle: vi.fn().mockReturnThis(),
     insert: vi.fn().mockReturnThis(),
     update: vi.fn().mockReturnThis(),
+    delete: vi.fn().mockReturnThis(),
   }
   return { mockQueryBuilder: builder }
 })
@@ -103,6 +104,22 @@ describe('responseRepository', () => {
       await expect(
         responseRepository.updateField('r1', 'name', 'updated'),
       ).resolves.toBeUndefined()
+    })
+  })
+
+  describe('deleteResponse()', () => {
+    it('deletes response successfully', async () => {
+      mockQueryBuilder.abortSignal.mockResolvedValue({ error: null })
+
+      await expect(
+        responseRepository.deleteResponse('r1'),
+      ).resolves.toBeUndefined()
+    })
+
+    it('propagates error when delete fails', async () => {
+      mockQueryBuilder.abortSignal.mockResolvedValue({ error: new Error('Delete failed') })
+
+      await expect(responseRepository.deleteResponse('r1')).rejects.toThrow('Delete failed')
     })
   })
 

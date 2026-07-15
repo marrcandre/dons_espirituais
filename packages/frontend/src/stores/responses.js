@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import * as responseRepository from '../repositories/responseRepository.js'
+import { deleteResponseUseCase } from '../application/quiz/delete-response'
 
 export const useResponsesStore = defineStore('responses', () => {
   const current = ref(null)
@@ -62,6 +63,26 @@ export const useResponsesStore = defineStore('responses', () => {
     }
   }
 
+  async function deleteItem(id) {
+    loading.value = true
+    error.value = null
+
+    try {
+      await deleteResponseUseCase({ responseId: id })
+      list.value = list.value.filter((item) => item.id !== id)
+      if (current.value?.id === id) {
+        current.value = null
+      }
+      return true
+    } catch (err) {
+      console.error('Erro ao excluir teste:', err)
+      error.value = 'Erro ao excluir teste. Tente novamente.'
+      return false
+    } finally {
+      loading.value = false
+    }
+  }
+
   function $reset() {
     current.value = null
     list.value = []
@@ -78,6 +99,7 @@ export const useResponsesStore = defineStore('responses', () => {
     fetchByUserId,
     fetchAll,
     updateField,
+    deleteItem,
     $reset,
   }
 })

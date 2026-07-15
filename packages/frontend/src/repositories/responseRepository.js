@@ -73,6 +73,14 @@ export async function countByUserId(userId) {
   return count ?? 0
 }
 
+export async function deleteResponse(id) {
+  const { error } = await runSupabaseQuery(
+    supabase.from('responses').delete().eq('id', id),
+    DEFAULT_TIMEOUT,
+  )
+  if (error) throw error
+}
+
 export async function selectField(id, field) {
   const { data, error } = await runSupabaseQuery(
     supabase.from('responses').select(field).eq('id', id).single(),

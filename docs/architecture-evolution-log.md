@@ -1108,9 +1108,52 @@ Consolidar o AboutView como página institucional oficial do projeto e adicionar
 | Typecheck | 0 erros |
 | Build | OK |
 
-**Próximos passos (Sprint 11.2 — Exclusão Administrativa):**
-- Botão de excluir teste na ResultsView (admin-only)
-- Modal de confirmação
-- Use case + repository + store
-- Migration SQL (RLS DELETE policy)
-- Release v2.3.0
+---
+
+## Sprint 11.2 — Exclusão Administrativa de Testes
+
+> **Período:** Julho/2026
+>
+> **Versão:** v2.3.0
+>
+> **Status:** ✅ Concluída
+
+### Objetivo
+
+Permitir que administradores excluam permanentemente um teste diretamente da tela de resultados, com confirmação obrigatória, feedback visual e respeito às políticas de segurança do Supabase.
+
+### Arquivos criados
+
+| Arquivo | Descrição |
+|---------|-----------|
+| `supabase/migrations/002_admin_delete.sql` | Política RLS `admin delete` para DELETE |
+| `application/quiz/delete-response.ts` | Use case `deleteResponseUseCase` |
+| `views/ResultsView.test.js` | 7 testes de view (botão, dialog, navegação, snackbar) |
+
+### Arquivos modificados
+
+| Arquivo | Alteração |
+|---------|-----------|
+| `repositories/responseRepository.js` | Adicionado `deleteResponse(id)` |
+| `stores/responses.js` | Adicionado `deleteItem(id)` — chama use case, remove da lista, limpa current |
+| `views/ResultsView.vue` | Botão Excluir (admin-only), dialog confirmação, loading, snackbar, navegação |
+| `repositories/tests/responseRepository.test.js` | +2 testes (delete sucesso, erro) |
+| `stores/tests/responses.test.js` | +3 testes (delete com list/current, error) |
+| `package.json` | Versão 2.3.0 |
+| `CHANGELOG.md` | Release v2.3.0 adicionada |
+
+### Decisões arquiteturais
+
+- **Use case isolado**: `deleteResponseUseCase` segue ADR-012 — função pura, sem dependência de Vue/Pinia, com Input/Result tipados
+- **Store delega para Application Layer**: `deleteItem()` chama o use case, não o repository diretamente
+- **View sem acesso ao repository**: ResultsView chama apenas `responseStore.deleteItem()`, respeitando o fluxo View → Store → Application → Repository
+- **data-testid usado em botões**: `delete-button`, `cancel-delete`, `confirm-delete` — padrão necessário para testes de Vuetify (v-btn icon não expõe attr icon no DOM)
+
+### Validação
+
+| Item | Resultado |
+|------|-----------|
+| Testes | **286 passando** (274 → 286, +12) |
+| Lint | 0 erros |
+| Typecheck | 0 erros |
+| Build | OK |

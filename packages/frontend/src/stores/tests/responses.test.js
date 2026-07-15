@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 
-const { mockFindById, mockFindByUserId, mockListAll, mockUpdateField } = vi.hoisted(() => ({
+const { mockFindById, mockFindByUserId, mockListAll, mockUpdateField, mockDeleteResponse } = vi.hoisted(() => ({
   mockFindById: vi.fn(),
   mockFindByUserId: vi.fn(),
   mockListAll: vi.fn(),
   mockUpdateField: vi.fn(),
+  mockDeleteResponse: vi.fn(),
 }))
 
 vi.mock('../../repositories/responseRepository', () => ({
@@ -13,6 +14,7 @@ vi.mock('../../repositories/responseRepository', () => ({
   findByUserId: mockFindByUserId,
   listAll: mockListAll,
   updateField: mockUpdateField,
+  deleteResponse: mockDeleteResponse,
 }))
 
 import { useResponsesStore } from '../responses'
@@ -119,6 +121,48 @@ describe('useResponsesStore', () => {
       const result = await store.updateField('r1', 'name', 'New')
 
       expect(result).toBe(false)
+    })
+  })
+
+  describe('deleteItem', () => {
+    it('removes item from list and clears current on success', async () => {
+      mockDeleteResponse.mockResolvedValue(undefined)
+      const store = useResponsesStore()
+      store.list = [{ id: 'r1' }, { id: 'r2' }]
+      store.current = { id: 'r1' }
+
+      const result = await store.deleteItem('r1')
+
+      expect(result).toBe(true)
+      expect(store.list).toEqual([{ id: 'r2' }])
+      expect(store.current).toBeNull()
+      expect(store.loading).toBe(false)
+      expect(store.error).toBeNull()
+      expect(mockDeleteResponse).toHaveBeenCalledWith('r1')
+    })
+
+    it('keeps current when deleting unrelated item', async () => {
+      mockDeleteResponse.mockResolvedValue(undefined)
+      const store = useResponsesStore()
+      store.list = [{ id: 'r1' }, { id: 'r2' }]
+      store.current = { id: 'r2' }
+
+      const result = await store.deleteItem('r1')
+
+      expect(result).toBe(true)
+      expect(store.list).toEqual([{ id: 'r2' }])
+      expect(store.current).toEqual({ id: 'r2' })
+    })
+
+    it('returns false and sets error on failure', async () => {
+      mockDeleteResponse.mockRejectedValue(new Error('Delete failed'))
+      const store = useResponsesStore()
+
+      const result = await store.deleteItem('r1')
+
+      expect(result).toBe(false)
+      expect(store.error).toBe('Erro ao excluir teste. Tente novamente.')
+      expect(store.loading).toBe(false)
     })
   })
 

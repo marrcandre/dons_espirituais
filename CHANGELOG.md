@@ -4,6 +4,46 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 
 ---
 
+## [2.3.0] - Julho/2026
+
+### Sprint 11.2 — Exclusão Administrativa de Testes
+
+Permite que administradores excluam permanentemente um teste diretamente da tela de resultados.
+
+**Migration:**
+- `supabase/migrations/002_admin_delete.sql` — política RLS `admin delete` para DELETE na tabela `responses`
+
+**Repository:**
+- `responseRepository.deleteResponse(id)` — método de exclusão com `runSupabaseQuery`
+
+**Nova Application Layer:**
+- `application/quiz/delete-response.ts` — use case `deleteResponseUseCase` com `DeleteResponseInput` e `DeleteResponseResult`
+
+**Store:**
+- `responses.deleteItem(id)` — action que chama o use case, remove da lista, limpa current e gerencia erros
+
+**ResultsView:**
+- Botão "Excluir" visível apenas para admin (`authStore.isAdmin`)
+- v-dialog de confirmação com texto explicativo e loading
+- Snackbar de sucesso/erro
+- `router.replace` para `my-results` ou `home` após exclusão
+
+**Testes:**
+| Arquivo | Testes |
+|---------|--------|
+| `repositories/tests/responseRepository.test.js` | +2 (delete success, error) |
+| `stores/tests/responses.test.js` | +3 (delete success with list/current, error) |
+| `views/ResultsView.test.js` | +7 (fetchById mount, button hidden/visible, dialog open, confirm navigation authenticated, confirm navigation guest, error) |
+
+**Métricas:**
+- Testes: **274 → 286** (+12)
+- Lint: **0 erros**
+- Typecheck: **0 erros**
+- Build: verde
+- Nenhuma alteração em domain, data, helpers ou components existentes
+
+---
+
 ## [2.2.0] - Julho/2026
 
 ### Sprint 11.1 — Contribuição via PIX

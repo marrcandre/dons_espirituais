@@ -74,6 +74,18 @@
           <!-- ACTIONS -->
           <div class="result-header-right d-flex ga-1">
             <v-btn
+              v-if="isAdmin"
+              data-testid="delete-button"
+              icon="mdi-delete"
+              variant="text"
+              size="small"
+              color="error"
+              :loading="deleteLoading"
+              :disabled="deleteLoading"
+              @click="confirmDelete"
+            />
+
+            <v-btn
               icon="mdi-share-variant"
               variant="text"
               size="small"
@@ -134,6 +146,46 @@
         Nome atualizado com sucesso.
       </v-snackbar>
 
+      <v-snackbar v-model="deleteSnackbar.show" :color="deleteSnackbar.color" timeout="3000">
+        {{ deleteSnackbar.message }}
+      </v-snackbar>
+
+      <!-- DELETE CONFIRMATION DIALOG -->
+      <v-dialog v-model="deleteDialog.open" persistent max-width="400" @click:outside="closeDeleteDialog">
+        <v-card :loading="deleteLoading" :disabled="deleteLoading">
+          <v-card-title class="text-h6">
+            Excluir este resultado?
+          </v-card-title>
+
+          <v-card-text>
+            <p class="mb-2">Esta ação removerá permanentemente este resultado e os dados associados.</p>
+            <p class="font-weight-medium text-error">Esta exclusão não poderá ser desfeita.</p>
+          </v-card-text>
+
+          <v-card-actions>
+            <v-spacer />
+            <v-btn
+              data-testid="cancel-delete"
+              variant="text"
+              :disabled="deleteLoading"
+              @click="closeDeleteDialog"
+            >
+              Cancelar
+            </v-btn>
+            <v-btn
+              data-testid="confirm-delete"
+              color="error"
+              variant="elevated"
+              :loading="deleteLoading"
+              :disabled="deleteLoading"
+              @click="executeDelete"
+            >
+              Excluir definitivamente
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
     </template>
 
     <div v-else class="result-empty-state" />
@@ -143,7 +195,7 @@
 
 <script setup>
 import { reactive, computed, ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth.js'
 import { useResponsesStore } from '../stores/responses.js'
 
@@ -177,6 +229,22 @@ const isOwner = computed(() =>
   authStore.user &&
   response.value?.user_id === authStore.user.id
 )
+
+const isAdmin = computed(() => authStore.isAdmin)
+
+const router = useRouter()
+
+const deleteDialog = reactive({
+  open: false,
+})
+
+const deleteLoading = ref(false)
+
+const deleteSnackbar = reactive({
+  show: false,
+  message: '',
+  color: 'success',
+})
 
 const chartOpen = ref(true)
 const analysisOpen = ref(true)
@@ -240,6 +308,46 @@ async function saveName() {
     nameEditor.error = 'Não foi possível atualizar o nome.'
   } finally {
     nameEditor.isSaving = false
+  }
+}
+
+/* DELETE */
+function confirmDelete() {
+  deleteDialog.open = true
+}
+
+function closeDeleteDialog() {
+  if (deleteLoading.value) return
+  deleteDialog.open = false
+}
+
+async function executeDelete() {
+  if (!response.value) return
+
+  deleteLoading.value = true
+
+  try {
+    await responseStore.deleteItem(response.value.id)
+
+    deleteDialog.open = false
+    deleteSnackbar.show = true
+    deleteSnackbar.message = 'Teste excluído com sucesso.'
+    deleteSnackbar.color = 'success'
+
+    setTimeout(() => {
+      if (authStore.user) {
+        router.replace({ name: 'my-results' })
+      } else {
+        router.replace({ name: 'home' })
+      }
+    }, 1500)
+  } catch (_err) {
+    deleteDialog.open = false
+    deleteSnackbar.show = true
+    deleteSnackbar.message = 'Erro ao excluir teste. Tente novamente.'
+    deleteSnackbar.color = 'error'
+  } finally {
+    deleteLoading.value = false
   }
 }
 
