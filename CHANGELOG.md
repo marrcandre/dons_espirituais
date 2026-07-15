@@ -4,6 +4,43 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 
 ---
 
+## [2.4.0] - Julho/2026
+
+### Sprint 12 — Layout Institucional
+
+Consolidação do layout global da aplicação com footer institucional, configuração centralizada e revisão do header.
+
+**Nova configuração:**
+- `src/config/app.ts` — metadados centralizados da aplicação (nome, descrição, versão, copyright, contato, repositório). Versão não depende mais de import do `package.json`.
+
+**AppFooter redesenhado:**
+- Estrutura em seções empilhadas inspirada no projeto Cinco Ministérios: brand (logo + descrição), navegação (Início, Sobre), extras (GitHub, Contato), apoio (Apoie este projeto) e copyright (autor + versão)
+- `<footer>` nativo com landmark semântico (em vez de `<v-footer>` Vuetify)
+- Links estilizados como texto puro com CSS (`<router-link>` e `<a>`), sem `AppButton`
+- Descrição do projeto exibida abaixo do logo
+- Seção "Apoie este projeto" com link destacado para a página Sobre (onde está o PIX)
+- Copyright separado por `border-top` com autor à esquerda e versão à direita
+- Totalmente responsivo e independente de autenticação
+
+**Layout global consolidado:**
+- `App.vue` — footer integrado após `<v-main>`, presente em toda a aplicação. Landmarks HTML5: `<header>`, `<main>`, `<footer>`.
+
+**Testes:**
+| Arquivo | Testes |
+|---------|--------|
+| `src/components/ui/__tests__/AppFooter.test.js` | 14 (renderização, descrição, navegação, GitHub, Contato, apoio, versão, copyright, independência de auth) |
+| `src/components/__tests__/AppHeader.test.js` | 11 (renderização, navegação, admin, tema, avatar) |
+| `src/__tests__/App.test.js` | 8 (layout com/sem auth, footer sempre presente, estrutura) |
+
+**Métricas:**
+- Testes: **286 → 317** (+31)
+- Lint: **0 erros**
+- Typecheck: **0 erros**
+- Build: verde
+- Nenhuma alteração em domain, application, stores, repositories, infrastructure, helpers, data, router ou views
+
+---
+
 ## [2.3.0] - Julho/2026
 
 ### Sprint 11.2 — Exclusão Administrativa de Testes

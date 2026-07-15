@@ -1,0 +1,6 @@
+export const APP_NAME = 'Dons Espirituais'
+export const APP_DESCRIPTION = 'Ferramenta gratuita para descoberta dos dons espirituais baseada no modelo de C. Peter Wagner.'
+export const APP_VERSION = '2.4.0'
+export const APP_COPYRIGHT_OWNER = 'Marco André Mendes'
+export const APP_CONTACT_EMAIL = 'marcoandre@gmail.com'
+export const APP_REPOSITORY_URL = 'https://github.com/marrcandre/dons-espirituais'
