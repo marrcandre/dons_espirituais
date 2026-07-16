@@ -1,15 +1,5 @@
 :root {
-  /* Core color tokens — kept for backward compatibility; prefer tokens.css values. */
-  --color-success: #388e3c;
-  --color-warning: #fb8c00;
-  --color-error: #d32f2f;
-  --color-background: #f8f8f5;
-  --color-surface: #ffffff;
-  --color-text: #1a1a1a;
-  --color-text-secondary: #5a5a5a;
-  --color-border: #e0e0e0;
-
-  /* Container tokens aligned with design plan naming. */
+  /* Container tokens — consumidos por utilities.css */
   --container-default: 900px;
   --container-reading: 700px;
   --container-form: 600px;

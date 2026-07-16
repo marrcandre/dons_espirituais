@@ -64,8 +64,8 @@ async function handleLogin() {
   min-height: 100vh;
   background: linear-gradient(
     160deg,
-    rgb(var(--v-theme-primary)) 0%,
-    color-mix(in srgb, rgb(var(--v-theme-primary)) 80%, white) 100%
+    var(--color-primary) 0%,
+    color-mix(in srgb, var(--color-primary) 80%, white) 100%
   );
 }
 </style>

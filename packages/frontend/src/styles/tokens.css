@@ -16,6 +16,14 @@
   --color-error: #d32f2f;
   --color-success: #388e3c;
   --color-overlay: rgba(0, 0, 0, 0.08);
+  --color-warning: #fb8c00;
+
+  --color-gold: #ffd700;
+  --color-gold-text: #d4af37;
+  --color-silver: #b0bec5;
+  --color-silver-text: #78909c;
+  --color-bronze: #b08d57;
+  --color-bronze-text: #8d6e63;
 
   /* ==================================================
    * Typography
@@ -47,7 +55,7 @@
 
   --line-height-tight: 1.2;
   --line-height-body: 1.6;
-  --line-height-relaxed: 1.8;
+  --line-height-relaxed: 1.9;
 
   /* ==================================================
    * Spacing
@@ -103,6 +111,14 @@
   --color-error: #ef5350;
   --color-success: #66bb6a;
   --color-overlay: rgba(255, 255, 255, 0.08);
+  --color-warning: #ffb74d;
+
+  --color-gold: #ffd700;
+  --color-gold-text: #d4af37;
+  --color-silver: #b0bec5;
+  --color-silver-text: #78909c;
+  --color-bronze: #b08d57;
+  --color-bronze-text: #8d6e63;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
