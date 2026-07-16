@@ -1157,3 +1157,79 @@ Permitir que administradores excluam permanentemente um teste diretamente da tel
 | Lint | 0 erros |
 | Typecheck | 0 erros |
 | Build | OK |
+
+---
+
+## Sprint 14 — Consolidação do Design System
+
+> **Período:** Julho/2026
+>
+> **Versão:** v2.7.0
+>
+> **Status:** ✅ Concluída
+
+### Objetivo
+
+Consolidar os tokens CSS como fonte única da identidade visual e eliminar a dependência direta de cores do Vuetify em componentes próprios.
+
+### Mudanças arquiteturais
+
+- **Tokens CSS como SSOT visual**: `tokens.css` expandido com tokens de pódio (`--color-gold`, `--color-silver`, `--color-bronze`), `--color-warning` adicionado, `variables.css` deduplicado (8 valores de cor removidos)
+- **Componentes próprios migrados para DS**: 19 ocorrências de `rgb(var(--v-theme-*))` substituídas por `var(--color-*)` em AppHeader, AppFooter, GiftBadges, AdminView e LoginView (incluindo gradiente)
+- **Sincronização de tema criada**: helper `src/helpers/theme.js` com `syncTheme()` que aplica/remove a classe `.dark` no `document.documentElement` em sincronia com o tema Vuetify
+- **GiftBadges unificado**: texto do badge passou a usar tokens DS (`--color-text-primary`, `--color-text-secondary`, `--color-primary`), eliminando classes Vuetify `text-high-emphasis`, `text-medium-emphasis` e `text-primary`
+
+### Correções
+
+- Classe `.dark` nunca era aplicada ao `<html>` — tokens dark do DS eram letra morta
+- GiftBadges ilegível no tema claro (texto Vuetify × fundo DS dessincronizados)
+- AppLogo lilac text no dark mode resolvido com `themeColorMap`
+- Vuetify deprecation `theme.global.name.value =` substituído por `theme.change()`
+- PIX key contraste corrigido em AboutView
+- AdminView com `import AppCard` ausente
+- ResultsChart `ref<null>` tipado corretamente
+
+### Refatorações
+
+- 19 ocorrências Vuetify → DS tokens em 5 componentes
+- Inline styles → scoped CSS em AppHeader, QuestionStep, AuthCallback, CollapsibleCard, AiAnalysis, GrowthSection
+- TypeScript incremental em GiftBadges, QuestionStep, QuizProgress, ResultsChart, AppLogo, AppHeader (reversões parciais conforme ADR-008)
+- `color` removido de `domain/spiritual-gifts.ts` (não utilizado por nenhum consumidor)
+- Eslint `no-undef: 'off'` para arquivos TS
+
+### Arquivos criados
+
+| Arquivo | Descrição |
+|---------|-----------|
+| `helpers/theme.js` | Função `syncTheme()` para sincronizar classe `.dark` com Vuetify |
+
+### Arquivos modificados
+
+| Arquivo | Alteração |
+|---------|-----------|
+| `styles/tokens.css` | Tokens podium, `--color-warning`, ajustes |
+| `styles/variables.css` | Deduplicado (8 cores removidas) |
+| `components/AppHeader.vue` | Cores DS, `syncTheme()`, deprecation fix |
+| `components/ui/AppFooter.vue` | 7 ocorrências Vuetify → DS tokens |
+| `components/GiftBadges.vue` | Fundo + texto DS, classes Vuetify removidas |
+| `views/AdminView.vue` | 3 ocorrências Vuetify → DS tokens |
+| `views/LoginView.vue` | Gradiente → `var(--color-primary)` |
+| `views/AboutView.vue` | PIX key contraste corrigido |
+| `domain/spiritual-gifts.ts` | `color` removido do tipo Gift |
+| `eslint.config.js` | `no-undef: 'off'` para TS |
+| Diversos `.vue` | Inline styles → scoped CSS |
+
+### Decisões arquiteturais
+
+- **Design System é a fonte única da identidade visual** — componentes próprios não devem mais usar `--v-theme-*` diretamente
+- **Sincronização de tema obrigatória** — toda alteração de tema Vuetify deve ser acompanhada da atualização da classe `.dark`
+- **Vuetify mantido para componentes estruturais** — botões, cards, layout e tipografia continuam via Vuetify (ADR-009)
+
+### Validação
+
+| Item | Resultado |
+|------|-----------|
+| Testes | **317 passando** (mantidos) |
+| Lint | 0 erros |
+| Typecheck | 0 erros |
+| Build | OK |

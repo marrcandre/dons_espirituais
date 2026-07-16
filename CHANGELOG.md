@@ -4,6 +4,44 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 
 ---
 
+## [2.7.0] - Julho/2026
+
+### Sprint 14 — Consolidação do Design System
+
+Consolidação dos tokens CSS como fonte única da identidade visual e eliminação da dependência direta de cores do Vuetify em componentes próprios.
+
+#### Added
+
+- `helpers/theme.js` — função `syncTheme()` para sincronizar classe `.dark` com Vuetify
+- Tokens de pódio em `tokens.css` (`--color-gold`, `--color-silver`, `--color-bronze` + text variants)
+- `--color-warning` adicionado aos tokens do DS
+
+#### Changed
+
+- **5 componentes migrados** para tokens DS: AppHeader (4 ocorrências), AppFooter (7), GiftBadges (6), AdminView (3), LoginView (gradiente)
+- **GiftBadzes**: texto unificado com tokens `--color-text-primary`, `--color-text-secondary`, `--color-primary`; classes Vuetify `text-high-emphasis`, `text-medium-emphasis`, `text-primary` removidas
+- **Inline styles** migrados para scoped CSS em AppHeader, QuestionStep, AuthCallback, CollapsibleCard, AiAnalysis, GrowthSection
+- `variables.css` deduplicado (8 valores de cor removidos)
+- `domain/spiritual-gifts.ts` — campo `color` removido do tipo Gift
+- Eslint config: `no-undef: 'off'` adicionado para arquivos TS
+- TypeScript incremental em GiftBadges, QuestionStep, QuizProgress, ResultsChart, AppLogo, AppHeader (com reversões conforme ADR-008)
+
+#### Fixed
+
+- Classe `.dark` nunca era aplicada ao `<html>` — tokens dark do DS eram ignorados
+- GiftBadges ilegível no tema claro (texto Vuetify × fundo DS dessincronizados)
+- AppLogo lilac text no dark mode
+- Vuetify deprecation: `theme.global.name.value =` → `theme.change()`
+- PIX key contraste corrigido em AboutView
+- AdminView: `import AppCard` ausente adicionado
+
+#### Technical
+
+- Lint 0 erros, typecheck 0 erros, 317 testes passando, build OK
+- Vuetify mantido para componentes estruturais (ADR-009, ADR-015)
+
+---
+
 ## [2.6.0] - Julho/2026
 
 ### Sprint 13 — Publicação, Operação e Maturidade
