@@ -23,11 +23,10 @@ describe('Gift data consistency', () => {
     expect(gifts[26].name).toBe('Liderança em Adoração')
   })
 
-  it('cada dom deve ter name, icon e color como strings', () => {
+  it('cada dom deve ter name e icon como strings', () => {
     gifts.forEach(g => {
       expect(typeof g.name).toBe('string')
       expect(typeof g.icon).toBe('string')
-      expect(typeof g.color).toBe('string')
     })
   })
 

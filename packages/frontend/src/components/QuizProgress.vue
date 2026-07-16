@@ -14,10 +14,10 @@
   </div>
 </template>
 
-<script setup>
-defineProps({
-  progress: { type: Number, required: true },
-  current: { type: Number, required: true },
-  total: { type: Number, required: true },
-})
+<script setup lang="ts">
+defineProps<{
+  progress: number
+  current: number
+  total: number
+}>()
 </script>

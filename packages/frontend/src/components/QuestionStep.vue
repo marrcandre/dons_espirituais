@@ -1,6 +1,6 @@
 <template>
   <v-card rounded="xl" elevation="2" class="pa-6">
-    <p class="text-body-1 font-weight-medium mb-6" style="line-height: 1.6">
+    <p class="text-body-1 font-weight-medium mb-6">
       {{ question.text }}
     </p>
 
@@ -13,8 +13,7 @@
         :prepend-icon="modelValue === opt.value ? 'mdi-check-circle' : 'mdi-circle-outline'"
         rounded="lg"
         size="large"
-        class="justify-start text-body-2 font-weight-regular"
-        style="width: 100%; height: 52px"
+        class="justify-start text-body-2 font-weight-regular question-step__option"
         @click="$emit('update:modelValue', opt.value)"
       >
         {{ opt.label }}
@@ -44,17 +43,33 @@
   </v-card>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ANSWER_LABELS } from '../constants/likert.js'
 
-defineProps({
-  question: { type: Object, required: true },
-  modelValue: { type: Number, default: undefined },
-  isFirst: { type: Boolean, default: false },
-  isLast: { type: Boolean, default: false },
-})
+export interface Question {
+  id: number
+  text: string
+}
 
-defineEmits(['update:modelValue', 'next', 'prev'])
+withDefaults(
+  defineProps<{
+    question: Question
+    modelValue?: number
+    isFirst?: boolean
+    isLast?: boolean
+  }>(),
+  {
+    modelValue: undefined,
+    isFirst: false,
+    isLast: false,
+  },
+)
+
+defineEmits<{
+  'update:modelValue': [value: number | undefined]
+  next: []
+  prev: []
+}>()
 </script>
 
 
@@ -64,5 +79,9 @@ defineEmits(['update:modelValue', 'next', 'prev'])
 }
 .v-card:hover {
   transform: translateY(-2px);
+}
+.question-step__option {
+  width: 100%;
+  height: 52px;
 }
 </style>

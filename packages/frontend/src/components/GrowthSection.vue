@@ -11,7 +11,7 @@
           Reflita
         </h3>
 
-        <ul class="text-body-2 text-medium-emphasis pl-5" style="line-height: 1.9">
+        <ul class="text-body-2 text-medium-emphasis pl-5 growth-section__list">
           <li>
             Em quais atividades cristãs você sente mais alegria e disposição?
           </li>
@@ -32,7 +32,7 @@
           Pratique
         </h3>
 
-        <ul class="text-body-2 text-medium-emphasis pl-5" style="line-height: 1.9">
+        <ul class="text-body-2 text-medium-emphasis pl-5 growth-section__list">
           <li>
             Sirva regularmente em alguma área da igreja.
           </li>
@@ -60,3 +60,9 @@
 
 <script setup>
 </script>
+
+<style scoped>
+.growth-section__list {
+  line-height: var(--line-height-relaxed);
+}
+</style>

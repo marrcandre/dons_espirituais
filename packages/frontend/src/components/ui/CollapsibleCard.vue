@@ -1,9 +1,8 @@
 <template>
   <AppCard :variant="variant">
     <div
-      class="d-flex align-center justify-space-between ga-2 mb-2"
+      class="d-flex align-center justify-space-between ga-2 mb-2 collapsible-card__trigger"
       :class="{ 'mb-0': !isOpen }"
-      style="cursor: pointer"
       @click="toggle"
     >
       <div class="d-flex align-center ga-2 min-width-0">
@@ -65,3 +64,9 @@ function toggle() {
   emit('update:modelValue', !props.modelValue)
 }
 </script>
+
+<style scoped>
+.collapsible-card__trigger {
+  cursor: pointer;
+}
+</style>
