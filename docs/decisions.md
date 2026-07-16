@@ -292,3 +292,25 @@
 - Negativas: CD adiado para Sprint 13 (deploy manual entre Sprints 10.2 e 13)
 
 **Status:** ✅ Implementado
+
+---
+
+## ADR-015: Design System como fonte única da identidade visual
+
+**Data:** 2026-07-16 (Sprint 14)
+
+**Contexto:** Componentes próprios (AppHeader, AppFooter, GiftBadges, AdminView, etc.) usavam `rgb(var(--v-theme-*))` do Vuetify para cores, enquanto o Design System definia `--color-*` com os mesmos valores. Embora as cores fossem idênticas, dependiam de mecanismos de ativação distintos: Vuetify controla o tema via classes internas no `v-app`; o DS depende da classe `.dark` no `document.documentElement`. Ao alternar o tema, os dois sistemas podiam dessincronizar, resultando em texto ilegível.
+
+**Decisão:**
+
+1. **Design System é a fonte única da identidade visual** — componentes próprios devem usar exclusivamente `var(--color-*)` para cores, nunca `--v-theme-*`.
+2. **Vuetify mantém responsabilidade sobre componentes estruturais** — botões, cards, layout, tipografia utilitária continuam via Vuetify.
+3. **A sincronização entre o tema Vuetify e o DS é obrigatória** — toda alteração de tema deve atualizar a classe `.dark` no `<html>` para que os tokens DS reflitam o tema correto.
+4. **Componentes próprios que precisam de cores em bindings JavaScript** (ex.: `:style`) devem usar um mapa de resolução (como `themeColorMap` em AppLogo) em vez de acessar `--v-theme-*` diretamente.
+
+**Consequências:**
+
+- Positivas: Consistência visual garantida entre todos os componentes próprios; tokens mudam em um único lugar e refletem em toda a aplicação; DS fica desacoplado do Vuetify — possível substituir a biblioteca de UI sem perder a identidade visual.
+- Negativas: Componentes existentes precisam ser migrados (Sprint 14 concluiu esta migração); componentes novos devem seguir a regra desde a criação; manutenção do `themeColorMap` em AppLogo para casos de bindings JS.
+
+**Status:** ✅ Implementado na Sprint 14

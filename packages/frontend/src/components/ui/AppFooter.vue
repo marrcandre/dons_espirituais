@@ -5,7 +5,7 @@
         <AppLogo
           variant="full"
           :size="28"
-          color="#1B5438"
+          color="primary"
         />
         <p class="app-footer__description">
           {{ APP_DESCRIPTION }}
@@ -75,7 +75,7 @@ import {
 <style scoped>
 .app-footer {
   margin-top: auto;
-  border-top: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+  border-top: 1px solid var(--color-border);
 }
 
 .app-footer__inner {
@@ -97,7 +97,7 @@ import {
   margin: 0;
   font-size: var(--font-size-caption, 12px);
   line-height: var(--line-height-body, 1.6);
-  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+  color: var(--color-text-secondary);
 }
 
 .app-footer__nav,
@@ -110,13 +110,13 @@ import {
 .app-footer__link {
   font-size: var(--font-size-helper, 14px);
   font-weight: 500;
-  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+  color: var(--color-text-secondary);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .app-footer__link:hover {
-  color: rgb(var(--v-theme-primary));
+  color: var(--color-primary);
 }
 
 .app-footer__support {
@@ -127,7 +127,7 @@ import {
 .app-footer__support-link {
   font-size: var(--font-size-helper, 14px);
   font-weight: 600;
-  color: rgb(var(--v-theme-primary));
+  color: var(--color-primary);
   text-decoration: none;
   transition: color 0.2s ease;
 }
@@ -141,8 +141,8 @@ import {
   justify-content: space-between;
   align-items: center;
   font-size: var(--font-size-caption, 12px);
-  color: rgba(var(--v-theme-on-surface), var(--v-disabled-opacity));
+  color: var(--color-text-disabled);
   padding-top: var(--space-md, 16px);
-  border-top: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+  border-top: 1px solid var(--color-border);
 }
 </style>

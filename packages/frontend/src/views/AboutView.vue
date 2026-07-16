@@ -189,7 +189,7 @@
           <p class="text-caption text-medium-emphasis mb-2">
             Chave PIX
           </p>
-          <code class="pix-key text-body-2 font-weight-medium primary--text">
+          <code class="pix-key text-body-2 font-weight-medium">
             {{ pix.key }}
           </code>
         </div>
@@ -376,12 +376,14 @@ onMounted(async () => {
   if (canvasRef.value) {
     try {
       const payload = buildPixPayload(pix.key, pix.holder)
+      // Cores do QR Code refletem o Design System (primary/surface).
+      // São passadas como constantes porque a API toCanvas() não aceita CSS variables.
       await QRCode.toCanvas(canvasRef.value, payload, {
         width: 180,
         margin: 2,
         color: {
-          dark: '#1B5438',
-          light: '#FFFFFF',
+          dark: '#1a4d2e',
+          light: '#ffffff',
         },
       })
     } catch {
@@ -409,10 +411,12 @@ onMounted(async () => {
 
 .pix-key {
   display: inline-block;
-  word-break: break-all;
   max-width: 280px;
-  background: rgb(var(--v-theme-surface-variant));
   padding: 4px 12px;
   border-radius: 6px;
+  word-break: break-all;
+  background-color: var(--color-surface);
+  color: var(--color-primary);
+  border: 1px solid var(--color-border);
 }
 </style>

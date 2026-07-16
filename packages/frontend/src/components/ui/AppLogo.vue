@@ -3,7 +3,7 @@
     to="/"
     class="app-logo"
     :class="`app-logo--${variant}`"
-    :style="{ color, gap: `${iconSize * 0.25}px` }"
+    :style="{ color: cssColor, gap: `${iconSize * 0.25}px` }"
   >
     <v-icon
       :icon="icon"
@@ -21,16 +21,31 @@
   </router-link>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 
-const props = defineProps({
-  icon: { type: String, default: 'mdi-gift-outline' },
-  size: { type: [Number, String], default: 30 },
-  color: { type: String, default: 'white' },
-  variant: { type: String, default: 'full' },
-})
+const props = withDefaults(
+  defineProps<{
+    icon?: string
+    size?: number | string
+    color?: string
+    variant?: string
+  }>(),
+  {
+    icon: 'mdi-gift-outline',
+    size: 30,
+    color: 'white',
+    variant: 'full',
+  },
+)
 
+const themeColorMap: Record<string, string> = {
+  primary: 'rgb(var(--v-theme-primary))',
+  secondary: 'rgb(var(--v-theme-secondary))',
+  white: '#FFFFFF',
+}
+
+const cssColor = computed(() => themeColorMap[props.color] ?? props.color)
 const iconSize = computed(() => Number(props.size))
 </script>
 

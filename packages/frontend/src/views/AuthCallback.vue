@@ -12,8 +12,14 @@ onMounted(async () => {
 })
 </script>
 
+<style scoped>
+.auth-callback {
+  height: 100vh;
+}
+</style>
+
 <template>
-  <div class="d-flex justify-center align-center" style="height: 100vh;">
+  <div class="d-flex justify-center align-center auth-callback">
     Carregando login...
   </div>
 </template>

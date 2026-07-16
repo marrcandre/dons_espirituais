@@ -420,3 +420,42 @@ Criar na Sprint 6 para registrar decisões desde o início da fase.
 
 ### D08 — Tokens CSS imediatamente
 Criar variáveis CSS na Sprint 6 — baixo esforço, alto benefício.
+
+---
+
+## 7. Lições Aprendidas — Sprint 14 (Design System)
+
+### 7.1 Design System e Vuetify não devem compartilhar responsabilidade de cor
+
+**Problema:** Componentes próprios usavam `--v-theme-*` (Vuetify) para cores, enquanto o DS definia `--color-*` com os mesmos valores. Visualmente idênticos, mas vinculados a mecanismos de ativação diferentes — Vuetify controla o tema via classes internas no `v-app`, enquanto o DS depende da classe `.dark` no `<html>`.
+
+**Consequência:** Ao alternar o tema, Vuetify e DS podiam ficar dessincronizados: texto com cor de um tema, fundo com cor do outro. O resultado era texto ilegível sem nenhum erro de compilação ou teste quebrado.
+
+**Conclusão arquitetural:** Cada componente próprio deve obter **todas as suas cores** de um único sistema de tokens. Misturar DS e Vuetify para cores diferentes no mesmo componente é uma violação de consistência visual que testes automatizados não detectam.
+
+### 7.2 O sistema de temas precisa de sincronização explícita
+
+**Problema:** O DS definia cores para tema escuro dentro do seletor `.dark { ... }` em `tokens.css`, mas nenhum código aplicava essa classe ao DOM. O tema escuro do DS era letra morta.
+
+**Conclusão arquitetural:** Sempre que um sistema de tokens CSS depende de uma classe para alternar entre temas, a aplicação dessa classe deve ser parte da implementação — não um detalhe esquecido. A função `syncTheme()` foi criada para garantir que Vuetify theme, classe `.dark` e CSS variables estejam sempre sincronizados. Este padrão deve ser replicado se novos mecanismos de tema forem introduzidos.
+
+### 7.3 Design System é identidade visual; biblioteca de componentes é infraestrutura
+
+**Distinção estabelecida:** O Design System (tokens.css) define **o que** é usado (cores, tipografia, espaçamentos). O Vuetify define **como** é renderizado (botões, cards, layout, tipografia utilitária). Componentes próprios (AppHeader, GiftBadges, etc.) são a ponte entre os dois — usam Vuetify para estrutura e DS para identidade visual.
+
+**Conclusão arquitetural:** Esta separação permite:
+- Substituir o Vuetify no futuro sem perder a identidade visual
+- Mudar tokens sem refatorar a estrutura dos componentes
+- Manter a consistência visual independente da biblioteca de UI escolhida
+
+### 7.4 Validação visual em ambos os temas é obrigatória para mudanças de Design System
+
+**Problema:** A migração de `rgb(var(--v-theme-background))` para `var(--color-background)` em GiftBadges passou em todos os testes, lint, typecheck e build. Visualmente estava correta no tema claro. Mas no tema escuro, o fundo permanecia claro porque a classe `.dark` nunca era aplicada.
+
+**Conclusão arquitetural:** Testes automatizados não validam aparência. Para sprints com foco em Design System, a validação visual deve ser feita explicitamente em ambos os temas (claro e escuro) antes de considerar a tarefa concluída. Esta validação não precisa ser automatizada — uma verificação manual nos dois temas é suficiente e eficaz.
+
+### 7.5 Utilitários pequenos são preferíveis a composables para sincronização simples
+
+**Decisão:** Em vez de criar um composable `useThemeSync` ou modificar uma store Pinia, a sincronização do tema foi implementada como uma função pura de 3 linhas em `helpers/theme.js`.
+
+**Conclusão arquitetural:** Funções utilitárias são a ferramenta certa quando a responsabilidade é uma operação simples (toggle de classe no DOM) sem estado reativo, sem ciclo de vida Vue, e sem dependência de store. Introduzir composables ou stores para operações triviais aumenta a complexidade sem benefício.

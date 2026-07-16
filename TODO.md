@@ -15,9 +15,6 @@
 ## 🟡 Média Complexidade
 
 ### Design System
-- [ ] GiftBadges: substituir gold/silver/bronze hardcoded por tokens
-- [ ] Migrar ~12 estilos inline para classes/tokens CSS
-- [ ] Eliminar duplicata `line-height: 1.9` (usar `--line-height-body`)
 - [ ] Padronizar tabelas (Sprint 7)
 
 ### Navegação e UX
@@ -90,6 +87,17 @@
 - [ ] Registrar versões do prompt
 
 ## ✅ Concluídas
+
+### Sprint 14 — Consolidação do Design System ✓
+- [x] **Tokens CSS consolidados** — `tokens.css` como SSOT visual; `variables.css` deduplicado
+- [x] **GiftBadges** — cores de pódio (gold/silver/bronze) via tokens; texto migrado para DS
+- [x] **Inline styles → scoped CSS** — AppHeader, QuestionStep, AuthCallback, CollapsibleCard, AiAnalysis, GrowthSection
+- [x] **Duplicata line-height corrigida** — `--line-height-relaxed` atualizado 1.8 → 1.9
+- [x] **19 ocorrências Vuetify → DS** em AppHeader, AppFooter, GiftBadges, AdminView, LoginView
+- [x] **Sincronização de tema** — `helpers/theme.js` com `syncTheme()`; `.dark` classe agora sincronizada com Vuetify
+- [x] **Correções visuais** — PIX key, AppLogo lilac, GiftBadges legibilidade, Vuetify deprecation
+- [x] **TypeScript incremental** em 8 componentes (com reversões conforme ADR-008)
+- [x] **317 testes passando, 0 lint errors, 0 typecheck errors, build OK**
 
 ### Sprint 11 — Identidade Institucional ✓
 - [x] **Criar AppLogo.vue** — componente reutilizável (full/compact, size, color)

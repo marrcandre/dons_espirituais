@@ -71,8 +71,7 @@
     <!-- Análise disponível -->
     <div
       v-else-if="text"
-      class="text-body-2"
-      style="line-height: 1.9; white-space: pre-wrap"
+      class="text-body-2 ai-analysis__text"
     >
       {{ text }}
     </div>
@@ -280,3 +279,10 @@ onUnmounted(() => {
   stopPolling()
 })
 </script>
+
+<style scoped>
+.ai-analysis__text {
+  line-height: var(--line-height-relaxed);
+  white-space: pre-wrap;
+}
+</style>

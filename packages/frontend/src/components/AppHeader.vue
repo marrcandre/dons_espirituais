@@ -6,7 +6,7 @@
   >
     <AppLogo
       :size="24"
-      color="rgb(var(--v-theme-primary))"
+      color="primary"
       class="ml-2"
     />
 
@@ -63,7 +63,7 @@
                 v-if="avatarUrl && !avatarError"
                 :src="avatarUrl"
                 :alt="initials"
-                style="width:100%;height:100%;object-fit:cover;border-radius:50%"
+                class="app-header__avatar"
                 @error="avatarError = true"
               />
 
@@ -104,17 +104,22 @@ import { computed, ref, watch } from 'vue'
 import { useTheme } from 'vuetify'
 import { useAuthStore } from '../stores/auth.js'
 import { initials as getInitials } from '../helpers/string.js'
+import { syncTheme } from '../helpers/theme.js'
 import AppLogo from '../components/ui/AppLogo.vue'
 
 const theme = useTheme()
 const authStore = useAuthStore()
 
-theme.global.name.value = localStorage.getItem('theme') || 'light'
+const savedTheme = localStorage.getItem('theme') || 'light'
+theme.change(savedTheme)
+syncTheme(savedTheme)
 
 function toggleTheme() {
-  const newTheme = theme.global.name.value === 'dark' ? 'light' : 'dark'
-  theme.global.name.value = newTheme
-  localStorage.setItem('theme', newTheme)
+  const current = theme.global.name.value
+  const next = current === 'dark' ? 'light' : 'dark'
+  theme.change(next)
+  syncTheme(next)
+  localStorage.setItem('theme', next)
 }
 
 const avatarError = ref(false)
@@ -142,14 +147,21 @@ const initials = computed(() => {
 
 <style scoped>
 .app-header__icon {
-  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+  color: var(--color-text-secondary);
 }
 
 .app-header__icon:hover {
-  color: rgb(var(--v-theme-primary));
+  color: var(--color-primary);
 }
 
 .app-header__icon.router-link-active {
-  color: rgb(var(--v-theme-primary));
+  color: var(--color-primary);
+}
+
+.app-header__avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 </style>

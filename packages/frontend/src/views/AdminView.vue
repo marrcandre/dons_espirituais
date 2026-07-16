@@ -268,6 +268,7 @@ import { useAuthStore } from '../stores/auth.js'
 import { useResponsesStore } from '../stores/responses.js'
 import { formatDateTime } from '../helpers/date.js'
 import AppPage from "../components/ui/AppPage.vue";
+import AppCard from "../components/ui/AppCard.vue";
 import LoadingState from "../components/ui/LoadingState.vue";
 import EmptyState from "../components/ui/EmptyState.vue";
 import ErrorState from "../components/ui/ErrorState.vue";
@@ -480,7 +481,7 @@ onMounted(loadRows);
   cursor: default;
   transition: transform var(--duration-fast) var(--easing-standard),
     color var(--duration-fast) var(--easing-standard);
-  color: rgba(var(--v-theme-on-surface), 0.5);
+  color: var(--color-text-secondary);
 }
 
 .status-icon:hover {
@@ -488,7 +489,7 @@ onMounted(loadRows);
 }
 
 .status-icon.active {
-  color: rgb(var(--v-theme-primary));
+  color: var(--color-primary);
 }
 
 .clickable {
@@ -496,7 +497,7 @@ onMounted(loadRows);
 }
 
 .hover-text:hover {
-  color: rgb(var(--v-theme-primary));
+  color: var(--color-primary);
 }
 
 .is-editable {

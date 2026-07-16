@@ -4,7 +4,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useTheme, useDisplay } from 'vuetify'
 import { Bar } from 'vue-chartjs'
@@ -16,15 +16,16 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js'
+import type { Scores } from '../domain/scoring'
 import { rankGifts } from '../domain/scoring'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend)
 
-const props = defineProps({
-  scores: { type: Object, required: true },
-})
+const props = defineProps<{
+  scores: Scores
+}>()
 
-const chartWrapperEl = ref(null)
+const chartWrapperEl = ref<HTMLElement | null>(null)
 
 function getChartCanvas() {
   return chartWrapperEl.value?.querySelector('canvas') ?? null
@@ -43,7 +44,7 @@ const gridColor = computed(() => isDark.value ? 'rgba(255,255,255,0.12)' : '#e0e
 const ranked = computed(() => rankGifts(props.scores))
 
 // Gradiente verde: score alto = verde escuro, baixo = verde bem claro
-function scoreColor(score) {
+function scoreColor(score: number) {
   const ratio = score / 15
   const r = Math.round(27 + (220 - 27) * (1 - ratio))
   const g = Math.round(84 + (240 - 84) * (1 - ratio))
@@ -67,7 +68,8 @@ const chartData = computed(() => ({
 const chartPlugins = [
   {
     id: 'valueLabel',
-    afterDatasetsDraw(chart) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    afterDatasetsDraw(chart: any) {
       const { ctx, data } = chart
       ctx.save()
       ctx.font = 'bold 11px sans-serif'
@@ -78,7 +80,8 @@ const chartPlugins = [
       const dataset = data.datasets[0]
       const meta = chart.getDatasetMeta(0)
 
-      meta.data.forEach((bar, index) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      meta.data.forEach((bar: any, index: number) => {
         const val = dataset.data[index]
         const posX = bar.x + 6
         const posY = bar.y
@@ -92,7 +95,7 @@ const chartPlugins = [
 const chartOptions = computed(() => {
   const tickFontSize = mobile.value ? 10 : 12
   return {
-    indexAxis: 'y',
+    indexAxis: 'y' as const,
     responsive: true,
     maintainAspectRatio: false,
     layout: {
@@ -104,7 +107,8 @@ const chartOptions = computed(() => {
       legend: { display: false },
       tooltip: {
         callbacks: {
-          label: (ctx) => ` ${ctx.raw}/15`,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          label: (ctx: any) => ` ${ctx.raw}/15`,
         },
       },
     },
