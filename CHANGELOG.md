@@ -4,6 +4,44 @@ Todas as alterações relevantes deste projeto serão documentadas aqui.
 
 ---
 
+## [2.8.0] - Julho/2026
+
+### Sprint 15 — UX & Performance
+
+Refinamento de UX, otimização de performance e observabilidade.
+
+#### Changed
+
+- **Arquitetura:** Auth store delegada para application layer (D01); Supabase isolado em `infrastructure/supabase/` (D02)
+- **Testes:** Padronizados em `__tests__` (D03, D04) — `scoring.test.js` movido para `domain/__tests__/`
+- **Design System:** 25 `<v-btn>` → `<AppButton>`, 6 `<v-alert>` → `<AppAlert>` (D05, D06)
+- **Estados:** LoadingState/EmptyState/ErrorState aplicados em HistoryList e AiAnalysis (D07)
+- **UX Mobile:** AppHeader com densidade reduzida e botão Sobre → ícone (~74px economizados)
+- **Performance:** Tree-shaken Vuetify (31 de 600+ componentes); vendor chunk separado via `manualChunks`
+
+#### Added
+
+- `AiAnalysisText.vue` — formatação de texto com markdown simples (##, **, *, listas)
+- `@vercel/analytics` — page views automáticos (componente `<Analytics />`)
+- `@vercel/speed-insights` — Core Web Vitals (LCP, CLS, INP)
+- `@sentry/vue` — error tracking condicional (DSN via `VITE_SENTRY_DSN`)
+- `src/plugins/sentry.js` — módulo de configuração isolado
+
+#### Fixed
+
+- **AppButton:** Ícones não renderizavam em botões icon-only — dois `<v-btn>` mutuamente exclusivos (ADR-016)
+- **AiAnalysis:** Scoped CSS não atingia conteúdo `v-html` — correção com `:deep()`
+- **Build warning:** Chunk >500 kB eliminado (main chunk: 909 kB → 247 kB, −73%)
+
+#### Technical
+
+- 348 testes (34 files) | Lint 0 | Typecheck 0 | Build OK
+- Todos os chunks < 500 kB
+- Total JS: 592 kB (−35%)
+- ADR-015 (Design System como fonte única) e ADR-016 (AppButton two-branch) documentados
+
+---
+
 ## [2.7.0] - Julho/2026
 
 ### Sprint 14 — Consolidação do Design System

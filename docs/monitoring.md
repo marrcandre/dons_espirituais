@@ -5,8 +5,9 @@
 | Ferramenta | Status | Função |
 |------------|--------|--------|
 | UptimeRobot | ✅ Ativo | Monitoramento de disponibilidade |
-| Vercel Analytics | △ Não implementado | Métricas de uso e performance |
-| Sentry | △ Não implementado | Error tracking |
+| Vercel Analytics | ✅ Implementado | Métricas de uso e performance |
+| Vercel Speed Insights | ✅ Implementado | Core Web Vitals (LCP, CLS, INP) |
+| Sentry | ✅ Implementado | Error tracking (condicional ao DSN) |
 
 ---
 
@@ -29,92 +30,70 @@ Acessar: [Dashboard UptimeRobot](https://uptimerobot.com) → Monitor Settings.
 
 ---
 
-## Vercel Analytics (recomendação)
+## Vercel Analytics + Speed Insights
 
 ### O que é
 
-Ferramenta nativa da Vercel que fornece:
-- **Métricas de uso** — page views, visitantes únicos, visitas por rota
-- **Métricas de performance** — TTFB, First Contentful Paint (FCP), Largest Contentful Paint (LCP)
-- **Dados em tempo real** — sessões ativas
+Ferramentas nativas da Vercel que fornecem:
+- **Web Analytics** — page views, visitantes únicos, visitas por rota (via `@vercel/analytics`)
+- **Speed Insights** — Core Web Vitals: LCP, CLS, INP (via `@vercel/speed-insights`)
 
-### Prós
+### Implementação
 
-- Integração zero-config com Vercel
-- Não precisa de cookie consent (dados anônimos e agregados)
-- Impacto mínimo no bundle (~1KB)
-- Gratuito no plano Hobby
+1. `@vercel/analytics` e `@vercel/speed-insights` instalados como dependências
+2. `<Analytics />` do `@vercel/analytics/vue` adicionado ao `App.vue` — tracking automático de page views via `vue-router`
+3. `injectSpeedInsights()` chamado no setup de `App.vue` — medição de performance
+4. Ativar no dashboard Vercel: Project → Analytics → Enable
 
-### Contras
+### Bundle impact
 
-- Dados apenas de sessões, não de erros individuais
-- Requer ativação no dashboard Vercel (Project → Analytics → Enable)
-
-### Passos para implementar
-
-1. Dashboard Vercel → Project → Analytics → Enable
-2. Nenhuma alteração de código necessária (Vercel injeta o script automaticamente)
-
-### Recomendação
-
-Implementação simples e sem riscos. Ativar diretamente no dashboard Vercel.
+~4 kB adicionados ao chunk principal (251 kB total, < 500 kB).
 
 ---
 
-## Sentry (recomendação)
+## Sentry
 
 ### O que é
 
 Plataforma de error tracking que captura exceções no frontend com:
 - Stack trace detalhado
 - Informações do browser e sistema operacional
-- Breadcrumbs do usuário (ações que levaram ao erro)
 - Source maps para debug em produção
 
-### Prós
+### Implementação
 
-- Monitoramento proativo de erros no frontend
-- Integração nativa com Vue 3 e Vite
-- Plano gratuito generoso (5k eventos/mês)
+1. `@sentry/vue` instalado como dependência
+2. `src/plugins/sentry.js` criado com `initSentry(app)` — inicialização condicional
+3. Sentry só é ativado se `VITE_SENTRY_DSN` estiver definido no ambiente
+4. Desabilitado em desenvolvimento (`enabled: import.meta.env.PROD`)
+5. Sem tracing avançado (`tracesSampleRate: 0`) — escopo inicial
 
-### Contras
+### Configuração
 
-- Aumento de ~30-40KB no bundle (pode ser reduzido com tree-shaking)
-- Requer configuração de source maps no build
-- Requer conta Sentry
+```bash
+# .env (desenvolvimento local — opcional)
+VITE_SENTRY_DSN=https://exemplo@sentry.io/0000000
+```
 
-### Passos para implementar
+Para produção, configurar no dashboard Vercel:
+Project → Settings → Environment Variables → `VITE_SENTRY_DSN`
+
+### Ativação no Vercel
 
 1. Criar conta em [sentry.io](https://sentry.io)
 2. Criar projeto Vue/Vite
-3. Adicionar dependência: `@sentry/vue` e `@sentry/vite-plugin`
-4. Configurar no `main.js`:
-
-```js
-import * as Sentry from '@sentry/vue'
-Sentry.init({
-  app,
-  dsn: '<DSN_DO_PROJETO>',
-  environment: import.meta.env.MODE,
-  integrations: [Sentry.browserTracingIntegration()],
-  tracesSampleRate: 0.2,
-})
-```
-
-5. Adicionar plugin Sentry no `vite.config.js` para upload de source maps
-6. Configurar `VITE_SENTRY_DSN` nas variáveis de ambiente do Vercel
-
-### Recomendação
-
-Aguardar demanda. Para o volume atual de usuários, o monitoramento do UptimeRobot + logs manuais no Supabase são suficientes. Sentry agrega valor quando houver tráfego significativo ou relatos de erros não reproduzíveis.
+3. Copiar o DSN do projeto Sentry
+4. Adicionar `VITE_SENTRY_DSN` nas variáveis de ambiente do Vercel
+5. Fazer deploy — Sentry será ativado automaticamente
 
 ---
 
 ## Recomendações finais
 
-| Prioridade | Ação | Esforço | Impacto |
-|:----------:|------|:-------:|:-------:|
-| 1 | Ativar Vercel Analytics | 5min (dashboard) | Alto |
-| 2 | Configurar Sentry | 2h (código + dashboard) | Alto (quando houver tráfego) |
-| 3 | Healthcheck endpoint | 1h (Edge Function) | Médio |
-| 4 | Logs estruturados no frontend | 2h (serviço de logging) | Médio |
+| Prioridade | Ação | Esforço | Status |
+|:----------:|------|:-------:|:------:|
+| 1 | Ativar Vercel Analytics | 5min (dashboard) | ✅ |
+| 2 | Configurar Sentry | 1h (DSN + deploy) | ✅ Implementado (aguarda DSN) |
+| 3 | Source maps no Sentry | 2h (vite-plugin) | 📋 Backlog |
+| 4 | Healthcheck endpoint | 1h (Edge Function) | 📋 Backlog |
+| 5 | Logs estruturados no frontend | 2h (serviço de logging) | 📋 Backlog |

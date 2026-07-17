@@ -224,9 +224,26 @@ src/
 | Fase | Data | Status |
 |------|------|--------|
 | 0 — Preparação | 2026-07-17 | ✅ |
-| 1 — Correções arquiteturais | — | ⏳ |
-| 2 — Design System | — | ⏳ |
-| 3 — UX | — | ⏳ |
-| 4 — Performance | — | ⏳ |
-| 5 — Observabilidade | — | ⏳ |
-| 6 — Auditoria final | — | ⏳ |
+| 1 — Correções arquiteturais | — | ✅ |
+| 2 — Design System | — | ✅ |
+| 3 — UX | — | ✅ |
+| 4 — Performance | — | ✅ |
+| 5 — Observabilidade | — | ✅ |
+| 6 — Auditoria final | — | ✅ |
+
+### Métricas Finais
+
+| Métrica | Início (Sprint 15) | Final |
+|---------|-------------------|-------|
+| Testes | 317 (33 files) | **348** (34 files) |
+| Lint | 0 errors | 0 errors |
+| Typecheck | 0 errors | 0 errors |
+| Build | OK (warning chunk >500 kB) | **OK (chunks < 500 kB)** |
+| Main JS chunk | 909 kB | **247 kB** (−73%) |
+
+### Débitos
+
+| Status | Itens |
+|--------|-------|
+| ✅ Resolvidos | D01, D02, D03, D04, D05, D06, D07, D08, D09, D10, D11 |
+| ⏸️ Mantido no backlog | D12 — Responsividade não auditada formalmente |

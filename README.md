@@ -6,7 +6,7 @@ Aplicação web para descoberta e análise de dons espirituais baseada no modelo
 
 - **Frontend:** Vue 3 + Vite + Vuetify 3 + Pinia + Vue Router
 - **Backend:** Supabase (PostgreSQL, Auth, Edge Functions)
-- **Testes:** Vitest + Vue Test Utils + happy-dom (317 testes)
+- **Testes:** Vitest + Vue Test Utils + happy-dom (348 testes)
 - **Análise IA:** Gemini via Supabase Edge Functions
 - **Qualidade:** ESLint + vue-tsc + CI (GitHub Actions)
 - **Deploy:** Vercel (integração nativa GitHub)
@@ -83,8 +83,9 @@ O deploy é feito via integração nativa Vercel + GitHub:
 | Ferramenta | Status | Função |
 |------------|--------|--------|
 | UptimeRobot | ✅ Ativo | Disponibilidade das Edge Functions |
-| Vercel Analytics | △ Pendente | Métricas de uso e performance |
-| Sentry | △ Pendente | Error tracking |
+| Vercel Analytics | ✅ Ativo | Métricas de uso e performance |
+| Vercel Speed Insights | ✅ Ativo | Core Web Vitals (LCP, CLS, INP) |
+| Sentry | ✅ Implementado | Error tracking (condicional ao DSN) |
 
 Veja `docs/monitoring.md` para detalhes e recomendações.
 
@@ -95,6 +96,6 @@ Veja `docs/monitoring.md` para detalhes e recomendações.
 - `docs/architecture-evolution-plan.md` — plano de evolução arquitetural (Sprints 6–13)
 - `docs/architecture-evolution-analysis.md` — análise arquitetural detalhada
 - `docs/architecture-evolution-log.md` — log de execução de todas as sprints
-- `docs/decisions.md` — decisões técnicas (ADRs 1–14)
+- `docs/decisions.md` — decisões técnicas (ADRs 1–16)
 - `docs/design_plan.md` — Design System e tokens CSS
 - `docs/gift-system-plan*` — histórico da refatoração do domínio (Sprints 0–5)

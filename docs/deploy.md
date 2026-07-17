@@ -46,8 +46,11 @@ Configuradas no dashboard Vercel → Project → Settings → Environment Variab
 |----------|-----------|:-----------:|-----------|
 | `VITE_SUPABASE_URL` | URL do projeto Supabase (ex: `https://xxxxx.supabase.co`) | Sim | Produção, Preview |
 | `VITE_SUPABASE_ANON_KEY` | Chave anônima do Supabase (pública, pode ser exposta no cliente) | Sim | Produção, Preview |
+| `VITE_SENTRY_DSN` | DSN do projeto Sentry para error tracking | Não (opcional) | Produção |
 
 > **Atenção:** `VITE_SUPABASE_ANON_KEY` é a chave anônima (pública), não a `service_role_key`. A `service_role_key` é usada apenas em Edge Functions e nunca deve ser exposta no frontend.
+>
+> **VITE_SENTRY_DSN:** Opcional. Se não definido, o Sentry não é inicializado. Configurar apenas se houver conta Sentry ativa.
 
 ### Domínio
 
