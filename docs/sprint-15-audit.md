@@ -93,6 +93,15 @@ infrastructure/supabase/
 
 **Decisão:** Todo componente próprio deve usar `<AppButton>` em vez de `<v-btn>` e `<AppAlert>` em vez de `<v-alert>`. A regra é documentada em `CONTRIBUTING.md`. Exceção: componentes Vuetify estruturais (v-app, v-main, v-card, v-list, etc.) continuam permitidos conforme ADR-009.
 
+### ADR-S15-005: AppButton renderiza dois `<v-btn>` mutuamente exclusivos
+
+**Decisão:** AppButton deve usar dois `<v-btn>` mutuamente exclusivos — um com `<slot />` (quando o pai passa conteúdo) e outro self-closing (quando o pai é icon-only). Um simples `<slot v-if="$slots.default" />` NÃO resolve o problema porque o Vue 3 SEMPRE passa uma função `slots.default` ao `v-btn` quando há qualquer slot outlet entre as tags `<v-btn>...</v-btn>`, mesmo que o outlet avalie para vazio. O Vuetify checa `!slots.default && hasIcon` — como `slots.default` é sempre uma função definida, o ícone nunca é renderizado.
+
+**Contexto:** Bug descoberto durante a Fase 2.4. O AppButton original tinha `<slot />` incondicional, o que fazia com que todo botão de ícone puro (AppHeader, ResultsView) parasse de exibir ícones. A primeira tentativa de correção (`<slot v-if="$slots.default" />`) falhou porque o slot outlet ainda estava dentro das tags do v-btn, fazendo Vue 3 sempre prover uma `default` slot function. A correção definitiva são dois `<v-btn>` com `v-if`/`v-else`.
+
+**Arquivos afetados:**
+- `components/ui/AppButton.vue` — dois `<v-btn>` mutuamente exclusivos (c/ e s/ slot)
+
 ---
 
 ## Arquivos Modificados
@@ -127,6 +136,10 @@ infrastructure/supabase/
 | 2.4 | ResultsView.vue | 8 v-btn → AppButton, 1 v-alert → AppAlert | ✅ |
 | 2.4 | AdminView.vue | 4 v-btn → AppButton, 1 v-alert → AppAlert | ✅ |
 | 2.4 | LoginView.vue | 1 v-alert → AppAlert | ✅ |
+| 2.5 | HistoryList.vue | LoadingState/EmptyState/ErrorState aplicados | ✅ |
+| 2.5 | AiAnalysis.vue | LoadingState aplicado | ✅ |
+| 2.5 | CONTRIBUTING.md | Regras de Design System adicionadas | ✅ |
+| 2.4b | components/ui/AppButton.vue | Dois `<v-btn>` mutuamente exclusivos (bug ícones — slot condicional insuficiente) | ✅ |
 
 ---
 
@@ -179,6 +192,30 @@ src/
 ```
 
 **Critério de aceite:** 100% dos diretórios de teste usam `__tests__`. Nenhum arquivo de teste fora da camada correspondente.
+
+### 2.4 — Componentes Vuetify encapsulados pelo DS
+
+**Mudanças:**
+- 25 `<v-btn>` substituídos por `<AppButton>` em 8 componentes
+- 6 `<v-alert>` substituídos por `<AppAlert>` em 5 componentes
+- Zero ocorrências de `<v-btn>` ou `<v-alert>` raw em componentes próprios (DS wrappers são a exceção permitida)
+
+**Bug corrigido (pós-migração):** AppButton com `<slot />` incondicional quebrava renderização de ícones em botões self-closing (`<AppButton icon="mdi-xxx" />`). O Vuetify v-btn verifica `!slots.default && hasIcon` para decidir se renderiza o ícone; como o slot estava sempre presente no template, `slots.default` nunca era falsy, e o ícone nunca aparecia. Todos os botões de ícone no AppHeader e ResultsView foram afetados.
+
+**Tentativa 1 (falha):** `<slot v-if="$slots.default" />` — ainda deixa um slot outlet entre as tags `<v-btn>`, fazendo Vue 3 SEMPRE prover uma `slots.default` function ao v-btn (o v-if apenas muda o retorno, não a existência).
+
+**Fix definitivo:** dois `<v-btn>` mutuamente exclusivos com `v-if`/`v-else` — um com `<slot />` quando há conteúdo do pai, outro self-closing para icon-only. Confirmado por teste de diagnóstico que compara o HTML gerado entre as abordagens.
+
+**Impacto arquitetural:** Consistência visual completa. Qualquer mudança futura no estilo de botões ou alertas é feita em um único lugar (AppButton/AppAlert). O Vuetify fica isolado atrás do DS.
+
+### 2.5 — Estados padronizados aplicados
+
+**Mudanças:**
+- HistoryList: LoadingState para carregamento, EmptyState (com title customizado) para lista vazia, ErrorState para erro — estados antes eram inline com `v-progress-circular` e `<p>` text
+- AiAnalysis: LoadingState (com message) substituiu `v-progress-circular` + `<p>` manual
+- CONTRIBUTING.md: regras de Design System documentadas
+
+**Impacto:** Experiência consistente de loading/empty/error em toda a aplicação. Novos componentes seguem o padrão documentado.
 
 ---
 

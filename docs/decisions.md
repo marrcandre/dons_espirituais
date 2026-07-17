@@ -314,3 +314,34 @@
 - Negativas: Componentes existentes precisam ser migrados (Sprint 14 concluiu esta migração); componentes novos devem seguir a regra desde a criação; manutenção do `themeColorMap` em AppLogo para casos de bindings JS.
 
 **Status:** ✅ Implementado na Sprint 14
+
+---
+
+## ADR-016: AppButton não pode criar slot artificial que impeça renderização de ícones
+
+**Data:** 2026-07-17 (Sprint 15)
+
+**Contexto:** Durante a migração de `<v-btn>` para `<AppButton>` (Fase 2.4 da Sprint 15), todos os botões de ícone puro no AppHeader e ResultsView pararam de exibir ícones visualmente, embora os testes continuassem passando. A investigação revelou:
+
+1. **Causa raiz:** O template do AppButton continha `<slot />` entre as tags `<v-btn>`. Mesmo quando a condição `v-if="$slots.default"` impedia a renderização do slot, o Vue 3 **sempre** passa uma função `slots.default` ao `v-btn` como slot content provider, porque o slot outlet está estruturalmente presente no template como filho de `<v-btn>`.
+2. **Mecanismo interno do Vuetify:** `VBtn.js` linha 205 usa `!slots.default && hasIcon` para decidir se renderiza o ícone. Como `slots.default` é sempre uma função definida (retorne ela conteúdo ou não), a condição sempre falha — o ícone nunca é renderizado.
+3. **Primeira correção (insuficiente):** `<slot v-if="$slots.default" />` — não funciona porque o slot outlet ainda está dentro das tags `<v-btn>`, gerando uma slot function sempre presente.
+
+**Decisão:**
+
+1. **Dois `<v-btn>` mutuamente exclusivos:** AppButton renderiza um `<v-btn>` com `<slot />` quando há conteúdo do pai (`v-if="$slots.default"`), e um `<v-btn>` **self-closing** (sem slot) no `v-else`, que permite ao Vuetify detectar `slots.default` como `undefined` e renderizar o ícone.
+2. **`icon` prop é reservada para icon-only buttons:** Quando AppButton recebe tanto `icon` prop quanto slot content, o slot content tem precedência — o ícone não é renderizado (consistente com Vuetify). Para botões com ícone + texto, usar `prepend-icon` ou `append-icon`.
+3. **Testes de regressão obrigatórios:** Todo wrapper do Design System que encapsula um componente Vuetify baseado em slot deve ter testes que validam o comportamento com e sem slot content.
+
+**Consequências:**
+
+- Positivas: Ícones funcionam em AppButton; comportamento consistente com Vuetify nativo; testes de regressão (22 testes) protegem contra futuras quebras; aprendizado arquitetural documentado para todos os wrappers DS.
+- Negativas: Duplicação leve do template (dois `<v-btn>` em vez de um); necessidade de documentar que `icon` + texto não funciona — usar `prepend-icon`/`append-icon`.
+
+**Regra futura:** Wrappers do Design System não podem criar slots artificiais que alterem o comportamento interno de componentes Vuetify baseados em slot detection. Todo componente que encapsula `v-btn`, `v-alert` ou similar deve ser testado com e sem slot content.
+
+**Arquivos afetados:**
+- `components/ui/AppButton.vue` — dois `<v-btn>` mutuamente exclusivos
+- `components/ui/__tests__/AppButton.test.js` — 22 testes (14 novos de regressão)
+
+**Status:** ✅ Implementado na Sprint 15

@@ -98,6 +98,14 @@ Componentes Vuetify devem ser encapsulados pelo Design System.
 
 Veja `docs/design_plan.md` para a documentação completa do Design System.
 
+### Regra de encapsulamento
+
+Componentes de abstração do Design System **devem preservar o comportamento nativo dos componentes Vuetify encapsulados**, especialmente APIs baseadas em detecção de slots.
+
+**Exemplo:** O Vuetify `v-btn` usa `!slots.default && hasIcon` para decidir se renderiza um ícone. Um wrapper que sempre expõe um slot outlet (mesmo vazio) quebra esse comportamento. A correção é usar dois branches mutuamente exclusivos (`v-if="$slots.default"` com slot, `v-else` self-closing).
+
+Todo wrapper deve ser testado com e sem slot content para validar que não há regressão no comportamento nativo.
+
 ## Licença
 
 Ao contribuir, você concorda que suas contribuições serão licenciadas sob a MIT License (veja `LICENSE`).

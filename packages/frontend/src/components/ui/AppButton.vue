@@ -12,6 +12,7 @@ withDefaults(defineProps<{
 
 <template>
   <v-btn
+    v-if="$slots.default"
     :size="size"
     :rounded="rounded"
     :loading="loading"
@@ -19,4 +20,11 @@ withDefaults(defineProps<{
   >
     <slot />
   </v-btn>
+  <v-btn
+    v-else
+    :size="size"
+    :rounded="rounded"
+    :loading="loading"
+    v-bind="$attrs"
+  />
 </template>
