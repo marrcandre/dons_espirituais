@@ -1,4 +1,4 @@
-import { supabase } from '../services/supabase.js'
+import { supabase } from '../infrastructure/supabase/client.js'
 
 export async function invokeGenerateAI(responseId, name, force = false) {
   const { error } = await supabase.functions.invoke('generate-ai', {

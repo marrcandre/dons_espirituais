@@ -12,7 +12,7 @@ const { mockFunctions, mockChannel, mockRemoveChannel } = vi.hoisted(() => {
   }
 })
 
-vi.mock('../../services/supabase', () => ({
+vi.mock('../../infrastructure/supabase/client', () => ({
   supabase: {
     functions: mockFunctions,
     channel: vi.fn(() => mockChannel),

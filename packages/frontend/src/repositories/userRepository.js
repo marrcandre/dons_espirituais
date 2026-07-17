@@ -1,5 +1,5 @@
-import { supabase } from '../services/supabase.js'
-import { runSupabaseQuery } from '../services/supabaseQuery.js'
+import { supabase } from '../infrastructure/supabase/client.js'
+import { runSupabaseQuery } from '../infrastructure/supabase/queries.js'
 
 const DEFAULT_TIMEOUT = 8000
 

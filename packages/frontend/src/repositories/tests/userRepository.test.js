@@ -10,7 +10,7 @@ const { mockQueryBuilder } = vi.hoisted(() => {
   return { mockQueryBuilder: builder }
 })
 
-vi.mock('../../services/supabase', () => ({
+vi.mock('../../infrastructure/supabase/client', () => ({
   supabase: {
     from: vi.fn(() => mockQueryBuilder),
   },

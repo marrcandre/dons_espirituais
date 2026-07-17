@@ -97,17 +97,30 @@ infrastructure/supabase/
 
 ## Arquivos Modificados
 
-*(a ser preenchido durante a sprint)*
-
 | Fase | Arquivo | Ação | Status |
 |------|---------|------|--------|
 | 0 | docs/sprint-15-audit.md | Criado | ✅ |
+| 1.1 | application/auth/ports.ts | Expandido: UserProfile com id, role | ✅ |
+| 1.1 | application/auth/user-profile.ts | Refatorado: retry, retorna role | ✅ |
+| 1.1 | application/auth/tests/user-profile.test.ts | Atualizado: 6 testes (retry, role) | ✅ |
+| 1.1 | stores/auth.js | Refatorado: usa application layer, remove userRepository | ✅ |
+| 1.1 | stores/tests/auth.test.js | Atualizado: mocks application layer | ✅ |
 
 ---
 
 ## Impactos
 
-*(a ser preenchido durante a sprint)*
+### 1.1 — Auth store migrada para application layer
+
+**Mudanças:**
+- `UserProfile` expandido com `id` e `role` (ports.ts)
+- `getUserProfile()` agora inclui retry (3 tentativas, 300ms delay) para lidar com propagação assíncrona do perfil
+- `stores/auth.js` não importa mais `userRepository` — delega profile para `getUserProfile()` da application layer
+- `stores/auth.js` não contém mais `loadProfile()` — lógica de retry movida para application layer
+
+**Risco:** Nenhum. Retry com `catch(() => null)` em vez de `try/catch` individual por tentativa → mais resiliente que a implementação anterior.
+
+**Testes:** 318 passando (+1 novo teste de retry).
 
 ---
 
