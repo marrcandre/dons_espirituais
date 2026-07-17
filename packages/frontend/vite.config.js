@@ -5,8 +5,19 @@ import vuetify from 'vite-plugin-vuetify'
 export default defineConfig({
   plugins: [
     vue(),
-    vuetify({ autoImport: false }), // já importamos manualmente em plugins/vuetify.js
+    vuetify({ autoImport: false }),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/vuetify')) {
+            return 'vendor-vuetify'
+          }
+        },
+      },
+    },
+  },
   optimizeDeps: {
     include: ['vuetify'],
   },
