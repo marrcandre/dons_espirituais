@@ -105,6 +105,15 @@ infrastructure/supabase/
 | 1.1 | application/auth/tests/user-profile.test.ts | Atualizado: 6 testes (retry, role) | ✅ |
 | 1.1 | stores/auth.js | Refatorado: usa application layer, remove userRepository | ✅ |
 | 1.1 | stores/tests/auth.test.js | Atualizado: mocks application layer | ✅ |
+| 1.2 | infrastructure/supabase/client.ts | Criado (TS, ex-services/supabase.js) | ✅ |
+| 1.2 | infrastructure/supabase/queries.ts | Criado (TS, ex-services/supabaseQuery.js) | ✅ |
+| 1.2 | repositories/authRepository.js | Import atualizado → infrastructure/supabase | ✅ |
+| 1.2 | repositories/aiRepository.js | Import atualizado → infrastructure/supabase | ✅ |
+| 1.2 | repositories/userRepository.js | Import atualizado → infrastructure/supabase | ✅ |
+| 1.2 | repositories/responseRepository.js | Import atualizado → infrastructure/supabase | ✅ |
+| 1.2 | repositories/tests/*.test.js (4) | Mock paths atualizados | ✅ |
+| 1.2 | services/supabase.js | Removido | ✅ |
+| 1.2 | services/supabaseQuery.js | Removido | ✅ |
 
 ---
 
@@ -121,6 +130,17 @@ infrastructure/supabase/
 **Risco:** Nenhum. Retry com `catch(() => null)` em vez de `try/catch` individual por tentativa → mais resiliente que a implementação anterior.
 
 **Testes:** 318 passando (+1 novo teste de retry).
+
+### 1.2 — Infrastructure Supabase criada
+
+**Mudanças:**
+- `services/supabase.js` → `infrastructure/supabase/client.ts` (convertido para TypeScript)
+- `services/supabaseQuery.js` → `infrastructure/supabase/queries.ts` (convertido para TypeScript)
+- 4 repositórios e 4 arquivos de teste com imports ajustados
+- Camada `services/` eliminada (resta apenas `__tests__/scoring.test.js` — será movido na Fase 1.3)
+- Nenhum acesso direto ao Supabase fora da infrastructure
+
+**Impacto arquitetural:** A camada `infrastructure/` agora contém todo o acesso ao Supabase, alinhado ao fluxo de dependências da arquitetura em 4 camadas. O diretório `services/` foi eliminado como camada.
 
 ---
 
