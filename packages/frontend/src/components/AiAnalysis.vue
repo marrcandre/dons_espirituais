@@ -58,12 +58,10 @@
     <LoadingState v-if="loading" :size="40" message="Preparando a análise..." class="py-6" />
 
     <!-- Análise disponível -->
-    <div
+    <AiAnalysisText
       v-else-if="text"
-      class="text-body-2 ai-analysis__text"
-    >
-      {{ text }}
-    </div>
+      :text="text"
+    />
 
     <!-- Erro -->
     <AppAlert
@@ -127,6 +125,7 @@ import { useResponsesStore } from '../stores/responses.js'
 import AppButton from './ui/AppButton.vue'
 import AppAlert from './ui/AppAlert.vue'
 import LoadingState from './ui/LoadingState.vue'
+import AiAnalysisText from './results/AiAnalysisText.vue'
 
 const props = defineProps({
   responseId: { type: String, required: true },
@@ -273,8 +272,4 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.ai-analysis__text {
-  line-height: var(--line-height-relaxed);
-  white-space: pre-wrap;
-}
 </style>
