@@ -86,7 +86,17 @@ infrastructure → Repositories, serviços (JavaScript/TypeScript)
 presentation/  → Views, Componentes, Stores, Router (Vue + JS)
 ```
 
-Veja `README.md` e `docs/architecture-evolution-plan.md` para detalhes.
+### Design System
+
+Componentes Vuetify devem ser encapsulados pelo Design System.
+
+- Use `<AppButton>` em vez de `<v-btn>` em componentes próprios.
+- Use `<AppAlert>` em vez de `<v-alert>` em componentes próprios.
+- Use `<AppCard>` em vez de `<v-card>` em componentes próprios.
+- Use `LoadingState`, `EmptyState` e `ErrorState` para estados de carregamento, vazio e erro.
+- Componentes estruturais do Vuetify (`v-app`, `v-main`, `v-list`, `v-dialog`, etc.) continuam permitidos.
+
+Veja `docs/design_plan.md` para a documentação completa do Design System.
 
 ## Licença
 

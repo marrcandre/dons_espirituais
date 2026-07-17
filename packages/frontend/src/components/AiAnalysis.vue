@@ -55,18 +55,7 @@
     </div>
 
     <!-- Carregando -->
-    <div v-if="loading" class="text-center py-6">
-      <v-progress-circular
-        indeterminate
-        color="primary"
-        size="40"
-        class="mb-3"
-      />
-
-      <p class="text-body-2 text-medium-emphasis mt-2">
-        Preparando a análise...
-      </p>
-    </div>
+    <LoadingState v-if="loading" :size="40" message="Preparando a análise..." class="py-6" />
 
     <!-- Análise disponível -->
     <div
@@ -137,6 +126,7 @@ import { useAiStore } from '../stores/ai.js'
 import { useResponsesStore } from '../stores/responses.js'
 import AppButton from './ui/AppButton.vue'
 import AppAlert from './ui/AppAlert.vue'
+import LoadingState from './ui/LoadingState.vue'
 
 const props = defineProps({
   responseId: { type: String, required: true },

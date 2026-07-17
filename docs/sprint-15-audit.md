@@ -119,6 +119,14 @@ infrastructure/supabase/
 | 1.3 | stores/tests/ (4 arquivos) | Renomeado → __tests__/ | ✅ |
 | 1.3 | application/auth/tests/ | Renomeado → __tests__/ | ✅ |
 | 1.3 | services/ | Removido (vazio após migrações) | ✅ |
+| 2.4 | AppHeader.vue | 5 v-btn → AppButton | ✅ |
+| 2.4 | CollapsibleCard.vue | 1 v-btn → AppButton | ✅ |
+| 2.4 | UserInfoForm.vue | 1 v-btn → AppButton | ✅ |
+| 2.4 | QuestionStep.vue | 3 v-btn → AppButton | ✅ |
+| 2.4 | AiAnalysis.vue | 3 v-btn → AppButton, 3 v-alert → AppAlert | ✅ |
+| 2.4 | ResultsView.vue | 8 v-btn → AppButton, 1 v-alert → AppAlert | ✅ |
+| 2.4 | AdminView.vue | 4 v-btn → AppButton, 1 v-alert → AppAlert | ✅ |
+| 2.4 | LoginView.vue | 1 v-alert → AppAlert | ✅ |
 
 ---
 

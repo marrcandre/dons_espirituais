@@ -12,9 +12,7 @@
       </h2>
     </div>
 
-    <div v-if="loading" class="text-center py-4">
-      <v-progress-circular indeterminate color="primary" size="32" />
-    </div>
+    <LoadingState v-if="loading" :size="32" class="py-4" />
 
     <v-list v-else-if="history.length" lines="two">
       <v-list-item v-for="item in history" :key="item.id" :to="{ name: 'results', params: { id: item.id } }"
@@ -32,7 +30,9 @@
       </v-list-item>
     </v-list>
 
-    <p v-else class="text-body-2 text-medium-emphasis">Nenhum teste anterior.</p>
+    <EmptyState v-else-if="!error" title="Nenhum teste anterior." />
+
+    <ErrorState v-else :message="error" />
   </AppCard>
 </template>
 
@@ -43,6 +43,9 @@ import { useResponsesStore } from '../stores/responses.js'
 import { formatDate } from '../helpers/date.js'
 import { topGift } from '../domain/scoring'
 import AppCard from './ui/AppCard.vue'
+import LoadingState from './ui/LoadingState.vue'
+import EmptyState from './ui/EmptyState.vue'
+import ErrorState from './ui/ErrorState.vue'
 
 defineProps({
   currentId: { type: String, required: true },
@@ -53,6 +56,7 @@ const responseStore = useResponsesStore()
 
 const loading = computed(() => responseStore.loading)
 const history = computed(() => responseStore.list)
+const error = computed(() => responseStore.error)
 
 onMounted(() => {
   responseStore.fetchByUserId(authStore.user.id, {
