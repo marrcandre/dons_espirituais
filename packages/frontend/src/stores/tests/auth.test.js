@@ -3,11 +3,11 @@ import { setActivePinia, createPinia } from 'pinia'
 
 let onAuthCallback
 
-const { mockGetSession, mockSignInWithGoogle, mockSignOut, mockFindById } = vi.hoisted(() => ({
+const { mockGetSession, mockSignInWithGoogle, mockSignOut, mockGetUserProfile } = vi.hoisted(() => ({
   mockGetSession: vi.fn(),
   mockSignInWithGoogle: vi.fn(),
   mockSignOut: vi.fn(),
-  mockFindById: vi.fn(),
+  mockGetUserProfile: vi.fn(),
 }))
 
 vi.mock('../../repositories/authRepository', () => ({
@@ -20,8 +20,8 @@ vi.mock('../../repositories/authRepository', () => ({
   }),
 }))
 
-vi.mock('../../repositories/userRepository', () => ({
-  findById: mockFindById,
+vi.mock('../../application/auth/user-profile', () => ({
+  getUserProfile: mockGetUserProfile,
 }))
 
 vi.mock('../../router', () => ({
@@ -40,16 +40,16 @@ describe('useAuthStore', () => {
   describe('init', () => {
     it('sets user and profile when session exists', async () => {
       mockGetSession.mockResolvedValue({ user: { id: 'u1', email: 'test@test.com' } })
-      mockFindById.mockResolvedValue({ id: 'u1', role: 'admin', name: 'Admin' })
+      mockGetUserProfile.mockResolvedValue({ id: 'u1', name: 'Admin', email: 'test@test.com', role: 'admin' })
       const store = useAuthStore()
 
       await store.init()
 
       expect(store.user).toEqual({ id: 'u1', email: 'test@test.com' })
-      expect(store.profile).toEqual({ id: 'u1', role: 'admin', name: 'Admin' })
+      expect(store.profile).toEqual({ id: 'u1', name: 'Admin', email: 'test@test.com', role: 'admin' })
       expect(store.initialized).toBe(true)
       expect(mockGetSession).toHaveBeenCalledTimes(1)
-      expect(mockFindById).toHaveBeenCalledWith('u1')
+      expect(mockGetUserProfile).toHaveBeenCalledOnce()
     })
 
     it('sets user to null and skips profile when no session', async () => {
@@ -61,7 +61,7 @@ describe('useAuthStore', () => {
       expect(store.user).toBeNull()
       expect(store.profile).toBeNull()
       expect(store.initialized).toBe(true)
-      expect(mockFindById).not.toHaveBeenCalled()
+      expect(mockGetUserProfile).not.toHaveBeenCalled()
     })
 
     it('handles errors without throwing', async () => {

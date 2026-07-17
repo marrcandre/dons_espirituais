@@ -21,13 +21,13 @@ beforeEach(() => {
 })
 
 describe('getUserProfile', () => {
-  it('retorna name e email quando usuario autenticado tem perfil', async () => {
+  it('retorna id, name, email e role quando usuario autenticado tem perfil', async () => {
     mockGetUser.mockResolvedValue({ id: 'user-1', email: 'joao@email.com' })
-    mockFindById.mockResolvedValue({ name: 'João Silva' })
+    mockFindById.mockResolvedValue({ name: 'João Silva', role: 'admin' })
 
     const result = await getUserProfile()
 
-    expect(result).toEqual({ name: 'João Silva', email: 'joao@email.com' })
+    expect(result).toEqual({ id: 'user-1', name: 'João Silva', email: 'joao@email.com', role: 'admin' })
   })
 
   it('retorna null quando nao ha usuario autenticado', async () => {
@@ -38,25 +38,40 @@ describe('getUserProfile', () => {
     expect(result).toBeNull()
   })
 
-  it('retorna name vazio quando usuario autenticado nao tem perfil', async () => {
+  it('retorna valores padrao quando usuario autenticado nao tem perfil', async () => {
     mockGetUser.mockResolvedValue({ id: 'user-1', email: 'joao@email.com' })
     mockFindById.mockResolvedValue(null)
 
     const result = await getUserProfile()
 
-    expect(result).toEqual({ name: '', email: 'joao@email.com' })
+    expect(result).toEqual({ id: 'user-1', name: '', email: 'joao@email.com', role: 'user' })
   })
 
-  it('propaga erro quando repository falha', async () => {
-    mockGetUser.mockRejectedValue(new Error('Auth error'))
+  it('usa retry quando primeira chamada falha', async () => {
+    mockGetUser.mockResolvedValue({ id: 'user-1', email: 'joao@email.com' })
+    mockFindById
+      .mockRejectedValueOnce(new Error('DB error'))
+      .mockResolvedValueOnce({ name: 'João Silva', role: 'admin' })
 
-    await expect(getUserProfile()).rejects.toThrow('Auth error')
+    const result = await getUserProfile()
+
+    expect(mockFindById).toHaveBeenCalledTimes(2)
+    expect(result).toEqual({ id: 'user-1', name: 'João Silva', email: 'joao@email.com', role: 'admin' })
   })
 
-  it('propaga erro quando userRepository falha', async () => {
+  it('retorna null apos todas as tentativas de retry falharem', async () => {
     mockGetUser.mockResolvedValue({ id: 'user-1', email: 'joao@email.com' })
     mockFindById.mockRejectedValue(new Error('DB error'))
 
-    await expect(getUserProfile()).rejects.toThrow('DB error')
+    const result = await getUserProfile()
+
+    expect(mockFindById).toHaveBeenCalledTimes(3)
+    expect(result).toEqual({ id: 'user-1', name: '', email: 'joao@email.com', role: 'user' })
+  })
+
+  it('propaga erro quando authRepository falha', async () => {
+    mockGetUser.mockRejectedValue(new Error('Auth error'))
+
+    await expect(getUserProfile()).rejects.toThrow('Auth error')
   })
 })

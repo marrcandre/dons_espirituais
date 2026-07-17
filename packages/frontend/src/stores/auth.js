@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import * as authRepository from "../repositories/authRepository.js";
-import * as userRepository from "../repositories/userRepository.js";
+import { getUserProfile } from "../application/auth/user-profile.js";
 import router from "../router";
 
 export const useAuthStore = defineStore("auth", () => {
@@ -29,7 +29,7 @@ export const useAuthStore = defineStore("auth", () => {
         user.value = session?.user ?? null;
 
         if (session?.user) {
-          await loadProfile(session.user.id);
+          profile.value = await getUserProfile()
         }
 
         if (!authSubscription) {
@@ -38,9 +38,11 @@ export const useAuthStore = defineStore("auth", () => {
               user.value = session?.user ?? null;
 
               if (session?.user) {
-                loadProfile(session.user.id).catch((err) => {
-                  console.error("Erro ao carregar perfil:", err);
-                });
+                getUserProfile()
+                  .then((p) => { profile.value = p })
+                  .catch((err) => {
+                    console.error("Erro ao carregar perfil:", err);
+                  });
               } else {
                 profile.value = null;
               }
@@ -60,24 +62,6 @@ export const useAuthStore = defineStore("auth", () => {
     })();
 
     return initPromise;
-  }
-
-  async function loadProfile(userId) {
-    let tries = 0;
-
-    while (tries < 3) {
-      const data = await userRepository.findById(userId).catch(() => null);
-
-      if (data) {
-        profile.value = data
-        return
-      }
-
-      await new Promise((r) => setTimeout(r, 300));
-      tries++;
-    }
-
-    profile.value = null
   }
 
   async function signInWithGoogle() {
