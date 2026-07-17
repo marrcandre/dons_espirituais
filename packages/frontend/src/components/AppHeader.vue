@@ -13,7 +13,7 @@
     <v-spacer />
 
     <template #append>
-      <v-btn
+      <AppButton
         v-if="authStore.canAccessAdminPanel"
         icon="mdi-shield-account"
         variant="text"
@@ -22,7 +22,7 @@
         title="Painel Admin"
       />
 
-      <v-btn
+      <AppButton
         icon="mdi-history"
         variant="text"
         class="app-header__icon"
@@ -30,16 +30,16 @@
         title="Meus resultados"
       />
 
-      <v-btn
+      <AppButton
         variant="text"
         class="app-header__icon text-none"
         to="/sobre"
         title="Sobre o projeto"
       >
         Sobre
-      </v-btn>
+      </AppButton>
 
-      <v-btn
+      <AppButton
         :icon="theme.global.name.value === 'dark' ? 'mdi-white-balance-sunny' : 'mdi-moon-waning-crescent'"
         variant="text"
         class="app-header__icon"
@@ -49,7 +49,7 @@
 
       <v-menu>
         <template #activator="{ props }">
-          <v-btn
+          <AppButton
             icon
             v-bind="props"
             variant="text"
@@ -74,7 +74,7 @@
                 {{ initials }}
               </span>
             </v-avatar>
-          </v-btn>
+          </AppButton>
         </template>
 
         <v-list>
@@ -106,6 +106,7 @@ import { useAuthStore } from '../stores/auth.js'
 import { initials as getInitials } from '../helpers/string.js'
 import { syncTheme } from '../helpers/theme.js'
 import AppLogo from '../components/ui/AppLogo.vue'
+import AppButton from '../components/ui/AppButton.vue'
 
 const theme = useTheme()
 const authStore = useAuthStore()

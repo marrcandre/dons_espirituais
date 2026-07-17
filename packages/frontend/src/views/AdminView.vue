@@ -159,7 +159,7 @@
                   @keyup.esc="cancelNameEdit"
                 />
 
-                <v-btn
+                <AppButton
                   icon="mdi-check"
                   color="success"
                   size="small"
@@ -167,7 +167,7 @@
                   @click="saveName(item)"
                 />
 
-                <v-btn
+                <AppButton
                   icon="mdi-close"
                   variant="text"
                   size="small"
@@ -203,7 +203,7 @@
                   @keyup.esc="cancelGPEdit"
                 />
 
-                <v-btn
+                <AppButton
                   icon="mdi-check"
                   color="success"
                   size="small"
@@ -211,7 +211,7 @@
                   @click="saveGP(item)"
                 />
 
-                <v-btn
+                <AppButton
                   icon="mdi-close"
                   variant="text"
                   size="small"
@@ -242,7 +242,7 @@
 
       <!-- ACTIONS -->
       <section class="mb-3 mb-sm-4">
-        <v-alert
+        <AppAlert
           type="info"
           variant="tonal"
           density="compact"
@@ -250,7 +250,7 @@
           icon="mdi-information-outline"
         >
           Clique no nome ou GP para edição inline e no ícone de status para abrir o resultado.
-        </v-alert>
+        </AppAlert>
       </section>
 
       <!-- DIALOGS -->
@@ -272,6 +272,8 @@ import AppCard from "../components/ui/AppCard.vue";
 import LoadingState from "../components/ui/LoadingState.vue";
 import EmptyState from "../components/ui/EmptyState.vue";
 import ErrorState from "../components/ui/ErrorState.vue";
+import AppButton from "../components/ui/AppButton.vue";
+import AppAlert from "../components/ui/AppAlert.vue";
 
 // =========================================================
 // ROUTE / STORE

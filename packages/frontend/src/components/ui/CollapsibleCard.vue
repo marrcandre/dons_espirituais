@@ -16,7 +16,7 @@
       <div class="d-flex align-center ga-1 flex-shrink-0">
         <slot name="actions" />
 
-        <v-btn
+        <AppButton
           :icon="isOpen ? 'mdi-chevron-up' : 'mdi-chevron-down'"
           variant="text"
           size="small"
@@ -37,6 +37,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import AppCard from './AppCard.vue'
+import AppButton from './AppButton.vue'
 
 const props = withDefaults(
   defineProps<{

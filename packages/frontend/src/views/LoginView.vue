@@ -11,9 +11,9 @@
         <v-icon size="56" color="primary" class="mb-2">mdi-gift</v-icon>
       </PageHeader>
 
-      <v-alert v-if="error" type="error" variant="tonal" class="mb-3 mb-sm-4" closable @click:close="error = null">
+      <AppAlert v-if="error" type="error" variant="tonal" class="mb-3 mb-sm-4" closable @click:close="error = null">
         {{ error }}
-      </v-alert>
+      </AppAlert>
 
       <AppButton color="primary" size="large" block rounded="lg" :loading="loading" prepend-icon="mdi-google"
         @click="handleLogin">
@@ -33,6 +33,7 @@ import { useAuthStore } from '../stores/auth.js'
 import AppPage from '../components/ui/AppPage.vue'
 import AppCard from '../components/ui/AppCard.vue'
 import AppButton from '../components/ui/AppButton.vue'
+import AppAlert from '../components/ui/AppAlert.vue'
 import PageHeader from '../components/ui/PageHeader.vue'
 
 const authStore = useAuthStore()

@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Banner: nome alterado -->
-    <v-alert
+    <AppAlert
       v-if="showRegenerateBanner"
       type="warning"
       variant="tonal"
@@ -13,7 +13,7 @@
       </div>
 
       <div class="d-flex justify-center ga-2 flex-wrap">
-        <v-btn
+        <AppButton
           size="small"
           color="warning"
           variant="flat"
@@ -22,18 +22,18 @@
           @click="handleRegenerate"
         >
           Atualizar
-        </v-btn>
+        </AppButton>
 
-        <v-btn
+        <AppButton
           size="small"
           variant="text"
           color="warning"
           @click="dismissBanner"
         >
           Agora não
-        </v-btn>
+        </AppButton>
       </div>
-    </v-alert>
+    </AppAlert>
 
     <!-- Refresh -->
     <div
@@ -42,7 +42,7 @@
     >
       <v-tooltip text="Gerar análise">
         <template #activator="{ props }">
-          <v-btn
+          <AppButton
             icon="mdi-refresh"
             variant="text"
             color="primary"
@@ -77,7 +77,7 @@
     </div>
 
     <!-- Erro -->
-    <v-alert
+    <AppAlert
       v-else-if="error"
       type="warning"
       variant="tonal"
@@ -93,10 +93,10 @@
       <br /><br />
 
       Caso a análise ainda não esteja disponível, ela será gerada automaticamente assim que possível.
-    </v-alert>
+    </AppAlert>
 
     <!-- Sem análise -->
-    <v-alert
+    <AppAlert
       v-else
       type="info"
       variant="tonal"
@@ -116,7 +116,7 @@
       <br /><br />
 
       Esta página será atualizada automaticamente assim que a análise estiver pronta.
-    </v-alert>
+    </AppAlert>
 
     <!-- Snackbars -->
     <v-snackbar v-model="showSuccess" color="success" timeout="3000">
@@ -135,6 +135,8 @@ import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '../stores/auth.js'
 import { useAiStore } from '../stores/ai.js'
 import { useResponsesStore } from '../stores/responses.js'
+import AppButton from './ui/AppButton.vue'
+import AppAlert from './ui/AppAlert.vue'
 
 const props = defineProps({
   responseId: { type: String, required: true },

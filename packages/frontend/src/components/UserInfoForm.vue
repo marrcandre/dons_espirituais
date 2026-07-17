@@ -37,7 +37,7 @@
       />
 
       <div class="d-flex justify-center">
-        <v-btn
+        <AppButton
           type="submit"
           color="primary"
           size="large"
@@ -47,7 +47,7 @@
           min-width="220"
         >
           Começar o teste
-        </v-btn>
+        </AppButton>
       </div>
     </v-form>
   </AppCard>
@@ -58,6 +58,7 @@ import { ref, onMounted } from 'vue'
 import { required, ageRange } from '../helpers/validation.js'
 import { getUserProfile } from '../application/auth/user-profile'
 import AppCard from './ui/AppCard.vue'
+import AppButton from './ui/AppButton.vue'
 
 const emit = defineEmits(['submit'])
 

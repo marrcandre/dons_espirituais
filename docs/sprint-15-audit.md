@@ -114,6 +114,11 @@ infrastructure/supabase/
 | 1.2 | repositories/tests/*.test.js (4) | Mock paths atualizados | ✅ |
 | 1.2 | services/supabase.js | Removido | ✅ |
 | 1.2 | services/supabaseQuery.js | Removido | ✅ |
+| 1.3 | services/__tests__/scoring.test.js | Movido → domain/__tests__/scoring.test.js | ✅ |
+| 1.3 | repositories/tests/ (4 arquivos) | Renomeado → __tests__/ | ✅ |
+| 1.3 | stores/tests/ (4 arquivos) | Renomeado → __tests__/ | ✅ |
+| 1.3 | application/auth/tests/ | Renomeado → __tests__/ | ✅ |
+| 1.3 | services/ | Removido (vazio após migrações) | ✅ |
 
 ---
 
@@ -141,6 +146,31 @@ infrastructure/supabase/
 - Nenhum acesso direto ao Supabase fora da infrastructure
 
 **Impacto arquitetural:** A camada `infrastructure/` agora contém todo o acesso ao Supabase, alinhado ao fluxo de dependências da arquitetura em 4 camadas. O diretório `services/` foi eliminado como camada.
+
+### 1.3 — Testes organizados por camada
+
+**Mudanças:**
+- `scoring.test.js` movido de `services/__tests__/` para `domain/__tests__/` — testa `domain/scoring.ts`, agora está na camada correta
+- 3 diretórios padronizados: `tests` → `__tests__` (repositories, stores, application/auth)
+- `services/` removido por completo (vazio após movimentações)
+
+**Estrutura final de testes:**
+```
+src/
+  __tests__/                     # App.test.js
+  domain/__tests__/              # scoring.test.js (corrigido)
+  application/__tests__/         # quiz-session, submit-quiz
+  application/auth/__tests__/    # user-profile (padronizado)
+  components/__tests__/          # 5 feature components
+  components/ui/__tests__/       # 7 DS components
+  data/__tests__/                # gifts, questions
+  helpers/__tests__/             # array, date, string, validation
+  infrastructure/                # repository tests em __tests__/ (padronizado)
+  stores/__tests__/              # 4 stores (padronizado)
+  views/                         # co-located .test.js (mantido)
+```
+
+**Critério de aceite:** 100% dos diretórios de teste usam `__tests__`. Nenhum arquivo de teste fora da camada correspondente.
 
 ---
 

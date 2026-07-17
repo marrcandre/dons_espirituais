@@ -5,7 +5,7 @@
     </p>
 
     <div class="d-flex flex-column gap-2 mb-6">
-      <v-btn
+      <AppButton
         v-for="opt in ANSWER_LABELS"
         :key="opt.value"
         :color="modelValue === opt.value ? 'primary' : undefined"
@@ -17,11 +17,11 @@
         @click="$emit('update:modelValue', opt.value)"
       >
         {{ opt.label }}
-      </v-btn>
+      </AppButton>
     </div>
 
     <div class="d-flex justify-space-between gap-2">
-      <v-btn
+      <AppButton
         variant="outlined"
         color="grey"
         prepend-icon="mdi-arrow-left"
@@ -29,22 +29,23 @@
         @click="$emit('prev')"
       >
         Anterior
-      </v-btn>
+      </AppButton>
 
-      <v-btn
+      <AppButton
         color="primary"
         :append-icon="isLast ? 'mdi-check-circle' : 'mdi-arrow-right'"
         :disabled="modelValue === undefined || modelValue === null"
         @click="$emit('next')"
       >
         {{ isLast ? 'Finalizar' : 'Próxima' }}
-      </v-btn>
+      </AppButton>
     </div>
   </v-card>
 </template>
 
 <script setup lang="ts">
 import { ANSWER_LABELS } from '../constants/likert.js'
+import AppButton from './ui/AppButton.vue'
 
 export interface Question {
   id: number

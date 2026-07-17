@@ -6,9 +6,9 @@
 
     <!-- ERROR -->
     <div v-else-if="error" class="result-error-state mb-4">
-      <v-alert type="error" rounded="xl">
+      <AppAlert type="error" rounded="xl">
         {{ error }}
-      </v-alert>
+      </AppAlert>
     </div>
 
     <!-- RESULT -->
@@ -27,7 +27,7 @@
                 {{ response.name }}
               </h1>
 
-              <v-btn
+              <AppButton
                 v-if="isOwner"
                 icon="mdi-pencil"
                 variant="text"
@@ -50,7 +50,7 @@
                 @keyup.esc="cancelNameEdit"
               />
 
-              <v-btn
+              <AppButton
                 icon="mdi-check"
                 color="success"
                 size="small"
@@ -58,7 +58,7 @@
                 @click="saveName"
               />
 
-              <v-btn
+              <AppButton
                 icon="mdi-close"
                 size="small"
                 variant="text"
@@ -73,7 +73,7 @@
 
           <!-- ACTIONS -->
           <div class="result-header-right d-flex ga-1">
-            <v-btn
+            <AppButton
               v-if="isAdmin"
               data-testid="delete-button"
               icon="mdi-delete"
@@ -85,14 +85,14 @@
               @click="confirmDelete"
             />
 
-            <v-btn
+            <AppButton
               icon="mdi-share-variant"
               variant="text"
               size="small"
               @click="shareResult"
             />
 
-            <v-btn
+            <AppButton
               icon="mdi-printer"
               variant="text"
               size="small"
@@ -164,15 +164,15 @@
 
           <v-card-actions>
             <v-spacer />
-            <v-btn
+            <AppButton
               data-testid="cancel-delete"
               variant="text"
               :disabled="deleteLoading"
               @click="closeDeleteDialog"
             >
               Cancelar
-            </v-btn>
-            <v-btn
+            </AppButton>
+            <AppButton
               data-testid="confirm-delete"
               color="error"
               variant="elevated"
@@ -181,7 +181,7 @@
               @click="executeDelete"
             >
               Excluir definitivamente
-            </v-btn>
+            </AppButton>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -207,6 +207,8 @@ import ResourcesSection from '../components/ResourcesSection.vue'
 import AppPage from '../components/ui/AppPage.vue'
 import LoadingState from '../components/ui/LoadingState.vue'
 import CollapsibleCard from '../components/ui/CollapsibleCard.vue'
+import AppButton from '../components/ui/AppButton.vue'
+import AppAlert from '../components/ui/AppAlert.vue'
 import { formatDate } from '../helpers/date.js'
 
 const route = useRoute()
