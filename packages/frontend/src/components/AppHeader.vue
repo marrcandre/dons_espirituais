@@ -17,6 +17,7 @@
         v-if="authStore.canAccessAdminPanel"
         icon="mdi-shield-account"
         variant="text"
+        density="comfortable"
         class="app-header__icon"
         to="/admin"
         title="Painel Admin"
@@ -25,23 +26,26 @@
       <AppButton
         icon="mdi-history"
         variant="text"
+        density="comfortable"
         class="app-header__icon"
         to="/meus-resultados"
         title="Meus resultados"
       />
 
       <AppButton
+        icon="mdi-information-outline"
         variant="text"
-        class="app-header__icon text-none"
+        density="comfortable"
+        class="app-header__icon"
         to="/sobre"
         title="Sobre o projeto"
-      >
-        Sobre
-      </AppButton>
+        aria-label="Sobre o aplicativo"
+      />
 
       <AppButton
         :icon="theme.global.name.value === 'dark' ? 'mdi-white-balance-sunny' : 'mdi-moon-waning-crescent'"
         variant="text"
+        density="comfortable"
         class="app-header__icon"
         :title="theme.global.name.value === 'dark' ? 'Modo claro' : 'Modo escuro'"
         @click="toggleTheme"
@@ -53,6 +57,7 @@
             icon
             v-bind="props"
             variant="text"
+            density="comfortable"
             class="app-header__icon"
           >
             <v-avatar

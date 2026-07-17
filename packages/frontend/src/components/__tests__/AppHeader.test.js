@@ -48,7 +48,8 @@ describe('AppHeader', () => {
 
   it('renders navigation links', () => {
     const wrapper = mountHeader()
-    expect(wrapper.text()).toContain('Sobre')
+    const sobreBtn = wrapper.find('[title="Sobre o projeto"]')
+    expect(sobreBtn.exists()).toBe(true)
   })
 
   it('renders admin button when user has admin access', () => {
