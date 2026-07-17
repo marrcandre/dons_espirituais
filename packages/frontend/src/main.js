@@ -4,12 +4,15 @@ import App from './App.vue'
 import router from './router/index.js'
 import './styles/index.css'
 import vuetify from './plugins/vuetify.js'
+import { initSentry } from './plugins/sentry.js'
 import { useAuthStore } from './stores/auth.js'
 
 const app = createApp(App)
 
 const pinia = createPinia()
 app.use(pinia)
+
+initSentry(app)
 
 const auth = useAuthStore()
 
